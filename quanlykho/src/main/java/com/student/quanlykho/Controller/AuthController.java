@@ -2,6 +2,7 @@ package com.student.quanlykho.Controller;
 
 import com.student.quanlykho.Entity.NguoiDung;
 import com.student.quanlykho.Repository.NguoiDungRepository;
+import com.student.quanlykho.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,22 +14,29 @@ import java.util.Map;
 public class AuthController {
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody Map<String, String> request){
+    public Map<String, Object> login(@RequestBody Map<String, String> request){
         String username = request.get("username");
         String password = request.get("password");
 
         NguoiDung user = nguoiDungRepository.findById(username).orElse(null);
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        if (user != null && user.getMatKhau().equals(password)){
+            String token = jwtUtils.generteToken(user.getMaND());
 
-        if (user != null && user.getMatKhau().equals(password)) {
-            // Tuần 1: Trả về token giả định để Frontend lưu vào LocalStorage
-            response.put("token", "JWT_TOKEN_DEMO_" + user.getVaiTro());
-            response.put("role", user.getVaiTro());
-            response.put("message", "Login thành công");
-        } else {
+            response.put("token", token);
+            response.put("type", "Bearer");
+            response.put("roler", user.getVaiTro());
+            response.put("username", user.getHoTen());
+            response.put("message","đăng nhập thành công");
+
+        }
+        else {
             response.put("message", "Sai tài khoản hoặc mật khẩu");
+            response.put("status", "error");
         }
         return response;
     }

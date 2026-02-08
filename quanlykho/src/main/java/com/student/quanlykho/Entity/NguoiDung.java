@@ -10,12 +10,16 @@ import lombok.Data;
 @DiscriminatorColumn(name = "vai_tro", discriminatorType = DiscriminatorType.STRING)
 public class NguoiDung {
     @Id
+    @Column(name = "ma_nd")
     private String maND;
+    @Column(name = "ho_ten")
     private String hoTen;
-
+    @Column(name = "mat_khau")
     private String matKhau;
-
-    @Column(insertable = false, updatable = false)
+    @Column(name = "vai_tro", insertable = false, updatable = false)
     private String vaiTro;
-
+    @Column(name = "so_dt")
+    private int soDT;
+    @Column(name = "email")
+    private String email;
 }

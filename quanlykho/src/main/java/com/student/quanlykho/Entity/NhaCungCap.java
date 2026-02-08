@@ -1,5 +1,6 @@
 package com.student.quanlykho.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -11,7 +12,10 @@ import lombok.Data;
 public class NhaCungCap {
 
     @Id
+    @Column(name = "ma_ncc")
     private String maNCC;
+    @Column(name = "ten_ncc")
     private String temNCC;
+    @Column(name = "dia_chi")
     private String diaChi;
 }

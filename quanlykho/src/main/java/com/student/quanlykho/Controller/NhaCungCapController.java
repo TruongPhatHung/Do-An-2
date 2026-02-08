@@ -34,7 +34,7 @@ public class NhaCungCapController {
                     return nhaCungCapRepository.save(nhaCungCap);
 
                 })
-                .orElseThrow(()-> new RuntimeException("Không tìm thấy nhà cung cấp:"+ id))
+                .orElseThrow(()-> new RuntimeException("Không tìm thấy nhà cung cấp:"+ id));
 
     }
     @DeleteMapping("/{id}")
