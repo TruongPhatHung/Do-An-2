@@ -3,7 +3,7 @@ package com.student.quanlykho.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
+@Entity
 @Data
 @Table(name = "chi_tiet_phieu_xuat")
 public class ChiTietPhieuXuat {

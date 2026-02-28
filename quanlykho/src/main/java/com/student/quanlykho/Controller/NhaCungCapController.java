@@ -29,7 +29,7 @@ public class NhaCungCapController {
         return nhaCungCapRepository.findById(id)
                 .map(nhaCungCap -> {
                     nhaCungCap.setMaNCC(nhaCungCapMoi.getMaNCC());
-                    nhaCungCap.setTemNCC(nhaCungCapMoi.getTemNCC());
+                    nhaCungCap.setTenNCC(nhaCungCapMoi.getTenNCC());
                     nhaCungCap.setDiaChi(nhaCungCapMoi.getDiaChi());
                     return nhaCungCapRepository.save(nhaCungCap);
 

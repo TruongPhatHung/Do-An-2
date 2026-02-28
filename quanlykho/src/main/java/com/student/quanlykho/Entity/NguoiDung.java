@@ -12,6 +12,8 @@ public class NguoiDung {
     @Id
     @Column(name = "ma_nd")
     private String maND;
+    @Column(name = "ten_dang_nhap", unique = true) // Tài khoản không được trùng
+    private String tenDangNhap;
     @Column(name = "ho_ten")
     private String hoTen;
     @Column(name = "mat_khau")

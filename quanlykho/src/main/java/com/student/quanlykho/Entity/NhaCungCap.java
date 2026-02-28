@@ -15,7 +15,7 @@ public class NhaCungCap {
     @Column(name = "ma_ncc")
     private String maNCC;
     @Column(name = "ten_ncc")
-    private String temNCC;
+    private String tenNCC;
     @Column(name = "dia_chi")
     private String diaChi;
 }
