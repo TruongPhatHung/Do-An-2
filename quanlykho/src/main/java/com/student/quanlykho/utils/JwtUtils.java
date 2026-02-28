@@ -34,4 +34,23 @@ public class JwtUtils {
     private Key key(){
         return Keys.hmacShaKeyFor(JwtSecret.getBytes(StandardCharsets.UTF_8));
     }
+    public boolean validateToken(String authToken) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken);
+            return true;
+        } catch (Exception ex) {
+            System.out.println("Lỗi xác thực Token: " + ex.getMessage());
+        }
+        return false;
+    }
+
+    // 2. Hàm đọc Tên đăng nhập từ trong ruột cái Token ra
+    public String getUsernameFromJWT(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
 }
