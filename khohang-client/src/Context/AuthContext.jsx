@@ -1,43 +1,63 @@
 import React, { createContext, useState } from 'react';
-// import api from '../services/axiosConfig'; // Tạm thời bạn có thể chưa cần dòng này nếu chưa gọi API
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState('');
+    const [error, setError] = useState(null);
+    const [user, setUser] = useState(null); // Lưu thông tin role, displayName
 
-  const login = async (username, password) => {
-    try {
-        // const response = await api.post('/auth/login', {username, password});
-        // const {token, role, maND, hoTen} = response.data;
-        // localStorage.setItem('token', token);
-        // setUser({username, role, maND, hoTen});
-        // setError('');
-        setUser({
-            maND: 'TEST01',
-            username: 'hung', // Dùng biến username bạn gõ từ form
-            role: 'ADMIN',
-            hoTen: 'hung phat truong'
-            // password: không cần lưu password vào state user để bảo mật
-        });
-        setError('');
-        return true;
-    } catch (err) {
-        console.error("Lỗi đăng nhập:", err);
-        setError('Tên đăng nhập hoặc mật khẩu không chính xác!');
-        return false;
-    }
- };
+    const login = async (username, password) => {
+        setError(null); // Xóa lỗi cũ trước khi gửi request mới
+        try {
+            // Gửi request tới Backend Spring Boot
+            const response = await fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                // Đóng gói data chuẩn Form Backend
+                body: JSON.stringify({ username, password }),
+            });
 
- const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
- };
+            const data = await response.json();
 
- return(
-    <AuthContext.Provider value={{user, login, logout, error}}>
-        {children}
-    </AuthContext.Provider>
- );
+            // Kiểm tra status từ cục JSON backend trả về
+            if (data.status === "success") {
+                // 1. Lưu Token và Role vào LocalStorage để làm "vé qua cửa" cho các trang khác
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.role);
+                localStorage.setItem('displayName', data.displayName);
+
+                // 2. Lưu vào state của React
+                setUser({
+                    role: data.role,
+                    displayName: data.displayName
+                });
+
+                return true; // Báo cho Login.jsx biết là thành công
+            } else {
+                // Nếu sai pass, hiển thị message từ Backend ("Sai tài khoản hoặc mật khẩu")
+                setError(data.message);
+                return false;
+            }
+        } catch (err) {
+            console.error("Lỗi kết nối server:", err);
+            setError("Không thể kết nối đến máy chủ!");
+            return false;
+        }
+    };
+
+    // Hàm đăng xuất
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('displayName');
+        setUser(null);
+    };
+
+    return (
+        <AuthContext.Provider value={{ login, logout, error, user }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
