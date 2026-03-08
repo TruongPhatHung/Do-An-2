@@ -1,0 +1,77 @@
+
+.nhapkho-container {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.po-selector {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border: 1px active #dee2e6;
+}
+
+.po-selector select {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    width: 300px;
+    margin-left: 10px;
+}
+
+.nhapkho-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.nhapkho-table th {
+    background-color: #2c3e50;
+    color: white;
+    padding: 12px;
+    text-align: center;
+}
+
+.nhapkho-table td {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    text-align: center;
+}
+
+.input-nhap {
+    width: 80px;
+    padding: 8px;
+    border: 2px solid #27ae60;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.input-nhap:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(39, 174, 96, 0.5);
+}
+
+.status-warning {
+    color: #e67e22;
+    font-weight: bold;
+}
+
+.btn-confirm {
+    background-color: #27ae60;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-confirm:hover {
+    background-color: #219150;
+}
