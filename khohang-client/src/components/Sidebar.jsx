@@ -24,6 +24,14 @@ const Sidebar = () => {
                     <li><NavLink to="/nhap-kho" className="sidebar-item">📥 Nhập Kho</NavLink></li>
                 )}
                 <li><NavLink to="/danh-sach-po" className="sidebar-item">📋 Danh Sách Đơn Hàng</NavLink></li>
+                {(user.role === 'ADMIN' || user.role === 'KHO') && (
+                    <li><NavLink to="/xuat-kho" className="sidebar-item">📤 Xuất Kho</NavLink></li>
+                )}
+                {(user.role === 'ADMIN' || user.role === 'MUAHANG') && (
+                    <li><NavLink to="/dashboard" className="sidebar-item">📊 Dashboard</NavLink></li>
+                )}
+
+                
             </ul>
         </aside>
     );

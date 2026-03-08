@@ -8,6 +8,8 @@ import NhaCungCapList from './pages/NhaCungCapList';
 import POForm from './pages/POForm';
 import NhapKho from './pages/NhapKho';
 import POList from './pages/POList';
+import PhieuXuatKho from './pages/PhieuXuatKho';
+import Dashboard from './pages/Dashboard';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 
@@ -35,6 +37,8 @@ function App() {
                 <Route path="/don-hang" element={<POForm />} />
                 <Route path="/nhap-kho" element={<NhapKho />} />
                 <Route path="/danh-sach-po" element={<POList />} />
+                <Route path="/xuat-kho" element={<PhieuXuatKho />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/" element={<Navigate to="/login" />} />
               </Routes>
             </div>
