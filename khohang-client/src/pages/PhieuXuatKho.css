@@ -1,0 +1,54 @@
+
+.xuatkho-container {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+}
+
+.search-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f1f2f6;
+    border-radius: 5px;
+}
+
+.search-section input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.btn-add-item {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.xuatkho-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.xuatkho-table th {
+    background: #2c3e50;
+    color: white;
+    padding: 12px;
+}
+
+.xuatkho-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+.warning-text {
+    color: #e74c3c;
+    font-size: 12px;
+    display: block;
+}
