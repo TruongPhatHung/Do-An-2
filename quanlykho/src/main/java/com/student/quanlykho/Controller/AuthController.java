@@ -44,22 +44,35 @@ public class AuthController {
         String username = request.get("username");
         String password = request.get("password");
 
-        // 1. Tìm bằng Tên đăng nhập (chứ không phải ID)
+        // --- BẮT ĐẦU ĐẶT CAMERA ---
+        System.out.println("=== BAT DAU XU LY LOGIN ===");
+        System.out.println("1. Username Postman gui len: [" + username + "]");
+        System.out.println("2. Password Postman gui len: [" + password + "]");
+
+        // Tìm user
         NguoiDung user = nguoiDungRepository.findByTenDangNhap(username).orElse(null);
+
+        if (user == null) {
+            System.out.println("3. KET QUA: KHÔNG TÌM THẤY tài khoản trong Database!");
+        } else {
+            System.out.println("3. KET QUA: ĐÃ TÌM THẤY tài khoản: " + user.getTenDangNhap());
+            System.out.println("4. Mật khẩu lưu trong DB là: [" + user.getMatKhau() + "]");
+
+            boolean isMatch = passwordEncoder.matches(password, user.getMatKhau());
+            System.out.println("5. Mật khẩu có khớp không?: " + isMatch);
+        }
+        System.out.println("===========================");
+        // --- KẾT THÚC CAMERA ---
 
         Map<String, Object> response = new HashMap<>();
 
-        // 2. Dùng passwordEncoder.matches để so sánh mật khẩu đã mã hóa
         if (user != null && passwordEncoder.matches(password, user.getMatKhau())){
-            // 3. In token bằng MaND hoặc TenDangNhap đều được (thường dùng TenDangNhap)
             String token = jwtUtils.generteToken(user.getTenDangNhap());
-
             response.put("token", token);
             response.put("type", "Bearer");
-            response.put("roler", user.getVaiTro());
+            response.put("role", user.getVaiTro());
             response.put("username", user.getHoTen());
             response.put("message","đăng nhập thành công");
-
         }
         else {
             response.put("message", "Sai tài khoản hoặc mật khẩu");
