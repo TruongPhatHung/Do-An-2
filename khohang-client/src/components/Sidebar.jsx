@@ -13,6 +13,9 @@ const Sidebar = () => {
             <ul className="sidebar-menu">
                 <li><NavLink to="/hang-hoa" className="sidebar-item">📦 Hàng Hóa</NavLink></li>
                 <li><NavLink to="/nha-cung-cap" className="sidebar-item">🏢 Nhà Cung Cấp</NavLink></li>
+                {(user.role === 'ADMIN' || user.role === 'MUAHANG') && (
+                    <li><NavLink to="/add-supplier" className="sidebar-item">➕ Thêm NCC</NavLink></li>
+                )}
                 
                 {/* Quyền ADMIN hoặc MUAHANG mới được Lên đơn đặt hàng */}
                 {(user.role === 'ADMIN' || user.role === 'MUAHANG') && (
@@ -29,6 +32,13 @@ const Sidebar = () => {
                 )}
                 {(user.role === 'ADMIN' || user.role === 'MUAHANG') && (
                     <li><NavLink to="/dashboard" className="sidebar-item">📊 Dashboard</NavLink></li>
+                )}
+                {user.role === 'ADMIN' && (
+                    <li>
+                        <NavLink to="/tai-khoan" className="sidebar-item">
+                            👥 Quản Lý Tài Khoản
+                        </NavLink>
+                    </li>
                 )}
 
                 
