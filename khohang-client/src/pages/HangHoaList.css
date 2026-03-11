@@ -1,0 +1,86 @@
+/* src/pages/HangHoaList.css */
+
+.hanghoa-container {
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+.search-bar {
+    margin-bottom: 20px;
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.hanghoa-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.hanghoa-table th, 
+.hanghoa-table td {
+    border: 1px solid #e0e0e0;
+    padding: 12px;
+    text-align: left;
+}
+
+.hanghoa-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+/* Class tô màu đỏ cảnh báo khi tồn kho dưới định mức */
+.row-warning {
+    background-color: #ffe6e6; 
+}
+
+.row-normal {
+    background-color: #ffffff;
+}
+
+.text-bold {
+    font-weight: bold;
+    color: #333;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #f0f0f0;
+}
+
+.page-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.page-btn:disabled {
+    background-color: #e9ecef;
+    color: #a8a8a8;
+    cursor: not-allowed;
+}

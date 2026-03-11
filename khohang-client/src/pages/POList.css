@@ -1,0 +1,53 @@
+
+.polist-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Màu sắc cho từng trạng thái theo mô tả hệ thống */
+.status-new { background-color: #ebf5fb; color: #2e86c1; }      /* Mới tạo - Xanh dương nhạt */
+.status-partial { background-color: #fef9e7; color: #f39c12; }  /* Giao thiếu - Vàng cam */
+.status-completed { background-color: #eafaf1; color: #27ae60; }/* Hoàn tất - Xanh lá */
+
+.polist-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.polist-table th {
+    background-color: #f8f9fa;
+    color: #333;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.polist-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.btn-detail {
+    background: none;
+    border: 1px solid #3498db;
+    color: #3498db;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-detail:hover {
+    background: #3498db;
+    color: white;
+}

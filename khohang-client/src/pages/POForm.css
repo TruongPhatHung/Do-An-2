@@ -1,0 +1,79 @@
+
+.po-container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.po-header {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+}
+
+.po-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.po-table th, .po-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.po-table th {
+    background-color: #34495e;
+    color: white;
+}
+
+.btn-add {
+    margin-top: 15px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-remove {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+}
+
+.po-footer {
+    margin-top: 20px;
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.btn-submit {
+    margin-top: 20px;
+    width: 100%;
+    padding: 15px;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 5px;
+}
