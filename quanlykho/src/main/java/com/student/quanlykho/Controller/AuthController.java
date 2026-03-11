@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
@@ -26,17 +27,27 @@ public class AuthController {
             return "Lỗi: Tên đăng nhập đã tồn tại!";
         }
 
-        // Mã hóa mật khẩu trước khi lưu
+        // 1. Mã hóa mật khẩu
         user.setMatKhau(passwordEncoder.encode(user.getMatKhau()));
 
-        // Gán mã người dùng nếu chưa có (Tránh lỗi null ID nếu bạn chưa cài tự tăng)
-        if(user.getMaND() == null) user.setMaND("ND-" + System.currentTimeMillis());
+        // 2. Tạo mã người dùng tự động nếu chưa có
+        if (user.getMaND() == null) {
+            user.setMaND("ND-" + System.currentTimeMillis());
+        }
 
-        // Gán vai trò mặc định
-        if(user.getVaiTro() == null) user.setVaiTro("ADMIN");
+        // --- 3. ĐÂY LÀ CHỖ TỰ ĐỘNG ĐIỀN VAI TRÒ ---
+        // Nếu FE không gửi vai trò lên, mặc định cho làm USER
+        if (user.getVaiTro() == null || user.getVaiTro().trim().isEmpty()) {
+            user.setVaiTro("USER");
+        }
+
+        // Nếu muốn thông minh hơn: Cứ ai đặt tên đăng nhập có chữ "admin" thì thăng cấp làm ADMIN luôn
+        if (user.getTenDangNhap().toLowerCase().contains("admin")) {
+            user.setVaiTro("ADMIN");
+        }
 
         nguoiDungRepository.save(user);
-        return "Đăng ký tài khoản thành công!";
+        return "Đăng ký thành công! Vai trò được cấp: " + user.getVaiTro();
     }
 
     @PostMapping("/login")
@@ -79,5 +90,28 @@ public class AuthController {
             response.put("status", "error");
         }
         return response;
+    }
+    @GetMapping("/xem-all")
+    public List<NguoiDung> getAllUsers(){
+        return nguoiDungRepository.findAll();
+    }
+    @PutMapping("/{id}")
+    public NguoiDung updateUser(@PathVariable String id, @RequestBody NguoiDung userMoi) {
+        return nguoiDungRepository.findById(id)
+                .map(user -> {
+                    user.setHoTen(userMoi.getHoTen());
+                    user.setVaiTro(userMoi.getVaiTro());
+                    user.setEmail(userMoi.getEmail());
+                    user.setSoDT(userMoi.getSoDT());
+                    // Lưu ý: Thường không cho phép sửa Tên đăng nhập để tránh lỗi hệ thống
+                    return nguoiDungRepository.save(user);
+                })
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + id));
+    }
+
+    // 3. Xóa tài khoản
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable String id) {
+        nguoiDungRepository.deleteById(id);
     }
 }
