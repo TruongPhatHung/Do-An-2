@@ -1,6 +1,5 @@
 import React, { createContext, useState } from 'react';
 import api from '../services/axiosConfig';
-
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -11,19 +10,26 @@ export const AuthProvider = ({ children }) => {
         setError(null); // Xóa lỗi cũ trước khi gửi request mới
         try {
             // Gửi request tới Backend Spring Boot
-            const response = await fetch('http://10.10.141.171:8080/api/auth/login', {
+            console.log("Sending login request...");
+            const response = await fetch('http://10.10.148.243:8080/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 // Đóng gói data chuẩn Form Backend
                 body: JSON.stringify({ 
-                    username:username,
-                    password:password}),
+                    username: username, password:password }),
             });
+            if (!response.ok) {
+    throw new Error("Server response error");
+}
+
+
+            const data = await response.json();
+            console.log("Response from server:", data);
 
             // Kiểm tra status từ cục JSON backend trả về
-            const data = await response.json();
+          //  const data = await response.json();
 
 if (data.token) {
     localStorage.setItem('token', data.token);
@@ -34,19 +40,12 @@ if (data.token) {
         role: data.roler,
         displayName: data.username
     });
-
+//
     return true;
 } else {
     setError(data.message);
     return false;
 }
-        //         return true; // Báo cho Login.jsx biết là thành công
-        //     } else {
-        //         // Nếu sai pass, hiển thị message từ Backend ("Sai tài khoản hoặc mật khẩu")
-        //         setError(data.message);
-        //         return false;
-        // };
-      
         } catch (err) {
             console.error("Lỗi kết nối server:", err);
             setError("Không thể kết nối đến máy chủ!");

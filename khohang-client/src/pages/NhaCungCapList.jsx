@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './NhaCungCapList.css';
-// import api from '../services/axiosConfig'; // Tạm thời bạn có thể chưa cần dòng này nếu chưa gọi API
+import api from '../services/axiosConfig'; 
 
 const NhaCungCapList = () => {
     const [nhaCungCap, setNhaCungCap] = useState([]);
@@ -8,18 +8,17 @@ const NhaCungCapList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    // Dữ liệu giả Nhà cung cấp theo thiết kế hệ thống [cite: 45]
-    const mockNCC = [
-        { maNCC: 'NCC001', tenNCC: 'Công ty Thép Hòa Phát', diaChi: 'KCN Phố Nối, Hưng Yên' },
-        { maNCC: 'NCC002', tenNCC: 'Nhà máy Nhựa Bình Minh', diaChi: 'Quận 6, TP.HCM' },
-        { maNCC: 'NCC003', tenNCC: 'Tập đoàn Hóa chất Đức Giang', diaChi: 'Long Biên, Hà Nội' },
-        { maNCC: 'NCC004', tenNCC: 'Công ty Cổ phần Vina-Tools', diaChi: 'Thanh Xuân, Hà Nội' },
-        { maNCC: 'NCC005', tenNCC: 'Nhà cung cấp Ốc vít Miền Trung', diaChi: 'Hải Châu, Đà Nẵng' },
-        { maNCC: 'NCC006', tenNCC: 'Xưởng cơ khí Hoàng Gia', diaChi: 'Dĩ An, Bình Dương' },
-    ];
-
     useEffect(() => {
-        setNhaCungCap(mockNCC);
+       const fetchNCC = async () => {
+            try {
+                const response = await api.get('/nha-cung-cap');
+                setNhaCungCap(response.data);
+            } catch (error) {
+                console.error("Lỗi khi tải danh sách NCC:", error);
+                alert("Không thể kết nối đến máy chủ để lấy dữ liệu Nhà cung cấp!");
+            }
+        };
+        fetchNCC();
     }, []);
 
     // Logic tìm kiếm

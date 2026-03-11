@@ -10,6 +10,7 @@ import NhapKho from './pages/NhapKho';
 import POList from './pages/POList';
 import PhieuXuatKho from './pages/PhieuXuatKho';
 import Dashboard from './pages/Dashboard';
+import ThemHangHoa from './pages/ThemHangHoa';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/danh-sach-po" element={<POList />} />
                 <Route path="/xuat-kho" element={<PhieuXuatKho />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/them-hang-hoa" element={<ThemHangHoa />} />
                 <Route path="/" element={<Navigate to="/login" />} />
               </Routes>
             </div>
