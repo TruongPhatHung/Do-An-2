@@ -26,17 +26,17 @@ const HangHoaList = () => {
     useEffect(() => {
         setHangHoa(mockData);
         // --- SAU NÀY DEV A LÀM XONG API THÌ BẠN MỞ COMMENT ĐOẠN NÀY ---
-        /*
+        
         const fetchHangHoa = async () => {
             try {
-                const response = await api.get('/hang-hoa'); 
+                const response = await api.get('products'); 
                 setHangHoa(response.data);
             } catch (error) {
                 console.error("Lỗi khi tải danh sách hàng hóa:", error);
             }
         };
         fetchHangHoa();
-        */
+        
     }, []);
 
     // 1. Lọc dữ liệu theo từ khóa tìm kiếm

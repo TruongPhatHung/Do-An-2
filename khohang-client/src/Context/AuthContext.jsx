@@ -10,36 +10,42 @@ export const AuthProvider = ({ children }) => {
         setError(null); // Xóa lỗi cũ trước khi gửi request mới
         try {
             // Gửi request tới Backend Spring Boot
-            const response = await fetch('http://localhost:8080/api/auth/login', {
+            console.log("Sending login request...");
+            const response = await fetch('http://10.10.141.171:8080/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 // Đóng gói data chuẩn Form Backend
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ 
+                    username: username, password:password }),
             });
+            if (!response.ok) {
+    throw new Error("Server response error");
+}
+
 
             const data = await response.json();
+            console.log("Response from server:", data);
 
             // Kiểm tra status từ cục JSON backend trả về
-            if (data.status === "success") {
-                // 1. Lưu Token và Role vào LocalStorage để làm "vé qua cửa" cho các trang khác
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('role', data.role);
-                localStorage.setItem('displayName', data.displayName);
+          //  const data = await response.json();
 
-                // 2. Lưu vào state của React
-                setUser({
-                    role: data.role,
-                    displayName: data.displayName
-                });
+if (data.token) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('role', data.roler);
+    localStorage.setItem('displayName', data.username);
 
-                return true; // Báo cho Login.jsx biết là thành công
-            } else {
-                // Nếu sai pass, hiển thị message từ Backend ("Sai tài khoản hoặc mật khẩu")
-                setError(data.message);
-                return false;
-            }
+    setUser({
+        role: data.roler,
+        displayName: data.username
+    });
+//
+    return true;
+} else {
+    setError(data.message);
+    return false;
+}
         } catch (err) {
             console.error("Lỗi kết nối server:", err);
             setError("Không thể kết nối đến máy chủ!");

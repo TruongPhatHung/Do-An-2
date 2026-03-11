@@ -67,4 +67,8 @@ public class AuthController {
         }
         return response;
     }
+    @GetMapping("/test")
+    public String test(){
+        return "Backend running";
+    }
 }
