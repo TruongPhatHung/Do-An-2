@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5179")
 public class AuthController {
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
