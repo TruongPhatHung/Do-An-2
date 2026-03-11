@@ -1,0 +1,64 @@
+.ncc-container {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.ncc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin-top: 20px;
+}
+
+.ncc-input-group label {
+    font-weight: 500;
+    color: #333;
+}
+
+.ncc-input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Giúp input không bị tràn viền */
+}
+
+.ncc-input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.ncc-btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ncc-btn {
+    padding: 10px 20px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.ncc-btn-submit {
+    background: #2ecc71;
+}
+
+.ncc-btn-submit:hover {
+    background: #27ae60;
+}
+
+.ncc-btn-cancel {
+    background: #95a5a6;
+}
+
+.ncc-btn-cancel:hover {
+    background: #7f8c8d;
+}
