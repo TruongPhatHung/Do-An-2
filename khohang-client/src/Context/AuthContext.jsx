@@ -33,11 +33,11 @@ export const AuthProvider = ({ children }) => {
 
 if (data.token) {
     localStorage.setItem('token', data.token);
-    localStorage.setItem('role', data.roler);
+    localStorage.setItem('role', data.role);
     localStorage.setItem('displayName', data.username);
 
     setUser({
-        role: data.roler,
+        role: data.role,
         displayName: data.username
     });
 //
