@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Mở cửa cho phép đăng nhập, đăng ký không cần token
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/users/**").hasAuthority("ADMIN")
                         // Trong file SecurityConfig.java, sửa dòng này:
                         .requestMatchers(HttpMethod.POST, "/api/suppliers/**").hasAnyAuthority("ADMIN", "MUAHANG")
                         .requestMatchers(HttpMethod.GET, "/api/suppliers/**").authenticated()

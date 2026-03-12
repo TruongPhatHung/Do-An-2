@@ -16,10 +16,12 @@ public class NguoiDung {
     private String hoTen;
     @Column(name = "mat_khau")
     private String matKhau;
-    @Column(name = "vai_tro", insertable = false, updatable = false)
+    @Column(name = "vai_tro")
+    @com.fasterxml.jackson.annotation.JsonProperty("vaiTro")
     private String vaiTro;
     @Column(name = "so_dt")
-    private int soDT;
+    private String soDT;
     @Column(name = "email")
+    @com.fasterxml.jackson.annotation.JsonProperty("email")
     private String email;
 }
