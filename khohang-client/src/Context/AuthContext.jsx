@@ -12,9 +12,10 @@ export const AuthProvider = ({ children }) => {
             // Gửi request tới Backend Spring Boot
             console.log("Sending login request...");
 
-            //const response = await fetch('http://10.10.148.243:8080/api/auth/login', {
 
-             const response = await fetch('http://localhost:8080/api/auth/login', {
+           
+
+            const response = await fetch('http://10.10.6.24:8080/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -36,11 +37,11 @@ export const AuthProvider = ({ children }) => {
 
 if (data.token) {
     localStorage.setItem('token', data.token);
-    localStorage.setItem('role', data.role);
+    localStorage.setItem('role', data.role); // Lưu role vào localStorage
     localStorage.setItem('displayName', data.username);
 
     setUser({
-        role: data.role,
+        role: data.role, // Đảm bảo lấy đúng trường role
         displayName: data.username
     });
 //

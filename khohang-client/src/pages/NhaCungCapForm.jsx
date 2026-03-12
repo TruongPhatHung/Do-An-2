@@ -43,7 +43,7 @@ const NhaCungCapForm = () => {
 
     return (
         <div className="ncc-container">
-            <h2>➕ Thêm Nhà Cung Cấp Mới</h2>
+            <h2>Thêm Nhà Cung Cấp Mới</h2>
             
             {/* Vùng hiển thị lỗi */}
             {errorMessage && (

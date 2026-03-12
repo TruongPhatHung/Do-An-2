@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // URL của Developer A
+  baseURL: 'http://10.10.6.24:8080/api', // URL của Developer A
 });
 
 // Tự động đính kèm Token vào Header mỗi khi gọi API
