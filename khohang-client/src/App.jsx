@@ -35,8 +35,8 @@ function App() {
             <div style={{ flex: 1, padding: '20px', overflowY: 'auto', backgroundColor: '#f4f6f9' }}>
               <Routes>
                 <Route path="/login" element={<Login />} />
-                <Route path="/hang-hoa" element={<HangHoaList />} />
-                <Route path="/nha-cung-cap" element={<NhaCungCapList />} />
+                <Route path="/products" element={<ProtectedRoute><HangHoaList /></ProtectedRoute>} />
+                <Route path="/suppliers" element={<ProtectedRoute><NhaCungCapList /></ProtectedRoute>} />
                 <Route path="/don-hang" element={<POForm />} />
                 <Route path="/nhap-kho" element={<NhapKho />} />
                 <Route path="/danh-sach-po" element={<POList />} />

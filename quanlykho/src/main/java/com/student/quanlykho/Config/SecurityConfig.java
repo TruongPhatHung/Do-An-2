@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -35,6 +36,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Mở cửa cho phép đăng nhập, đăng ký không cần token
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Trong file SecurityConfig.java, sửa dòng này:
+                        .requestMatchers(HttpMethod.POST, "/api/suppliers/**").hasAnyAuthority("ADMIN", "MUAHANG")
+                        .requestMatchers(HttpMethod.GET, "/api/suppliers/**").authenticated()
+
                         // TẤT CẢ các API khác (kho, users, nhà cung cấp) ĐỀU PHẢI CÓ TOKEN
                         .anyRequest().authenticated()
                 )

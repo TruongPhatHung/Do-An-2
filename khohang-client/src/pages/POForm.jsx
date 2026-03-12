@@ -18,8 +18,8 @@ const POForm = () => {
         const fetchData = async () => {
             try {
                 const [nccRes, hhRes] = await Promise.all([
-                    api.get('/nha-cung-cap'),
-                    api.get('/hang-hoa')
+                    api.get('/suppliersp'),
+                    api.get('/products')
                 ]);
                 setSuppliers(nccRes.data);
                 setProducts(hhRes.data);

@@ -13,7 +13,7 @@ const NhapKho = () => {
         const fetchPendingPOs = async () => {
             try {
                 // Endpoint lấy các đơn hàng chưa hoàn tất
-                const response = await api.get('/don-dat-hang/pending'); 
+                const response = await api.get('/orders/importable');
                 setPendingPOs(response.data);
             } catch (error) {
                 console.error("Lỗi tải PO chờ nhập:", error);
@@ -34,24 +34,18 @@ const NhapKho = () => {
         setThucNhap({ ...thucNhap, [maHang]: val });
     };
 
-    const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
         e.preventDefault();
         const payload = {
-            maPO: selectedPO.maDon,
-            ngayNhap: new Date().toISOString(),
-            chiTietNhap: Object.keys(thucNhap).map(maHang => ({
-                maHang: maHang,
-                soLuongThucNhap: thucNhap[maHang]
-            }))
+            maDonHang: selectedPO.maDon, // Khớp với NhapKhoRequest bên Backend
+            chiTietNhap: thucNhap      // Khớp với Map<String, Integer>
         };
 
         try {
-            await api.post('/phieu-nhap', payload); // API xử lý phiếu nhập
-            alert("Xác nhận nhập kho thành công! Tồn kho đã tự động tăng.");
+            await api.post('/phieu-nhap', payload);
+            alert("Xác nhận nhập kho thành công!");
             setSelectedPO(null);
-            // Refresh lại danh sách PO
-            const res = await api.get('/don-dat-hang/pending');
-            setPendingPOs(res.data);
+            fetchPendingPOs(); // Tải lại danh sách
         } catch (error) {
             alert("Lỗi khi lưu phiếu nhập!");
         }
@@ -84,8 +78,8 @@ const NhapKho = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {selectedPO.chiTietDonHangs.map((item) => {
-                                const conLai = item.soLuong - (item.soLuongDaNhap || 0);
+                            {selectedPO.chiTiets?.map((item) => {
+                                const conLai = item.soLuongDat - (item.soLuongDaNhap || 0);
                                 if (conLai <= 0) return null;
                                 return (
                                     <tr key={item.maHang}>

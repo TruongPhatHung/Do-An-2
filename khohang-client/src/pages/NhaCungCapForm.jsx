@@ -8,12 +8,11 @@ const NhaCungCapForm = () => {
     
     // State lưu dữ liệu form
     const [formData, setFormData] = useState({
-        tenNhaCungCap: '',
+        maNCC: '',      // Đã có trong state
+        tenNCC: '',     
         diaChi: '',
-        soDienThoai: '',
         email: ''
     });
-
     // State quản lý hiệu ứng tải và lỗi
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -55,18 +54,29 @@ const NhaCungCapForm = () => {
 
             <form onSubmit={handleSubmit} className="ncc-form">
                 <div className="ncc-input-group">
+                    <label>Mã Nhà Cung Cấp (*):</label>
+                    <input 
+                        type="text" 
+                        name="maNCC" 
+                        value={formData.maNCC} 
+                        onChange={handleChange} 
+                        required 
+                        placeholder="Nhập mã (VD: NCC001, NCC_SS...)"
+                        className="ncc-input"
+                    />
+                </div>
+                <div className="ncc-input-group">
                     <label>Tên nhà cung cấp (*):</label>
                     <input 
                         type="text" 
-                        name="tenNhaCungCap" 
-                        value={formData.tenNhaCungCap} 
+                        name="tenNCC" 
+                        value={formData.tenNCC} 
                         onChange={handleChange} 
                         required 
                         placeholder="Nhập tên công ty/đại lý..."
                         className="ncc-input"
                     />
                 </div>
-
                 <div className="ncc-input-group">
                     <label>Địa chỉ:</label>
                     <input 

@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/phieu-xuat")
-@CrossOrigin(origins = "*")
 public class PhieuXuatController {
     @Autowired
     private XuatKhoService xuatKhoService;

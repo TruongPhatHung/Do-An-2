@@ -25,23 +25,20 @@ public class NhaCungCapController {
         return nhaCungCapRepository.save(nhaCungCap);
     }
     @PutMapping("/{id}")
-    public NhaCungCap update(@PathVariable String id, @RequestBody NhaCungCap nhaCungCapMoi){
+    public NhaCungCap update(@PathVariable Long id, @RequestBody NhaCungCap nhaCungCapMoi){
         return nhaCungCapRepository.findById(id)
                 .map(nhaCungCap -> {
                     nhaCungCap.setMaNCC(nhaCungCapMoi.getMaNCC());
                     nhaCungCap.setTenNCC(nhaCungCapMoi.getTenNCC());
                     nhaCungCap.setDiaChi(nhaCungCapMoi.getDiaChi());
                     return nhaCungCapRepository.save(nhaCungCap);
-
                 })
-                .orElseThrow(()-> new RuntimeException("Không tìm thấy nhà cung cấp:"+ id));
-
+                .orElseThrow(()-> new RuntimeException("Không tìm thấy nhà cung cấp: " + id));
     }
 
-
-    // Xóa nhà cung cấp
     @DeleteMapping("/{id}")
-    public void deleteNhaCungCap(@PathVariable String id) {
+    public String deleteNhaCungCap(@PathVariable Long id) { // Sửa thành Long
         nhaCungCapRepository.deleteById(id);
+        return "Xóa nhà cung cấp " + id + " thành công";
     }
 }

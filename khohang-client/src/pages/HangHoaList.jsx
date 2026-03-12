@@ -20,7 +20,7 @@ const HangHoaList = () => {
         
         const fetchHangHoa = async () => {
             try {
-                const response = await api.get('/hang-hoa'); // Đảm bảo endpoint đúng với backend
+                const response = await api.get('/products'); // Đảm bảo endpoint đúng với backend
                 setHangHoa(response.data);
             } catch (error) {
                 console.error("Lỗi khi tải danh sách hàng hóa:", error);

@@ -14,7 +14,7 @@ const Login = () => {
         e.preventDefault();
         const success = await login(username, password);
         if(success){
-            navigate('/hang-hoa');
+            navigate('/products');
     }
 };
 return (

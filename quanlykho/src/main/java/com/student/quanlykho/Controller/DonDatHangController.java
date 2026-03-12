@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "*")
+
 public class DonDatHangController {
     @Autowired
     private DonDatHangRepository donDatHangRepository;
@@ -45,8 +45,9 @@ public class DonDatHangController {
         donDatHang.setMaDon(request.getMaDon());
         donDatHang.setTrangThai("Mới Tạo");
 
-        NhaCungCap nhaCungCap = nhaCungCapRepository.findById(request.getNhaCungCap().getMaNCC())
-                .orElseThrow(()-> new RuntimeException("Không tìm thấy Nhà cung cấp"));
+        NhaCungCap nhaCungCap = nhaCungCapRepository.findByMaNCC(request.getNhaCungCap().getMaNCC())
+                .orElseThrow(()-> new RuntimeException("Không tìm thấy Nhà cung cấp có mã: " + request.getNhaCungCap().getMaNCC()));
+
         donDatHang.setNhaCungCap(nhaCungCap);
 
         List<ChiTietDonDatHang> chiTietDonDatHangs = request.getChiTiets().stream().map(item ->{

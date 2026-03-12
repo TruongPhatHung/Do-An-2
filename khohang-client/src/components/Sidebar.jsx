@@ -11,8 +11,8 @@ const Sidebar = () => {
     return (
         <aside className="sidebar">
             <ul className="sidebar-menu">
-                <li><NavLink to="/hang-hoa" className="sidebar-item">📦 Hàng Hóa</NavLink></li>
-                <li><NavLink to="/nha-cung-cap" className="sidebar-item">🏢 Nhà Cung Cấp</NavLink></li>
+                <li><NavLink to="/products" className="sidebar-item">📦 Hàng Hóa</NavLink></li>
+                <li><NavLink to="/suppliers" className="sidebar-item">🏢 Nhà Cung Cấp</NavLink></li>
                 {(user.role === 'ADMIN' || user.role === 'MUAHANG') && (
                     <li><NavLink to="/add-supplier" className="sidebar-item">➕ Thêm NCC</NavLink></li>
                 )}

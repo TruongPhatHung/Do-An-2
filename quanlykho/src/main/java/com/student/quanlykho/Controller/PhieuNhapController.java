@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 @RequestMapping("/api/phieu-nhap")
-@CrossOrigin(origins = "*")
 @RestController
 public class PhieuNhapController {
     @Autowired
