@@ -40,6 +40,8 @@ public class SecurityConfig {
                         // Trong file SecurityConfig.java, sửa dòng này:
                         .requestMatchers(HttpMethod.POST, "/api/suppliers/**").hasAnyAuthority("ADMIN", "MUAHANG")
                         .requestMatchers(HttpMethod.GET, "/api/suppliers/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/suppliers/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/suppliers/**").hasAuthority("ADMIN")
 
                         // TẤT CẢ các API khác (kho, users, nhà cung cấp) ĐỀU PHẢI CÓ TOKEN
                         .anyRequest().authenticated()

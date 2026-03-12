@@ -1,44 +1,36 @@
-// src/pages/POForm.jsx
 import React, { useState, useEffect } from 'react';
-import api from '../services/axiosConfig'; // Gọi API thật
+import api from '../services/axiosConfig';
 import './POForm.css';
 
 const POForm = () => {
-    // State lưu dữ liệu từ API
     const [suppliers, setSuppliers] = useState([]);
     const [products, setProducts] = useState([]);
 
-    // State quản lý Form
     const [supplier, setSupplier] = useState('');
-    const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
     const [items, setItems] = useState([{ productId: '', quantity: 1, price: 0 }]);
 
-    // GỌI API LẤY DANH SÁCH NCC VÀ HÀNG HÓA KHI MỞ TRANG
+    // 1. Lấy dữ liệu từ Database (Sửa lại endpoint cho đúng)
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [nccRes, hhRes] = await Promise.all([
-                    api.get('/suppliersp'),
+                    api.get('/suppliers'), // Đổi từ /suppliersp thành /suppliers cho khớp các trang trước
                     api.get('/products')
                 ]);
                 setSuppliers(nccRes.data);
                 setProducts(hhRes.data);
             } catch (error) {
-                console.error("Lỗi khi lấy dữ liệu nền:", error);
-                alert("Không thể tải danh sách Nhà cung cấp hoặc Hàng hóa. Vui lòng kiểm tra Server!");
+                console.error("Lỗi tải dữ liệu:", error);
+                alert("Không thể tải danh sách NCC hoặc Hàng hóa!");
             }
         };
         fetchData();
     }, []);
 
-    const addRow = () => setItems([...items, { productId: '', quantity: 1, price: 0 }]);
-    const removeRow = (index) => setItems(items.filter((_, i) => i !== index));
-
     const handleItemChange = (index, field, value) => {
         const newItems = [...items];
         newItems[index][field] = value;
 
-        // Tự động điền giá nhập khi chọn mã hàng
         if (field === 'productId') {
             const product = products.find(p => p.maHang === value);
             newItems[index].price = product ? product.giaNhap : 0;
@@ -46,46 +38,48 @@ const POForm = () => {
         setItems(newItems);
     };
 
+    const addRow = () => setItems([...items, { productId: '', quantity: 1, price: 0 }]);
+    const removeRow = (index) => setItems(items.filter((_, i) => i !== index));
     const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
-    // XỬ LÝ GỬI FORM (POST LÊN SERVER)
+    // 2. XỬ LÝ GỬI FORM (Sửa payload cho khớp DTO Java)
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Kiểm tra hợp lệ cơ bản
         if (!supplier) return alert("Vui lòng chọn Nhà cung cấp!");
-        if (items.some(item => !item.productId || item.quantity <= 0)) {
-            return alert("Vui lòng chọn sản phẩm và nhập số lượng hợp lệ cho tất cả các dòng!");
-        }
 
-        // Đóng gói dữ liệu theo chuẩn thường dùng
+        // ĐÓNG GÓI ĐÚNG CẤU TRÚC DonHangRequest TRONG JAVA
         const payload = {
-            maNCC: supplier,
-            ngayTao: orderDate,
-            tongTien: totalAmount,
-            chiTietDonHangs: items.map(item => ({
-                maHang: item.productId,
-                soLuong: item.quantity,
+            maDon: "PO-" + Date.now(), // Tự tạo mã đơn hàng dựa trên thời gian
+            nhaCungCap: {
+                maNCC: supplier // Chỗ này phải là Object chứa maNCC
+            },
+            chiTiets: items.map(item => ({
+                hangHoa: {
+                    maHang: item.productId // Chỗ này phải là Object chứa maHang
+                },
+                soLuongDat: item.quantity,
                 donGia: item.price
             }))
         };
 
         try {
-            await api.post('/don-dat-hang', payload); // API lưu Đơn hàng
-            alert("Đã tạo Đơn đặt hàng thành công!");
+            console.log("Dữ liệu gửi đi:", payload);
+            await api.post('/orders', payload); 
+            alert("✅ Đã tạo Đơn đặt hàng thành công!");
             
-            // Reset form sau khi thành công
+            // Reset form
             setSupplier('');
             setItems([{ productId: '', quantity: 1, price: 0 }]);
         } catch (error) {
-            console.error("Lỗi khi tạo PO:", error);
-            alert("Lưu đơn hàng thất bại. Vui lòng thử lại!");
+            console.error("Lỗi khi tạo PO:", error.response?.data || error.message);
+            alert("Lưu đơn hàng thất bại: " + (error.response?.data?.message || "Lỗi hệ thống"));
         }
     };
 
     return (
         <div className="po-container">
-            <h2>Lên Đơn Đặt Hàng (PO)</h2>
+            <h2>📝 Lên Đơn Đặt Hàng (PO)</h2>
             <form onSubmit={handleSubmit}>
                 <div className="po-header">
                     <div className="input-group">
@@ -95,10 +89,6 @@ const POForm = () => {
                             {suppliers.map(s => <option key={s.maNCC} value={s.maNCC}>{s.tenNCC}</option>)}
                         </select>
                     </div>
-                    <div className="input-group">
-                        <label>Ngày đặt:</label>
-                        <input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} required />
-                    </div>
                 </div>
 
                 <table className="po-table">
@@ -106,7 +96,7 @@ const POForm = () => {
                         <tr>
                             <th>Sản phẩm</th>
                             <th>Số lượng</th>
-                            <th>Đơn giá (VNĐ)</th>
+                            <th>Đơn giá</th>
                             <th>Thành tiền</th>
                             <th>Thao tác</th>
                         </tr>
@@ -125,14 +115,9 @@ const POForm = () => {
                                     </select>
                                 </td>
                                 <td>
-                                    <input 
-                                        type="number" 
-                                        min="1" 
-                                        value={item.quantity} 
-                                        onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
-                                    />
+                                    <input type="number" min="1" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))} />
                                 </td>
-                                <td>{item.price?.toLocaleString()}</td>
+                                <td>{item.price.toLocaleString()}</td>
                                 <td>{(item.quantity * item.price).toLocaleString()}</td>
                                 <td>
                                     {items.length > 1 && (
@@ -147,7 +132,7 @@ const POForm = () => {
                 <button type="button" className="btn-add" onClick={addRow}>+ Thêm mặt hàng</button>
 
                 <div className="po-footer">
-                    Tổng tiền thanh toán: <span style={{color: '#e74c3c'}}>{totalAmount.toLocaleString()} VNĐ</span>
+                    Tổng tiền: <span style={{color: '#e74c3c', fontWeight: 'bold'}}>{totalAmount.toLocaleString()} VNĐ</span>
                 </div>
 
                 <button type="submit" className="btn-submit">XÁC NHẬN TẠO ĐƠN HÀNG</button>
