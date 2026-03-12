@@ -1,5 +1,6 @@
 package com.student.quanlykho.Config;
 
+
 import com.student.quanlykho.Security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -26,15 +29,18 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http ) throws Exception{
-        http.cors(cors ->{})
+    public SecurityFilterChain filterChain(HttpSecurity http ) throws Exception {
+        http.cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
-                .cors(cors ->{})
-
-                .authorizeHttpRequests( auth -> auth
+                .authorizeHttpRequests(auth -> auth
+                        // Mở cửa cho phép đăng nhập, đăng ký không cần token
                         .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().permitAll()
-                );
+                        // TẤT CẢ các API khác (kho, users, nhà cung cấp) ĐỀU PHẢI CÓ TOKEN
+                        .anyRequest().authenticated()
+                )
+                // GẮN CÁI KHIÊN JWT VÀO ĐÂY!
+                .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
     @Bean
@@ -54,4 +60,5 @@ public class SecurityConfig {
 
         return source;
     }
+
 }
