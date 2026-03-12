@@ -42,7 +42,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/suppliers/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/suppliers/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/suppliers/**").hasAuthority("ADMIN")
-
+                         // Cho phép tạo Đơn hàng (POST)
+                        .requestMatchers(HttpMethod.POST, "/api/orders").hasAnyAuthority("ADMIN", "MUAHANG")
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG", "KHO")
                         // TẤT CẢ các API khác (kho, users, nhà cung cấp) ĐỀU PHẢI CÓ TOKEN
                         .anyRequest().authenticated()
                 )

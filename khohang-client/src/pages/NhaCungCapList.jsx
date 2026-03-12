@@ -10,8 +10,6 @@ const NhaCungCapList = () => {
     const itemsPerPage = 5;
     const navigate = useNavigate();
 
-    // 1. ĐƯA HÀM fetchNCC RA NGOÀI useEffect
-    // Sử dụng useCallback để tránh tạo lại hàm vô ích
     const fetchNCC = useCallback(async () => {
         try {
             const response = await api.get('/suppliers');
@@ -29,18 +27,17 @@ const NhaCungCapList = () => {
         navigate('/add-supplier'); 
     };
 
+    // Truyền dữ liệu sang trang Sửa
     const handleEdit = (ncc) => {
         navigate('/add-supplier', { state: { editData: ncc } });
     };
 
-    // 2. SỬA HÀM DELETE: Nhận ID (số) để xóa và MA (chuỗi) để hiện thông báo
     const handleDelete = async (id, ma) => {
-        if (window.confirm(`Bạn có chắc chắn muốn xóa nhà cung cấp mã ${ma}?`)) {
+        if (window.confirm(`❗ Bạn có chắc chắn muốn xóa nhà cung cấp mã ${ma} và toàn bộ hàng hóa liên quan không?`)) {
             try {
-                // Backend nhận ID số: /api/suppliers/1
                 await api.delete(`/suppliers/${id}`); 
                 alert("✅ Xóa thành công!");
-                fetchNCC(); // Gọi lại hàm lấy dữ liệu để cập nhật bảng
+                fetchNCC(); 
             } catch (error) {
                 console.error("Lỗi khi xóa:", error);
                 alert("❌ Xóa thất bại! Có thể NCC này đang có đơn hàng liên kết.");
@@ -48,13 +45,12 @@ const NhaCungCapList = () => {
         }
     };
 
-    // Logic tìm kiếm (thêm kiểm tra null để tránh crash)
     const filteredNCC = nhaCungCap.filter(ncc => 
         (ncc.tenNCC?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-        (ncc.maNCC?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+        (ncc.maNCC?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (ncc.email?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
 
-    // Logic phân trang
     const totalPages = Math.ceil(filteredNCC.length / itemsPerPage);
     const currentItems = filteredNCC.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -70,7 +66,7 @@ const NhaCungCapList = () => {
             <input 
                 type="text" 
                 className="search-bar"
-                placeholder="Tìm theo mã hoặc tên nhà cung cấp..." 
+                placeholder="Tìm theo mã, tên hoặc gmail..." 
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             />
@@ -81,6 +77,8 @@ const NhaCungCapList = () => {
                         <th>Mã NCC</th>
                         <th>Tên Nhà Cung Cấp</th>
                         <th>Địa Chỉ</th>
+                        <th>Gmail</th>
+                        <th style={{ textAlign: 'center' }}>Số Lượng Mặt Hàng</th> {/* Báo hiệu NCC đó có bao nhiêu món */}
                         <th style={{ textAlign: 'center' }}>Thao Tác</th>
                     </tr>
                 </thead>
@@ -90,9 +88,17 @@ const NhaCungCapList = () => {
                             <td className="text-bold">{ncc.maNCC}</td>
                             <td>{ncc.tenNCC}</td>
                             <td>{ncc.diaChi}</td>
-                            <td style={{ textAlign: 'center' }}>
+                            <td style={{ color: '#2980b9' }}>{ncc.email || 'N/A'}</td>
+                            
+                            {/* Hiển thị số lượng hàng hóa con */}
+                            <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                                <span style={{ background: '#ecf0f1', padding: '5px 10px', borderRadius: '15px' }}>
+                                    {ncc.danhSachHangHoa ? ncc.danhSachHangHoa.length : 0} món
+                                </span>
+                            </td>
+
+                            <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                                 <button className="btn-edit" onClick={() => handleEdit(ncc)}>Sửa</button>
-                                {/* 3. TRUYỀN CẢ ID VÀ maNCC VÀO ĐÂY */}
                                 <button 
                                     className="btn-delete" 
                                     onClick={() => handleDelete(ncc.id, ncc.maNCC)}
@@ -104,7 +110,7 @@ const NhaCungCapList = () => {
                     ))}
                     {currentItems.length === 0 && (
                         <tr>
-                            <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                            <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
                                 Không tìm thấy nhà cung cấp nào.
                             </td>
                         </tr>

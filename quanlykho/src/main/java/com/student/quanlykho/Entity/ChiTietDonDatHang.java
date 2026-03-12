@@ -17,10 +17,11 @@ public class ChiTietDonDatHang {
     @JsonIgnore // Tránh lặp vô tận khi chuyển sang JSON
     private DonDatHang donDatHang;
 
-    @ManyToOne
-    @JoinColumn(name = "ma_hang")
-    private HangHoa hangHoa;
+    @Column(name = "ma_hang")
+    private String maHang;
 
+    @Column(name = "ten_hang")
+    private String tenHang;
     @Column(name = "so_luong_dat")
     private int soLuongDat; // Số lượng muốn mua [cite: 77]
 
