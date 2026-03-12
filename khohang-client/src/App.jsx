@@ -13,7 +13,7 @@ import Dashboard from './pages/Dashboard';
 import ThemHangHoa from './pages/ThemHangHoa';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
-import NhaCungCapForm from './pages/NhaCungCapForm.jsx'; 
+import NhaCungCapForm from './pages/NhaCungCapForm'; 
 import QuanLyTaiKhoan from './pages/QuanLyTaiKhoan';
 
 
@@ -43,6 +43,7 @@ function App() {
                 <Route path="/xuat-kho" element={<PhieuXuatKho />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/them-hang-hoa" element={<ThemHangHoa />} />
+               
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />
                 <Route path="/add-supplier" element={<ProtectedRoute><NhaCungCapForm/></ProtectedRoute>}/>

@@ -37,3 +37,35 @@
     color: #a8a8a8;
     cursor: not-allowed;
 }
+.btn-add-main {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.btn-add-main:hover { background-color: #219150; }
+.btn-edit:hover { background-color: #d68910; }
+.btn-delete:hover { background-color: #c0392b; }
