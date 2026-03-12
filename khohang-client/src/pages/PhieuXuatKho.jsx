@@ -1,69 +1,56 @@
-import React, { useState } from 'react';
+// src/pages/PhieuXuatKho.jsx
+import React, { useState, useEffect } from 'react';
+import api from '../services/axiosConfig';
 import './PhieuXuatKho.css';
 
 const PhieuXuatKho = () => {
-    // Dữ liệu giả định tồn kho thực tế
-    const mockInventory = [
-        { maHang: 'SP001', tenHang: 'Thép tấm 5mm', tonKho: 100 },
-        { maHang: 'SP002', tenHang: 'Bulong M10', tonKho: 500 },
-    ];
-
+    const [inventory, setInventory] = useState([]); // Lấy từ DB
     const [items, setItems] = useState([]);
     const [searchId, setSearchId] = useState('');
 
-    // Hàm thêm nhanh sản phẩm vào danh sách xuất
+    useEffect(() => {
+        const fetchStock = async () => {
+            try {
+                const res = await api.get('/hang-hoa'); // Lấy tồn kho thực tế
+                setInventory(res.data);
+            } catch (error) { console.error(error); }
+        };
+        fetchStock();
+    }, []);
+
     const handleAddItem = () => {
-        const product = mockInventory.find(p => p.maHang === searchId.toUpperCase());
-        if (!product) {
-            alert("Không tìm thấy mã hàng này!");
-            return;
-        }
-        if (items.find(i => i.maHang === product.maHang)) {
-            alert("Sản phẩm đã có trong danh sách!");
-            return;
-        }
+        const product = inventory.find(p => p.maHang.toUpperCase() === searchId.toUpperCase());
+        if (!product) return alert("Không tìm thấy hàng!");
+        if (items.find(i => i.maHang === product.maHang)) return alert("Đã có trong danh sách!");
         setItems([...items, { ...product, soLuongXuat: 1 }]);
         setSearchId('');
     };
 
-    const updateQuantity = (index, val) => {
-        const newItems = [...items];
-        const qty = parseInt(val) || 0;
-        newItems[index].soLuongXuat = qty;
-        setItems(newItems);
-    };
-
-    const removeItem = (index) => {
-        setItems(items.filter((_, i) => i !== index));
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Kiểm tra logic xuất kho
-        const hasError = items.some(item => item.soLuongXuat > item.tonKho || item.soLuongXuat <= 0);
-        if (hasError) {
-            alert("Vui lòng kiểm tra lại số lượng xuất (không được vượt tồn hoặc bằng 0)!");
-            return;
-        }
-        console.log("Dữ liệu xuất kho:", items);
-        alert("Tạo phiếu xuất thành công! Tồn kho đã được trừ.");
-        setItems([]);
+        const payload = {
+            ngayXuat: new Date().toISOString(),
+            chiTietXuat: items.map(i => ({ maHang: i.maHang, soLuong: i.soLuongXuat }))
+        };
+
+        try {
+            await api.post('/phieu-xuat', payload);
+            alert("Xuất kho thành công! Tồn kho đã bị trừ.");
+            setItems([]);
+        } catch (error) { alert("Lỗi xuất kho!"); }
     };
 
     return (
         <div className="xuatkho-container">
-            <h2>📤 Tạo Phiếu Xuất Kho</h2>
-            
+            <h2>📤 Tạo Phiếu Xuất Kho (Dữ liệu DB)</h2>
             <div className="search-section">
                 <input 
-                    type="text" 
-                    placeholder="Nhập nhanh mã hàng (VD: SP001)..." 
-                    value={searchId}
-                    onChange={(e) => setSearchId(e.target.value)}
+                    type="text" placeholder="Nhập mã hàng..." 
+                    value={searchId} onChange={(e) => setSearchId(e.target.value)}
                 />
-                <button className="btn-add-item" onClick={handleAddItem}>Thêm hàng</button>
+                <button className="btn-add-item" onClick={handleAddItem}>Thêm</button>
             </div>
-
+            
             <form onSubmit={handleSubmit}>
                 <table className="xuatkho-table">
                     <thead>

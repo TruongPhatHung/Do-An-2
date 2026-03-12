@@ -1,38 +1,30 @@
 import React, { useState, useEffect, useContext } from 'react';
-// import api from '../service/axiosConfig'; 
+import api from '../services/axiosConfig'; 
 import { AuthContext } from '../Context/AuthContext';
 import './HangHoaList.css';
+import {useNavigate} from 'react-router-dom';
 
 const HangHoaList = () => {
     const [hangHoa, setHangHoa] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     // --- LOGIC PHÂN TRANG: Khai báo State ---
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5; // Giới hạn 5 sản phẩm 1 trang để test
 
-    // Dữ liệu giả (Mock Data) - Thêm nhiều sản phẩm để test phân trang
-    const mockData = [
-        { maHang: 'SP001', tenHang: 'Thép tấm 5mm', donViTinh: 'Tấm', soLuongTon: 50, soLuongToiThieu: 100, giaNhap: 500000 },
-        { maHang: 'SP002', tenHang: 'Bulong M10', donViTinh: 'Hộp', soLuongTon: 500, soLuongToiThieu: 200, giaNhap: 50000 },
-        { maHang: 'SP003', tenHang: 'Sơn chống rỉ', donViTinh: 'Thùng', soLuongTon: 15, soLuongToiThieu: 20, giaNhap: 1200000 },
-        { maHang: 'SP004', tenHang: 'Cờ lê', donViTinh: 'Cái', soLuongTon: 150, soLuongToiThieu: 50, giaNhap: 80000 },
-        { maHang: 'SP005', tenHang: 'Mỏ lết', donViTinh: 'Cái', soLuongTon: 40, soLuongToiThieu: 50, giaNhap: 150000 },
-        { maHang: 'SP006', tenHang: 'Máy khoan', donViTinh: 'Cái', soLuongTon: 10, soLuongToiThieu: 5, giaNhap: 2500000 },
-        { maHang: 'SP007', tenHang: 'Đinh 5 phân', donViTinh: 'Kg', soLuongTon: 100, soLuongToiThieu: 50, giaNhap: 20000 },
-    ];
-
     useEffect(() => {
-        setHangHoa(mockData);
+        
         // --- SAU NÀY DEV A LÀM XONG API THÌ BẠN MỞ COMMENT ĐOẠN NÀY ---
         
         const fetchHangHoa = async () => {
             try {
-                const response = await api.get('products'); 
+                const response = await api.get('/hang-hoa'); // Đảm bảo endpoint đúng với backend
                 setHangHoa(response.data);
             } catch (error) {
                 console.error("Lỗi khi tải danh sách hàng hóa:", error);
+                alert("Không thể kết nối đến máy chủ để lấy dữ liệu Hàng hóa!");
             }
         };
         fetchHangHoa();
@@ -64,14 +56,25 @@ const HangHoaList = () => {
     return (
         <div className="hanghoa-container">
             <h2>Quản Lý Danh Mục Hàng Hóa</h2>
-            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
             <input 
                 type="text" 
                 className="search-bar"
                 placeholder="Tìm theo mã hoặc tên hàng..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ margin: 0, width: '300px' }} // Tùy chỉnh CSS chút cho đẹp
             />
+            {/* NÚT THÊM HÀNG HÓA */}
+                {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
+                    <button 
+                        style={{ background: '#27ae60', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+                        onClick={() => navigate('/them-hang-hoa')}
+                    >
+                        + Thêm Hàng Hóa
+                    </button>
+                )}
+            </div>
 
             <table className="hanghoa-table">
                 <thead>

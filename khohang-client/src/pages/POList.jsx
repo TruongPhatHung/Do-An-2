@@ -1,30 +1,42 @@
 // src/pages/POList.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../services/axiosConfig';
 import './POList.css';
-// import api from '../services/axiosConfig'; // Tạm thời bạn có thể chưa cần dòng này nếu chưa gọi API
 
 const POList = () => {
-    // Dữ liệu giả định phản ánh đúng logic Tuần 2 (Giao hàng nhiều lần)
-    const [orders] = useState([
-        { id: 'PO-2024-001', supplier: 'Thép Hòa Phát', date: '2024-03-01', total: 15000000, status: 'COMPLETED' },
-        { id: 'PO-2024-002', supplier: 'Nhựa Bình Minh', date: '2024-03-05', total: 8000000, status: 'PARTIAL' },
-        { id: 'PO-2024-003', supplier: 'Sơn Kim Loại', date: '2024-03-07', total: 12000000, status: 'NEW' },
-    ]);
-
+    const [orders, setOrders] = useState([]);
     const [filterStatus, setFilterStatus] = useState('ALL');
 
+    // GỌI API LẤY DANH SÁCH ĐƠN HÀNG
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const response = await api.get('/don-dat-hang'); // Endpoint lấy danh sách PO
+                setOrders(response.data);
+            } catch (error) {
+                console.error("Lỗi tải danh sách Đơn hàng:", error);
+            }
+        };
+        fetchOrders();
+    }, []);
+
     const getStatusLabel = (status) => {
-        switch (status) {
+        // Tùy thuộc Back-end của bạn trả về chữ gì (MoiTao, GiaoThieu, HoanTat)
+        // Đây là ví dụ khớp với thiết kế hệ thống
+        switch (status?.toUpperCase()) {
+            case 'MOITAO': 
             case 'NEW': return <span className="status-badge status-new">Mới tạo</span>;
+            case 'GIAOTHIEU':
             case 'PARTIAL': return <span className="status-badge status-partial">Giao thiếu</span>;
+            case 'HOANTAT':
             case 'COMPLETED': return <span className="status-badge status-completed">Hoàn tất</span>;
-            default: return status;
+            default: return <span className="status-badge">{status}</span>;
         }
     };
 
     const filteredOrders = filterStatus === 'ALL' 
         ? orders 
-        : orders.filter(o => o.status === filterStatus);
+        : orders.filter(o => o.trangThai === filterStatus);
 
     return (
         <div className="polist-container">
@@ -54,17 +66,21 @@ const POList = () => {
                 </thead>
                 <tbody>
                     {filteredOrders.map(order => (
-                        <tr key={order.id}>
-                            <td style={{fontWeight: 'bold'}}>{order.id}</td>
-                            <td>{order.supplier}</td>
-                            <td>{order.date}</td>
-                            <td>{order.total.toLocaleString()} VNĐ</td>
-                            <td>{getStatusLabel(order.status)}</td>
+                        <tr key={order.maDon}>
+                            <td style={{fontWeight: 'bold'}}>{order.maDon}</td>
+                            {/* Thay ncc.tenNCC tùy thuộc vào object Back-end trả về */}
+                            <td>{order.nhaCungCap?.tenNCC || order.maNCC}</td> 
+                            <td>{order.ngayTao}</td>
+                            <td>{order.tongTien?.toLocaleString()} VNĐ</td>
+                            <td>{getStatusLabel(order.trangThai)}</td>
                             <td>
                                 <button className="btn-detail">Xem chi tiết</button>
                             </td>
                         </tr>
                     ))}
+                    {filteredOrders.length === 0 && (
+                        <tr><td colSpan="6" style={{textAlign: 'center'}}>Chưa có đơn đặt hàng nào.</td></tr>
+                    )}
                 </tbody>
             </table>
         </div>
