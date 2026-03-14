@@ -15,6 +15,7 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import NhaCungCapForm from './pages/NhaCungCapForm'; 
 import QuanLyTaiKhoan from './pages/QuanLyTaiKhoan';
+import EditNhaCungCap from './pages/EditNhaCungCap';
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />
                 <Route path="/add-supplier" element={<ProtectedRoute><NhaCungCapForm/></ProtectedRoute>}/>
+                <Route path="/edit-supplier/:id" element={<ProtectedRoute><EditNhaCungCap /></ProtectedRoute>} />
               </Routes>
             </div>
 

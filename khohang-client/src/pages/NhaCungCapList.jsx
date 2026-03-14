@@ -30,17 +30,19 @@ const NhaCungCapList = () => {
     };
 
     const handleEdit = (ncc) => {
-        navigate('/add-supplier', { state: { editData: ncc } });
+        navigate('/edit-supplier/:id', { state: { editData: ncc } });
     };
 
     // 2. SỬA HÀM DELETE: Nhận ID (số) để xóa và MA (chuỗi) để hiện thông báo
     const handleDelete = async (id, ma) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa nhà cung cấp mã ${ma}?`)) {
             try {
+
                 // Backend nhận ID số: /api/suppliers/1
                 await api.delete(`/suppliers/${id}`); 
                 alert("✅ Xóa thành công!");
                 fetchNCC(); // Gọi lại hàm lấy dữ liệu để cập nhật bảng
+
             } catch (error) {
                 console.error("Lỗi khi xóa:", error);
                 alert("❌ Xóa thất bại! Có thể NCC này đang có đơn hàng liên kết.");

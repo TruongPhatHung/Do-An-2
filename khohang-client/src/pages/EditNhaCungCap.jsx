@@ -1,51 +1,82 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/axiosConfig';
-import './NhaCungCapForm.css';
+import './EditNhaCungCap.css'; // Dùng chung CSS với form thêm mới cho đẹp
 
-const NhaCungCapForm = () => {
+const EditNhaCungCap = () => {
+    const { id } = useParams(); // Lấy mã NCC từ URL
     const navigate = useNavigate();
     
-    // State lưu dữ liệu form
     const [formData, setFormData] = useState({
-        maNCC: '',      // Đã có trong state
-        tenNCC: '',     
+        maNCC: '',
+        tenNCC: '', // Hoặc tenNhaCungCap tùy thuộc vào BE của bạn
         diaChi: '',
+        soDienThoai: '',
         email: ''
     });
-    // State quản lý hiệu ứng tải và lỗi
+
     const [isLoading, setIsLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
-    // Xử lý khi gõ vào ô input
+    // Gọi API lấy dữ liệu chi tiết của 1 Nhà Cung Cấp dựa vào ID
+    useEffect(() => {
+        const fetchSupplierDetails = async () => {
+            try {
+                // Lưu ý: Endpoint này phải khớp với backend (VD: /suppliers/NCC001)
+                const response = await api.get(`/suppliers/${id}`); 
+                const data = response.data;
+                
+                setFormData({
+                    maNCC: data.maNCC || id,
+                    tenNCC: data.tenNCC || data.tenNhaCungCap || '',
+                    diaChi: data.diaChi || '',
+                    soDienThoai: data.soDienThoai || '',
+                    email: data.email || ''
+                });
+            } catch (error) {
+                console.error("Lỗi khi lấy thông tin nhà cung cấp:", error);
+                setErrorMessage("❌ Không thể tải thông tin nhà cung cấp từ máy chủ.");
+            } finally {
+                setIsFetching(false);
+            }
+        };
+
+        fetchSupplierDetails();
+    }, [id]);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        setErrorMessage(''); // Xóa thông báo lỗi cũ khi người dùng bắt đầu sửa
+        setErrorMessage('');
     };
 
-    // Xử lý khi bấm nút Lưu
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setErrorMessage('');
 
         try {
-            await api.post('/suppliers', formData);
-            alert('✅ Thêm nhà cung cấp thành công!');
-            navigate('/nha-cung-cap'); // Đưa về trang danh sách
+            // Gọi API cập nhật (PUT)
+            await api.put(`/suppliers/${id}`, formData);
+            alert('✅ Cập nhật nhà cung cấp thành công!');
+            // Quay về danh sách nhà cung cấp (Lưu ý đường dẫn của bạn hiện tại là /suppliers hoặc /nha-cung-cap)
+            navigate('/suppliers'); 
         } catch (error) {
-            console.error('Lỗi khi thêm:', error);
-            setErrorMessage('❌ Thêm thất bại. Vui lòng kiểm tra lại kết nối hoặc dữ liệu!');
+            console.error('Lỗi khi cập nhật:', error);
+            setErrorMessage('❌ Cập nhật thất bại. Vui lòng kiểm tra lại!');
         } finally {
-            setIsLoading(false); // Tắt trạng thái loading dù thành công hay thất bại
+            setIsLoading(false);
         }
     };
 
+    if (isFetching) {
+        return <div style={{ textAlign: 'center', marginTop: '50px' }}>⏳ Đang tải dữ liệu...</div>;
+    }
+
     return (
         <div className="ncc-container">
-            <h2>Thêm Nhà Cung Cấp Mới</h2>
+            <h2>📝 Cập Nhật Thông Tin Nhà Cung Cấp</h2>
             
-            {/* Vùng hiển thị lỗi */}
             {errorMessage && (
                 <div style={{ backgroundColor: '#ff7675', color: 'white', padding: '10px', borderRadius: '4px', marginBottom: '15px' }}>
                     {errorMessage}
@@ -54,17 +85,17 @@ const NhaCungCapForm = () => {
 
             <form onSubmit={handleSubmit} className="ncc-form">
                 <div className="ncc-input-group">
-                    <label>Mã Nhà Cung Cấp (*):</label>
+                    <label>Mã nhà cung cấp (*):</label>
                     <input 
                         type="text" 
                         name="maNCC" 
                         value={formData.maNCC} 
-                        onChange={handleChange} 
-                        required 
-                        placeholder="Nhập mã (VD: NCC001, NCC_SS...)"
+                        disabled // Không cho phép sửa mã định danh
                         className="ncc-input"
+                        style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
                     />
                 </div>
+
                 <div className="ncc-input-group">
                     <label>Tên nhà cung cấp (*):</label>
                     <input 
@@ -73,10 +104,10 @@ const NhaCungCapForm = () => {
                         value={formData.tenNCC} 
                         onChange={handleChange} 
                         required 
-                        placeholder="Nhập tên công ty/đại lý..."
                         className="ncc-input"
                     />
                 </div>
+
                 <div className="ncc-input-group">
                     <label>Địa chỉ:</label>
                     <input 
@@ -84,12 +115,20 @@ const NhaCungCapForm = () => {
                         name="diaChi" 
                         value={formData.diaChi} 
                         onChange={handleChange} 
-                        placeholder="Số nhà, đường, quận, thành phố..."
                         className="ncc-input"
                     />
                 </div>
 
-            
+                <div className="ncc-input-group">
+                    <label>Số điện thoại:</label>
+                    <input 
+                        type="text" 
+                        name="soDienThoai" 
+                        value={formData.soDienThoai} 
+                        onChange={handleChange} 
+                        className="ncc-input"
+                    />
+                </div>
 
                 <div className="ncc-input-group">
                     <label>Email:</label>
@@ -98,7 +137,6 @@ const NhaCungCapForm = () => {
                         name="email" 
                         value={formData.email} 
                         onChange={handleChange} 
-                        placeholder="contact@nhacungcap.com"
                         className="ncc-input"
                     />
                 </div>
@@ -107,17 +145,15 @@ const NhaCungCapForm = () => {
                     <button 
                         type="submit" 
                         className="ncc-btn ncc-btn-submit" 
-                        disabled={isLoading} // Vô hiệu hóa nút khi đang tải
-                        style={{ opacity: isLoading ? 0.7 : 1, cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                        disabled={isLoading}
                     >
-                        {isLoading ? '⏳ Đang lưu...' : '💾 Lưu Thông Tin'}
+                        {isLoading ? '⏳ Đang lưu...' : '💾 Lưu Cập Nhật'}
                     </button>
                     
                     <button 
                         type="button" 
                         onClick={() => navigate('/suppliers')} 
                         className="ncc-btn ncc-btn-cancel"
-                        disabled={isLoading}
                     >
                         Hủy
                     </button>
@@ -127,4 +163,4 @@ const NhaCungCapForm = () => {
     );
 };
 
-export default NhaCungCapForm;
+export default EditNhaCungCap;
