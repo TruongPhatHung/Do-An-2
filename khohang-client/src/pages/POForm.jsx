@@ -3,37 +3,49 @@ import api from '../services/axiosConfig';
 import './POForm.css';
 
 const POForm = () => {
+    // Chỉ cần 1 state lưu danh sách Nhà Cung Cấp (bên trong nó đã có sẵn mảng danhSachHangHoa)
     const [suppliers, setSuppliers] = useState([]);
-    const [products, setProducts] = useState([]);
 
-    const [supplier, setSupplier] = useState('');
+    // State quản lý form
+    const [supplierId, setSupplierId] = useState('');
     const [items, setItems] = useState([{ productId: '', quantity: 1, price: 0 }]);
 
-    // 1. Lấy dữ liệu từ Database (Sửa lại endpoint cho đúng)
+    // 1. Chỉ cần gọi API lấy danh sách Nhà Cung Cấp
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchSuppliers = async () => {
             try {
-                const [nccRes, hhRes] = await Promise.all([
-                    api.get('/suppliers'), // Đổi từ /suppliersp thành /suppliers cho khớp các trang trước
-                    api.get('/products')
-                ]);
-                setSuppliers(nccRes.data);
-                setProducts(hhRes.data);
+                const response = await api.get('/suppliers');
+                setSuppliers(response.data);
             } catch (error) {
-                console.error("Lỗi tải dữ liệu:", error);
-                alert("Không thể tải danh sách NCC hoặc Hàng hóa!");
+                console.error("Lỗi tải dữ liệu NCC:", error);
+                alert("Không thể tải danh sách Nhà cung cấp!");
             }
         };
-        fetchData();
+        fetchSuppliers();
     }, []);
 
+    // 2. TÌM DANH SÁCH MẶT HÀNG CỦA CÔNG TY ĐANG CHỌN
+    // Tìm object NCC hiện tại trong mảng suppliers
+    const currentSupplier = suppliers.find(s => s.maNCC === supplierId);
+    // Nếu tìm thấy thì lấy danhSachHangHoa của nó, nếu không thì trả về mảng rỗng
+    const availableProducts = currentSupplier?.danhSachHangHoa || [];
+
+    // Xử lý khi người dùng ĐỔI Nhà cung cấp
+    const handleSupplierChange = (e) => {
+        setSupplierId(e.target.value);
+        // Reset lại giỏ hàng về 1 dòng trống
+        setItems([{ productId: '', quantity: 1, price: 0 }]);
+    };
+
+    // Xử lý khi chọn mặt hàng
     const handleItemChange = (index, field, value) => {
         const newItems = [...items];
         newItems[index][field] = value;
 
+        // Tự động điền giá nhập gốc khi chọn mã hàng
         if (field === 'productId') {
-            const product = products.find(p => p.maHang === value);
-            newItems[index].price = product ? product.giaNhap : 0;
+            const product = availableProducts.find(p => p.maHang === value);
+            newItems[index].price = product ? product.giaBan : 0; // Lấy giaBan từ bảng san_pham_ncc
         }
         setItems(newItems);
     };
@@ -42,38 +54,34 @@ const POForm = () => {
     const removeRow = (index) => setItems(items.filter((_, i) => i !== index));
     const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
-    // 2. XỬ LÝ GỬI FORM (Sửa payload cho khớp DTO Java)
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!supplier) return alert("Vui lòng chọn Nhà cung cấp!");
+        if (!supplierId) return alert("Vui lòng chọn Nhà cung cấp!");
+        if (items.some(item => !item.productId || item.quantity <= 0)) {
+            return alert("Vui lòng chọn mặt hàng và nhập số lượng hợp lệ cho tất cả các dòng!");
+        }
 
-        // ĐÓNG GÓI ĐÚNG CẤU TRÚC DonHangRequest TRONG JAVA
         const payload = {
-            maDon: "PO-" + Date.now(), // Tự tạo mã đơn hàng dựa trên thời gian
-            nhaCungCap: {
-                maNCC: supplier // Chỗ này phải là Object chứa maNCC
-            },
+            maDon: "PO-" + Date.now(), 
+            nhaCungCap: { maNCC: supplierId },
             chiTiets: items.map(item => ({
-                hangHoa: {
-                    maHang: item.productId // Chỗ này phải là Object chứa maHang
-                },
+                hangHoa: { maHang: item.productId },
                 soLuongDat: item.quantity,
                 donGia: item.price
             }))
         };
 
         try {
-            console.log("Dữ liệu gửi đi:", payload);
             await api.post('/orders', payload); 
             alert("✅ Đã tạo Đơn đặt hàng thành công!");
             
             // Reset form
-            setSupplier('');
+            setSupplierId('');
             setItems([{ productId: '', quantity: 1, price: 0 }]);
         } catch (error) {
-            console.error("Lỗi khi tạo PO:", error.response?.data || error.message);
-            alert("Lưu đơn hàng thất bại: " + (error.response?.data?.message || "Lỗi hệ thống"));
+            console.error("Lỗi khi tạo PO:", error);
+            alert("❌ Lưu đơn hàng thất bại!");
         }
     };
 
@@ -83,20 +91,26 @@ const POForm = () => {
             <form onSubmit={handleSubmit}>
                 <div className="po-header">
                     <div className="input-group">
-                        <label>Nhà cung cấp:</label>
-                        <select value={supplier} onChange={(e) => setSupplier(e.target.value)} required>
+                        <label>Nhà cung cấp (*):</label>
+                        <select value={supplierId} onChange={handleSupplierChange} required>
                             <option value="">-- Chọn nhà cung cấp --</option>
                             {suppliers.map(s => <option key={s.maNCC} value={s.maNCC}>{s.tenNCC}</option>)}
                         </select>
                     </div>
                 </div>
 
+                {!supplierId && (
+                    <div style={{color: '#e67e22', fontStyle: 'italic', marginBottom: '15px'}}>
+                        Vui lòng chọn Nhà cung cấp để xem bảng báo giá mặt hàng!
+                    </div>
+                )}
+
                 <table className="po-table">
                     <thead>
                         <tr>
                             <th>Sản phẩm</th>
-                            <th>Số lượng</th>
-                            <th>Đơn giá</th>
+                            <th>Số lượng mua</th>
+                            <th>Đơn giá gốc (VNĐ)</th>
                             <th>Thành tiền</th>
                             <th>Thao tác</th>
                         </tr>
@@ -109,16 +123,37 @@ const POForm = () => {
                                         value={item.productId} 
                                         onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
                                         required
+                                        disabled={!supplierId || availableProducts.length === 0}
                                     >
                                         <option value="">-- Chọn hàng --</option>
-                                        {products.map(p => <option key={p.maHang} value={p.maHang}>{p.tenHang}</option>)}
+                                        {availableProducts.map(p => (
+                                            <option key={p.maHang} value={p.maHang}>
+                                                {p.tenHang}
+                                            </option>
+                                        ))}
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="number" min="1" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))} />
+                                    <input 
+                                        type="number" 
+                                        min="1" 
+                                        value={item.quantity} 
+                                        onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value) || 0)} 
+                                        disabled={!item.productId} // Khóa nhập số lượng nếu chưa chọn mặt hàng
+                                    />
                                 </td>
-                                <td>{item.price.toLocaleString()}</td>
-                                <td>{(item.quantity * item.price).toLocaleString()}</td>
+                                <td>
+                                    <input 
+                                        type="number" 
+                                        min="0"
+                                        value={item.price} 
+                                        onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value) || 0)} 
+                                        disabled={!item.productId}
+                                    />
+                                </td>
+                                <td style={{ fontWeight: 'bold' }}>
+                                    {(item.quantity * item.price).toLocaleString()}
+                                </td>
                                 <td>
                                     {items.length > 1 && (
                                         <button type="button" className="btn-remove" onClick={() => removeRow(index)}>Xóa</button>
@@ -129,13 +164,32 @@ const POForm = () => {
                     </tbody>
                 </table>
 
-                <button type="button" className="btn-add" onClick={addRow}>+ Thêm mặt hàng</button>
+                {/* Cảnh báo nếu NCC không có bán mặt hàng nào */}
+                {supplierId && availableProducts.length === 0 && (
+                    <div style={{color: '#c0392b', margin: '10px 0', fontSize: '14px', fontStyle: 'italic'}}>
+                        ⚠️ Nhà cung cấp này hiện chưa có danh mục mặt hàng nào trong hệ thống!
+                    </div>
+                )}
+
+                <button 
+                    type="button" 
+                    className="btn-add" 
+                    onClick={addRow}
+                    disabled={!supplierId || availableProducts.length === 0} 
+                    style={{ opacity: (!supplierId || availableProducts.length === 0) ? 0.5 : 1, cursor: (!supplierId || availableProducts.length === 0) ? 'not-allowed' : 'pointer' }}
+                >
+                    + Thêm dòng
+                </button>
 
                 <div className="po-footer">
-                    Tổng tiền: <span style={{color: '#e74c3c', fontWeight: 'bold'}}>{totalAmount.toLocaleString()} VNĐ</span>
+                    Tổng thanh toán: <span style={{color: '#e74c3c', fontSize: '20px', fontWeight: 'bold'}}>
+                        {totalAmount.toLocaleString()} VNĐ
+                    </span>
                 </div>
 
-                <button type="submit" className="btn-submit">XÁC NHẬN TẠO ĐƠN HÀNG</button>
+                <button type="submit" className="btn-submit" disabled={!supplierId || items.length === 0 || availableProducts.length === 0}>
+                    XÁC NHẬN TẠO ĐƠN HÀNG (PO)
+                </button>
             </form>
         </div>
     );

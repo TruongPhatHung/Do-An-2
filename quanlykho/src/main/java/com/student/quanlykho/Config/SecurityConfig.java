@@ -34,6 +34,7 @@ public class SecurityConfig {
         http.cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                       
                         // Mở cửa cho phép đăng nhập, đăng ký không cần token
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/**").hasAuthority("ADMIN")
@@ -42,7 +43,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/suppliers/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/suppliers/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/suppliers/**").hasAuthority("ADMIN")
-
+                         // Cho phép tạo Đơn hàng (POST)
+                        .requestMatchers(HttpMethod.POST, "/api/orders").hasAnyAuthority("ADMIN", "MUAHANG")
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG", "KHO")
                         // TẤT CẢ các API khác (kho, users, nhà cung cấp) ĐỀU PHẢI CÓ TOKEN
                         .anyRequest().authenticated()
                 )

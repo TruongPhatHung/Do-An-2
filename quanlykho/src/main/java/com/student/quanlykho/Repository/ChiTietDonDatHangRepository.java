@@ -6,7 +6,10 @@ import com.student.quanlykho.Entity.HangHoa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ChiTietDonDatHangRepository  extends JpaRepository<ChiTietDonDatHang, Long > {
-    ChiTietDonDatHang findByDonDatHangAndHangHoa(DonDatHang donDatHang, HangHoa hangHoa);
+    // HÀM ĐÃ SỬA CHUẨN
+    Optional<ChiTietDonDatHang> findByDonDatHangAndMaHang(DonDatHang donDatHang, String maHang);
 }
