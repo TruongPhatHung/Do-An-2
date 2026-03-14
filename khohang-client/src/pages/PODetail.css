@@ -1,0 +1,120 @@
+.podetail-container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.podetail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 15px;
+}
+
+.podetail-header h2 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.text-highlight {
+    color: #2980b9;
+}
+
+.btn-back {
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-back:hover { background-color: #7f8c8d; }
+
+/* Grid chia 2 cột thông tin */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.info-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #f1f2f6;
+}
+
+.info-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #34495e;
+    font-size: 1.1rem;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 10px;
+}
+
+.info-card p {
+    margin: 8px 0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.total-money {
+    color: #e74c3c;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Badges */
+.badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+.badge-new { background-color: #e3f2fd; color: #2980b9; }
+.badge-partial { background-color: #fcf3cf; color: #d35400; }
+.badge-completed { background-color: #e8f8f5; color: #27ae60; }
+
+/* Bảng chi tiết */
+.table-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.table-section h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.podetail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.podetail-table th, .podetail-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+.podetail-table th {
+    background-color: #f8f9fa;
+    color: #34495e;
+    text-align: left;
+}
+
+.podetail-table tr:hover {
+    background-color: #fdfdfd;
+}

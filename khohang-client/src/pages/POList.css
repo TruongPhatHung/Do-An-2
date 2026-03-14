@@ -51,3 +51,40 @@
     background: #3498db;
     color: white;
 }
+/* Trong file POList.css */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-new {
+    background-color: #e3f2fd; /* Xanh dương nhạt */
+    color: #2980b9;
+}
+
+.status-partial {
+    background-color: #fcf3cf; /* Vàng nhạt */
+    color: #d35400;
+}
+
+.status-completed {
+    background-color: #e8f8f5; /* Xanh lá nhạt */
+    color: #27ae60;
+}
+
+.btn-detail {
+    background-color: #34495e;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.btn-detail:hover {
+    background-color: #2c3e50;
+}

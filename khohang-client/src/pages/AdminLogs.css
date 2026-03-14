@@ -1,0 +1,96 @@
+.logs-container {
+    padding: 25px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.logs-header {
+    margin-bottom: 25px;
+    border-left: 5px solid #2c3e50;
+    padding-left: 15px;
+}
+
+.logs-header h2 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.logs-header p {
+    color: #7f8c8d;
+    margin: 5px 0 0;
+}
+
+.logs-table-wrapper {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.logs-table th {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.logs-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 13.5px;
+    vertical-align: middle;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #2980b9;
+}
+
+/* Badges hành động */
+.action-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+}
+
+.badge-add { background-color: #27ae60; }
+.badge-edit { background-color: #2980b9; }
+.badge-delete { background-color: #e74c3c; }
+
+/* Phần hiển thị Thay đổi */
+.diff-view {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 400px;
+}
+
+.old-val {
+    color: #e74c3c;
+    text-decoration: line-through;
+    font-style: italic;
+    word-break: break-all;
+}
+
+.new-val {
+    color: #27ae60;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.arrow {
+    color: #bdc3c7;
+    font-weight: bold;
+}
+
+.logs-table tr:hover {
+    background-color: #fcfcfc;
+}
