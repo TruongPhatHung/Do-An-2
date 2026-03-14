@@ -10,12 +10,17 @@ import NhapKho from './pages/NhapKho';
 import POList from './pages/POList';
 import PhieuXuatKho from './pages/PhieuXuatKho';
 import Dashboard from './pages/Dashboard';
-import ThemHangHoa from './pages/ThemHangHoa';
+import NotificationBell from './components/NotificationBell';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import NhaCungCapForm from './pages/NhaCungCapForm'; 
 import QuanLyTaiKhoan from './pages/QuanLyTaiKhoan';
+
 import EditNhaCungCap from './pages/EditNhaCungCap';
+
+
+import PODetail from './pages/PODetail';
+import AdminLogs from './pages/AdminLogs';
 
 
 function App() {
@@ -43,12 +48,15 @@ function App() {
                 <Route path="/danh-sach-po" element={<POList />} />
                 <Route path="/xuat-kho" element={<PhieuXuatKho />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/them-hang-hoa" element={<ThemHangHoa />} />
+                <Route path="/thong-bao" element={<NotificationBell />} />
                
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />
                 <Route path="/add-supplier" element={<ProtectedRoute><NhaCungCapForm/></ProtectedRoute>}/>
                 <Route path="/edit-supplier/:id" element={<ProtectedRoute><EditNhaCungCap /></ProtectedRoute>} />
+
+                <Route path="/po-detail" element={<PODetail />} />
+                <Route path="/admin/logs" element={<AdminLogs />} />
               </Routes>
             </div>
 

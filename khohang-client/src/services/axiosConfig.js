@@ -1,10 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
+
   baseURL: 'http://10.10.12.18:8080/api', // URL của Developer A
   headers: {
         'Content-Type': 'application/json',
     },
+
+
 });
 
 // Tự động đính kèm Token vào Header mỗi khi gọi API

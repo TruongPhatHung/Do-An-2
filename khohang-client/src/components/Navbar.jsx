@@ -1,7 +1,7 @@
-
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
+import NotificationBell from './NotificationBell'; // <--- BẠN ĐÃ CÓ DÒNG NÀY CHƯA?
 import './Navbar.css';
 
 const Navbar = () => {
@@ -19,6 +19,9 @@ const Navbar = () => {
         <nav className="navbar">
             <div className="nav-logo">WMS-SYSTEM</div>
             <div className="nav-user">
+                
+                <NotificationBell /> {/* <--- BẠN ĐÃ ĐẶT CÁI CHUÔNG VÀO CHỖ NÀY CHƯA? */}
+
                 <span>Chào, <strong>{user.hoTen || 'User'}</strong> ({user.role})</span>
                 <button onClick={handleLogout} className="logout-btn">Đăng xuất</button>
             </div>

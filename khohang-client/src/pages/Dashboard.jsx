@@ -1,25 +1,53 @@
-
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
+import { 
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    PieChart, Pie, Cell
+} from 'recharts';
 import './Dashboard.css';
 
 const Dashboard = () => {
-    const [lowStockItems, setLowStockItems] = useState([]);
-    const [totalItems, setTotalItems] = useState(0);
+    const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({ tongMatHang: 0, tongSoLuong: 0, tongTienNhap: 0 });
+
+    // Bộ màu chuyên nghiệp hơn
+    const COLORS = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'];
+
+    // HÀM QUAN TRỌNG: Rút gọn tên sản phẩm để không làm nát biểu đồ
+    const truncateName = (name) => {
+        return name.length > 20 ? name.substring(0, 20) + '...' : name;
+    };
 
     const fetchDashboardData = async () => {
         try {
-            // Lấy danh sách hàng hóa từ API thực tế
-            const response = await api.get('/hang-hoa');
+            const response = await api.get('/products'); 
             const allData = response.data;
 
-            setTotalItems(allData.length);
+            let tongSL = 0;
+            let tongTien = 0;
 
-            // Lọc các mặt hàng có tồn kho thấp hơn định mức ngay tại Front-end
-            const warnings = allData.filter(item => item.soLuongTon < item.soLuongToiThieu);
-            setLowStockItems(warnings);
-            
+            const processedData = allData.map(item => {
+                const soLuong = item.soLuongTon || 0;
+                const giaNhap = item.giaNhap || 0; 
+                const thanhTien = soLuong * giaNhap;
+                tongSL += soLuong;
+                tongTien += thanhTien;
+
+                return {
+                    ...item,
+                    shortName: truncateName(item.tenHang), // Tên hiển thị trên chart
+                    thanhTien: thanhTien
+                };
+            });
+
+            setStats({
+                tongMatHang: processedData.length,
+                tongSoLuong: tongSL,
+                tongTienNhap: tongTien
+            });
+
+            setItems(processedData.filter(item => item.soLuongTon > 0).sort((a, b) => b.thanhTien - a.thanhTien));
             setLoading(false);
         } catch (error) {
             console.error("Lỗi Dashboard API:", error);
@@ -29,64 +57,117 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchDashboardData();
-
-        // Thiết lập cơ chế tự động làm mới dữ liệu (Real-time giả lập)
-        const interval = setInterval(fetchDashboardData, 30000); // 30 giây một lần
-        
-        return () => clearInterval(interval);
     }, []);
 
-    if (loading) return <div className="loading">Đang tải dữ liệu Dashboard...</div>;
+    const topValueItems = items.slice(0, 5);
+    const topQtyItems = [...items].sort((a, b) => b.soLuongTon - a.soLuongTon).slice(0, 7);
+
+    if (loading) return <div className="loading-screen">⏳ Đang tổng hợp dữ liệu...</div>;
 
     return (
-        <div className="dashboard-container">
-            <h2>📊 Bảng Điều Khiển Hệ Thống</h2>
+        <div className="dashboard-wrapper">
+            <header className="db-header">
+                <h2>📊 Phân Tích Kho Hàng Thực Thời</h2>
+                <p>Cập nhật lần cuối: {new Date().toLocaleTimeString()}</p>
+            </header>
             
-            <div className="stats-row">
-                <div className="stat-card">
-                    <h3>Tổng mặt hàng</h3>
-                    <p className="stat-number">{totalItems}</p>
-                    <small>Trong danh mục hệ thống</small>
+            {/* 1. THỐNG KÊ TỔNG QUAN (Card thiết kế lại) */}
+            <div className="db-stats-grid">
+                <div className="stat-card blue">
+                    <div className="stat-content">
+                        <h6>TỔNG MẶT HÀNG</h6>
+                        <div className="stat-value">{stats.tongMatHang}</div>
+                    </div>
+                    <div className="stat-icon-bg">📦</div>
                 </div>
-                
-                <div className={`stat-card warning ${lowStockItems.length > 0 ? 'active' : ''}`}>
-                    <h3>Mặt hàng sắp hết</h3>
-                    <p className="stat-number" style={{color: lowStockItems.length > 0 ? '#e74c3c' : '#2c3e50'}}>
-                        {lowStockItems.length}
-                    </p>
-                    <small>Cần nhập hàng bổ sung</small>
+                <div className="stat-card orange">
+                    <div className="stat-content">
+                        <h6>SỐ LƯỢNG TỒN</h6>
+                        <div className="stat-value">{stats.tongSoLuong.toLocaleString()}</div>
+                    </div>
+                    <div className="stat-icon-bg">📈</div>
+                </div>
+                <div className="stat-card green">
+                    <div className="stat-content">
+                        <h6>TỔNG VỐN TỒN KHO</h6>
+                        <div className="stat-value">{stats.tongTienNhap.toLocaleString()} đ</div>
+                    </div>
+                    <div className="stat-icon-bg">💰</div>
                 </div>
             </div>
 
-            <div className="warning-section">
-                <h3>⚠️ DANH SÁCH CẢNH BÁO ĐỊNH MỨC</h3>
-                
-                {lowStockItems.length > 0 ? (
-                    <div className="warning-grid">
-                        {lowStockItems.map(item => (
-                            <div key={item.maHang} className="warning-item">
-                                <div className="warning-info">
-                                    <strong>{item.tenHang}</strong>
-                                    <span>Mã: {item.maHang}</span>
-                                </div>
-                                <div className="warning-status">
-                                    <span>Tồn: <b style={{color: 'red'}}>{item.soLuongTon}</b></span>
-                                    <span>Định mức: {item.soLuongToiThieu}</span>
-                                </div>
-                                <button 
-                                    className="btn-order-now" 
-                                    onClick={() => window.location.href='/don-hang'}
-                                >
-                                    Lên đơn đặt hàng ngay
-                                </button>
-                            </div>
+            <div className="db-main-grid">
+                {/* 2. BIỂU ĐỒ CỘT */}
+                <div className="db-chart-container">
+                    <h5>📉 Top 7 Sản Phẩm Tồn Kho Nhiều Nhất</h5>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={topQtyItems}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                            <XAxis dataKey="maHang" tick={{fill: '#888', fontSize: 12}} axisLine={false} tickLine={false} />
+                            <YAxis axisLine={false} tickLine={false} />
+                            <Tooltip cursor={{fill: '#f8f9fc'}} />
+                            <Bar dataKey="soLuongTon" fill="#4e73df" radius={[4, 4, 0, 0]} barSize={35} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* 3. BIỂU ĐỒ TRÒN (Đã sửa lỗi hiển thị) */}
+                <div className="db-chart-container">
+                    <h5>🍩 Cơ Cấu Vốn (Top 5 Giá Trị)</h5>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                            <Pie
+                                data={topValueItems}
+                                cx="50%" cy="50%"
+                                innerRadius={60} outerRadius={85}
+                                paddingAngle={5}
+                                dataKey="thanhTien"
+                                nameKey="shortName" // Dùng tên đã rút gọn
+                            >
+                                {topValueItems.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                                ))}
+                            </Pie>
+                            <Tooltip formatter={(val) => val.toLocaleString() + " đ"} />
+                            <Legend layout="vertical" align="right" verticalAlign="middle" iconType="circle" />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            {/* 4. BẢNG CHI TIẾT */}
+            <div className="db-table-wrapper">
+                <h5>📋 Danh Sách Chi Tiết Giá Trị Hàng Hóa</h5>
+                <table className="db-modern-table">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã Hàng</th>
+                            <th>Tên Mặt Hàng</th>
+                            <th className="text-center">Số Lượng</th>
+                            <th className="text-right">Giá Nhập</th>
+                            <th className="text-right">Thành Tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((item, index) => (
+                            <tr key={item.maHang}>
+                                <td>{index + 1}</td>
+                                <td className="font-weight-bold">{item.maHang}</td>
+                                <td className="text-muted">{item.tenHang}</td>
+                                <td className="text-center">
+                                    <span className={`badge ${item.soLuongTon < 10 ? 'bg-danger' : 'bg-success'}`}>
+                                        {item.soLuongTon}
+                                    </span>
+                                </td>
+                                <td className="text-right">{item.giaNhap.toLocaleString()} đ</td>
+                                <td className="text-right font-weight-bold text-primary">
+                                    {item.thanhTien.toLocaleString()} đ
+                                </td>
+                            </tr>
                         ))}
-                    </div>
-                ) : (
-                    <div className="no-warning">
-                        ✅ Tuyệt vời! Tất cả mặt hàng đều ở mức tồn kho an toàn.
-                    </div>
-                )}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

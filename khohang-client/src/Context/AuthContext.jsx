@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
 
             const response = await fetch('http://10.10.12.18:8080/api/auth/login', {
 
+
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

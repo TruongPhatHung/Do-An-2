@@ -2,6 +2,7 @@ package com.student.quanlykho.Controller;
 
 import com.student.quanlykho.Entity.NguoiDung;
 import com.student.quanlykho.Repository.NguoiDungRepository;
+import com.student.quanlykho.Service.AuditLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -9,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-// ĐÂY MỚI LÀ ĐƯỜNG DẪN ĐÚNG MÀ REACT ĐANG GỌI TỚI
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
 public class NguoiDungController {
 
     @Autowired
@@ -19,55 +20,75 @@ public class NguoiDungController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // 1. Lấy toàn bộ danh sách nhân viên
+    @Autowired
+    private AuditLogService auditLogService;
+
     @GetMapping
     public List<NguoiDung> getAll() {
         return nguoiDungRepository.findAll();
     }
 
-    // 2. Admin thêm tài khoản mới
     @PostMapping
     public NguoiDung addUser(@RequestBody NguoiDung user) {
         if (user.getMaND() == null) {
             user.setMaND("ND-" + System.currentTimeMillis());
         }
-
-        // CHỖ NÀY QUAN TRỌNG: Chỉ gán mặc định nếu người dùng KHÔNG gửi quyền lên
         if (user.getVaiTro() == null || user.getVaiTro().trim().isEmpty()) {
             user.setVaiTro("KHO");
         }
-
         user.setMatKhau(passwordEncoder.encode(user.getMatKhau()));
-        return nguoiDungRepository.save(user); // Lưu xuống DB
+
+        NguoiDung saved = nguoiDungRepository.save(user);
+
+        // 🎯 GHI LOG: TẠO TÀI KHOẢN MỚI
+        String moi = String.format("User: %s, Quyền: %s, Cấp cho: %s",
+                saved.getTenDangNhap(), saved.getVaiTro(), saved.getHoTen());
+        auditLogService.ghiLog("THÊM", "TÀI KHOẢN", saved.getMaND(), "Chưa có", moi);
+
+        return saved;
     }
 
-    // 3. Tính năng "Tăng chức" - Cập nhật vai trò
     @PutMapping("/{maND}/role")
     public NguoiDung updateRole(@PathVariable String maND, @RequestBody String newRole) {
-        // Xóa dấu ngoặc kép dư thừa nếu gửi từ React dạng chuỗi thuần
         String role = newRole.replace("\"", "");
 
         return nguoiDungRepository.findById(maND).map(user -> {
+            String cu = "Quyền cũ: " + user.getVaiTro();
+
             user.setVaiTro(role);
-            return nguoiDungRepository.save(user);
+            NguoiDung saved = nguoiDungRepository.save(user);
+
+            // 🎯 GHI LOG: THAY ĐỔI QUYỀN TRUY CẬP
+            auditLogService.ghiLog("SỬA", "TÀI KHOẢN (QUYỀN)", maND, cu, "Quyền mới: " + saved.getVaiTro());
+
+            return saved;
         }).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
     }
 
-    // 4. Xóa tài khoản
-    @DeleteMapping("/{maND}")
-    public String delete(@PathVariable String maND) {
-        nguoiDungRepository.deleteById(maND);
-        return "Đã xóa tài khoản: " + maND;
-    }
     @PutMapping("/{maND}/password")
     public String updatePassword(@PathVariable String maND, @RequestBody String newPassword) {
-        // Xóa dấu ngoặc kép nếu gửi từ React dạng chuỗi thuần JSON
         String cleanPassword = newPassword.replace("\"", "");
 
         return nguoiDungRepository.findById(maND).map(user -> {
-            user.setMatKhau(passwordEncoder.encode(cleanPassword)); // Mã hóa mật khẩu mới
+            user.setMatKhau(passwordEncoder.encode(cleanPassword));
             nguoiDungRepository.save(user);
-            return "Đổi mật khẩu thành công cho tài khoản: " + user.getTenDangNhap();
+
+            // 🎯 GHI LOG: ĐỔI MẬT KHẨU (Tuyệt đối không log pass thật)
+            auditLogService.ghiLog("SỬA", "TÀI KHOẢN (MẬT KHẨU)", maND, "Mật khẩu cũ: ***", "Mật khẩu đã bị thay đổi (***)");
+
+            return "Đổi mật khẩu thành công";
         }).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng!"));
+    }
+
+    @DeleteMapping("/{maND}")
+    public String delete(@PathVariable String maND) {
+        NguoiDung user = nguoiDungRepository.findById(maND).orElse(null);
+        if(user != null) {
+            // 🎯 GHI LOG: XÓA TÀI KHOẢN
+            String cu = String.format("User: %s (%s)", user.getTenDangNhap(), user.getHoTen());
+            auditLogService.ghiLog("XÓA", "TÀI KHOẢN", maND, cu, "Đã khóa/Xóa tài khoản");
+            nguoiDungRepository.deleteById(maND);
+        }
+        return "Đã xóa tài khoản";
     }
 }

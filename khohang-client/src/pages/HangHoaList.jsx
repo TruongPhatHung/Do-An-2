@@ -66,14 +66,7 @@ const HangHoaList = () => {
                 style={{ margin: 0, width: '300px' }} // Tùy chỉnh CSS chút cho đẹp
             />
             {/* NÚT THÊM HÀNG HÓA */}
-                {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
-                    <button 
-                        style={{ background: '#27ae60', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
-                        onClick={() => navigate('/them-hang-hoa')}
-                    >
-                        + Thêm Hàng Hóa
-                    </button>
-                )}
+                
             </div>
 
             <table className="hanghoa-table">

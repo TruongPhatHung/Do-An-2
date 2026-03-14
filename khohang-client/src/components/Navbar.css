@@ -58,3 +58,19 @@
 .logout-btn:hover {
     background-color: #c0392b;
 }
+.nav-user {
+    display: flex;
+    align-items: center; /* Căn giữa theo chiều dọc */
+    gap: 20px; /* Tạo khoảng cách 20px giữa chuông, tên và nút đăng xuất */
+}
+.nav-user {
+    display: flex;
+    align-items: center; /* Căn giữa tất cả theo chiều dọc */
+    gap: 20px; /* Tạo khoảng cách 20px cho thoáng mắt */
+}
+
+/* Thêm một chút xíu cho cái chuông nếu nó bị lệch */
+.notification-wrapper {
+    display: flex;
+    align-items: center;
+}

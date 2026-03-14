@@ -71,6 +71,13 @@ const Sidebar = () => {
                         </NavLink>
                     </li>
                 )}
+                {role =='ADMIN' &&(
+                    <li>
+                        <NavLink to="/admin/logs" className="sidebar-item">
+                        📜 Nhật Ký Hệ Thống
+                        </NavLink>
+                    </li>
+                )}
 
             </ul>
         </aside>
