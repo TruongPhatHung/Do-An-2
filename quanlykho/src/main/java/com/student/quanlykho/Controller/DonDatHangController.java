@@ -90,9 +90,7 @@ public class DonDatHangController {
         return saved;
     }
 
-    // =========================================================
-    // --- CÁC CLASS DTO NẰM BÊN TRONG CLASS CONTROLLER ---
-    // =========================================================
+    
     public static class DonHangRequest {
         private String maDon;
         private NhaCungCapRequest nhaCungCap;
