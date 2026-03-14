@@ -1,5 +1,7 @@
 package com.student.quanlykho.Security;
 
+import com.student.quanlykho.Entity.NguoiDung;
+import com.student.quanlykho.Repository.NguoiDungRepository;
 import com.student.quanlykho.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -15,11 +19,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private NguoiDungRepository nguoiDungRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -30,17 +37,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 2. Nếu có Token và Token đó là hàng thật (Validate thành công)
             if (StringUtils.hasText(jwt) && jwtUtils.validateToken(jwt)) {
-                // Lấy username từ Token
                 String username = jwtUtils.getUsernameFromJWT(jwt);
 
-                // 3. Tạo một chứng chỉ xác thực "giả định" để báo cho Spring Security là "Ông này đã login rồi"
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        username, null, new ArrayList<>()); // Tạm thời để mảng trống cho phân quyền sau
+                // 1. Tìm User trong Database để lấy quyền (Vai trò)
+                NguoiDung user = nguoiDungRepository.findByTenDangNhap(username).orElse(null);
 
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (user != null) {
+                    // 2. Chuyển đổi VaiTro (VD: "ADMIN") thành định dạng quyền của Spring Security
+                    List<GrantedAuthority> authorities = new ArrayList<>();
+                    authorities.add(new SimpleGrantedAuthority(user.getVaiTro()));
 
-                // 4. Lưu chứng chỉ này vào hệ thống (Set Security Context)
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    // 3. Nhét danh sách quyền (authorities) vào chứng chỉ
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            user.getTenDangNhap(), null, authorities);
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         } catch (Exception ex) {
             logger.error("Không thể xác thực người dùng: " + ex.getMessage());

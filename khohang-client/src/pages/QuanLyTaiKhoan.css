@@ -1,0 +1,62 @@
+.tk-container {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tk-title {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.tk-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tk-table th {
+    background: #f4f6f9;
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+    color: #333;
+}
+
+.tk-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+/* Label phân quyền */
+.tk-role {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.tk-role.admin {
+    background: #ffeaa7;
+    color: #d35400;
+}
+
+.tk-role.user {
+    background: #81ecec;
+    color: #00b894;
+}
+
+.tk-btn-delete {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.tk-btn-delete:hover {
+    background: #c0392b;
+}

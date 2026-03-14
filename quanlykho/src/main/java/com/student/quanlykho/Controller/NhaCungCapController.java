@@ -37,8 +37,11 @@ public class NhaCungCapController {
                 .orElseThrow(()-> new RuntimeException("Không tìm thấy nhà cung cấp:"+ id));
 
     }
+
+
+    // Xóa nhà cung cấp
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id){
+    public void deleteNhaCungCap(@PathVariable String id) {
         nhaCungCapRepository.deleteById(id);
     }
 }
