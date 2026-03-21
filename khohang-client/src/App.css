@@ -1,0 +1,63 @@
+/* App.css */
+
+/* Reset toàn bộ lề trình duyệt */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body, #root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Ngăn cuộn toàn trang, chỉ cuộn vùng content */
+}
+
+/* Container chính bao phủ 100% màn hình */
+.app-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    transition: all 0.3s ease; /* Tạo hiệu ứng mượt khi đóng/mở */
+}
+/* Khi sidebar đóng, chúng ta thu hẹp Sidebar lại */
+.sidebar {
+    width: 230px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-closed .sidebar {
+    width: 0;
+    overflow: hidden; /* Ẩn các thành phần bên trong khi đóng */
+    opacity: 0;
+    pointer-events: none; /* Không cho click vào khi đã ẩn */
+}
+
+/* Phần logo trong Navbar cũng nên thu hẹp lại để khớp với Sidebar */
+.nav-brand-area {
+    width: 230px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-closed .nav-brand-area {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+}
+
+/* Khối bên phải (Navbar + Nội dung) */
+.main-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f6f9; /* Màu nền xám nhạt của hệ thống */
+    min-width: 0; /* Tránh lỗi flexbox bị tràn */
+}
+
+/* Vùng nội dung bên dưới Navbar */
+.content-area {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto; /* Chỉ cho phép cuộn nội dung ở đây */
+}

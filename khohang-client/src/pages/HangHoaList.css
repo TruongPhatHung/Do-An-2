@@ -1,86 +1,231 @@
 /* src/pages/HangHoaList.css */
 
 .hanghoa-container {
-    padding: 20px;
-    font-family: sans-serif;
+    padding: 24px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fc;
+    min-height: 100vh;
+}
+
+.hanghoa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.hanghoa-header h2 {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 22px;
+}
+
+/* Thanh tìm kiếm hiện đại */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: #858796;
+    font-size: 18px;
 }
 
 .search-bar {
-    margin-bottom: 20px;
-    padding: 10px;
-    width: 300px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: 350px;
+    padding: 10px 10px 10px 38px;
+    border: 1px solid #d1d3e2;
+    border-radius: 8px;
     font-size: 14px;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.search-bar:focus {
+    border-color: #bac8f3;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+/* Bảng dữ liệu */
+.table-responsive {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
 }
 
 .hanghoa-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.hanghoa-table th, 
-.hanghoa-table td {
-    border: 1px solid #e0e0e0;
-    padding: 12px;
-    text-align: left;
 }
 
 .hanghoa-table th {
-    background-color: #f8f9fa;
+    background-color: #f1f4f8;
+    color: #4a5568;
+    font-weight: 600;
+    padding: 16px 12px;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.hanghoa-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #edf2f7;
+    color: #2d3748;
+    vertical-align: middle;
+}
+
+.hanghoa-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.hanghoa-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Các thành phần nhỏ trong bảng */
+.font-medium {
+    font-weight: 600;
+    color: #4e73df;
+}
+
+.badge-category {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.price-text {
+    color: #e67e22;
     font-weight: bold;
 }
 
-/* Class tô màu đỏ cảnh báo khi tồn kho dưới định mức */
-.row-warning {
-    background-color: #ffe6e6; 
+.text-muted {
+    color: #718096;
 }
 
-.row-normal {
-    background-color: #ffffff;
+/* Cảnh báo tồn kho */
+.stock-normal {
+    font-weight: 600;
+    color: #2d3748;
 }
 
-.text-bold {
+.stock-warning {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-weight: bold;
-    color: #333;
+    color: #e74a3b;
+    background-color: #fce4e4;
+    padding: 4px 8px;
+    border-radius: 6px;
+    width: fit-content;
 }
 
+.warning-icon {
+    font-size: 16px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+/* Nút thao tác */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    font-size: 13px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background-color: #edf2f7;
+    color: #4a5568;
+}
+
+.btn-view:hover {
+    background-color: #e2e8f0;
+    color: #2b6cb0;
+}
+
+.btn-edit {
+    background-color: #eef2ff;
+    color: #4f46e5;
+}
+
+.btn-edit:hover {
+    background-color: #c7d2fe;
+}
+
+/* Giao diện không có dữ liệu */
 .empty-message {
     text-align: center;
-    padding: 20px;
-    color: #888;
+    padding: 40px !important;
+    color: #a0aec0;
 }
+
+.empty-message p {
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+/* Phân trang */
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 20px;
-    gap: 10px;
+    margin-top: 24px;
+    gap: 8px;
 }
 
 .page-btn {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    background-color: white;
+    padding: 8px 14px;
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    color: #4a5568;
     cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 
 .page-btn:hover:not(:disabled) {
-    background-color: #f0f0f0;
+    background-color: #edf2f7;
+    border-color: #cbd5e0;
 }
 
 .page-btn.active {
-    background-color: #007bff;
+    background-color: #4e73df;
     color: white;
-    border-color: #007bff;
+    border-color: #4e73df;
+    box-shadow: 0 2px 4px rgba(78, 115, 223, 0.2);
 }
 
 .page-btn:disabled {
-    background-color: #e9ecef;
-    color: #a8a8a8;
+    background-color: #f8fafc;
+    color: #cbd5e0;
     cursor: not-allowed;
+    border-color: #edf2f7;
 }

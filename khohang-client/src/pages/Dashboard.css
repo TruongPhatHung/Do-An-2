@@ -8,6 +8,33 @@
 .db-header h2 { color: #4e73df; font-weight: 800; margin: 0; }
 .db-header p { color: #858796; font-size: 0.9rem; }
 
+/* Trong Dashboard.css */
+
+.btn-export-excel {
+    background-color: #217346; /* Màu xanh lá chuẩn của Excel */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(33, 115, 70, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-export-excel:hover {
+    background-color: #1a5a37;
+    box-shadow: 0 6px 12px rgba(33, 115, 70, 0.3);
+    transform: translateY(-2px); /* Hiệu ứng nẩy nhẹ khi hover */
+}
+
+.btn-export-excel:active {
+    transform: translateY(0);
+}
+
 /* Stats Cards */
 .db-stats-grid {
     display: grid;

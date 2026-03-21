@@ -4,6 +4,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell
 } from 'recharts';
+import * as XLSX from 'xlsx'; // <--- IMPORT THƯ VIỆN Ở ĐÂY
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -59,6 +60,49 @@ const Dashboard = () => {
         fetchDashboardData();
     }, []);
 
+    // ===== HÀM XUẤT EXCEL =====
+    const handleExportExcel = () => {
+        // 1. Chuẩn bị dữ liệu định dạng đẹp cho Excel
+        const excelData = items.map((item, index) => ({
+            "STT": index + 1,
+            "Mã Hàng": item.maHang,
+            "Tên Mặt Hàng": item.tenHang, // Dùng tên đầy đủ, không cắt ngắn
+            "Số Lượng Tồn": item.soLuongTon,
+            "Giá Nhập (VNĐ)": item.giaNhap,
+            "Thành Tiền (VNĐ)": item.thanhTien
+        }));
+
+        // 2. Thêm một dòng tổng cộng ở cuối
+        excelData.push({
+            "STT": "",
+            "Mã Hàng": "",
+            "Tên Mặt Hàng": "TỔNG CỘNG:",
+            "Số Lượng Tồn": stats.tongSoLuong,
+            "Giá Nhập (VNĐ)": "",
+            "Thành Tiền (VNĐ)": stats.tongTienNhap
+        });
+
+        // 3. Tạo Worksheet và Workbook
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        
+        // Căn chỉnh độ rộng cột cho đẹp
+        worksheet['!cols'] = [
+            { wch: 5 },   // STT
+            { wch: 15 },  // Mã hàng
+            { wch: 40 },  // Tên
+            { wch: 15 },  // Số lượng
+            { wch: 20 },  // Giá nhập
+            { wch: 20 }   // Thành tiền
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoKho");
+
+        // 4. Xuất file với tên chứa ngày giờ hiện tại
+        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // Dạng YYYYMMDD
+        XLSX.writeFile(workbook, `BaoCao_TonKho_${dateStr}.xlsx`);
+    };
+
     const topValueItems = items.slice(0, 5);
     const topQtyItems = [...items].sort((a, b) => b.soLuongTon - a.soLuongTon).slice(0, 7);
 
@@ -66,9 +110,21 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-wrapper">
-            <header className="db-header">
-                <h2>📊 Phân Tích Kho Hàng Thực Thời</h2>
-                <p>Cập nhật lần cuối: {new Date().toLocaleTimeString()}</p>
+           {/* ĐÃ SỬA HEADER Ở ĐÂY */}
+            <header className="db-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h2>📊 Phân Tích Kho Hàng Thực Thời</h2>
+                    <p>Cập nhật lần cuối: {new Date().toLocaleTimeString()}</p>
+                </div>
+                
+                {/* NÚT XUẤT EXCEL */}
+                <button 
+                    onClick={handleExportExcel} 
+                    className="btn-export-excel"
+                    title="Tải xuống báo cáo chi tiết"
+                >
+                    <span style={{ marginRight: '8px' }}>📗</span> Xuất Báo Cáo
+                </button>
             </header>
             
             {/* 1. THỐNG KÊ TỔNG QUAN (Card thiết kế lại) */}

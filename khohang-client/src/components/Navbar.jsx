@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
-import NotificationBell from './NotificationBell'; // <--- BẠN ĐÃ CÓ DÒNG NÀY CHƯA?
+import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
-const Navbar = () => {
+const Navbar = ({ onToggleSidebar }) => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -16,14 +16,30 @@ const Navbar = () => {
     if (!user) return null;
 
     return (
-        <nav className="navbar">
-            <div className="nav-logo">WMS-SYSTEM</div>
-            <div className="nav-user">
-                
-                <NotificationBell /> {/* <--- BẠN ĐÃ ĐẶT CÁI CHUÔNG VÀO CHỖ NÀY CHƯA? */}
+        <nav className="navbar-top">
+            {/* Phần Logo bên trái */}
+            <div className="nav-brand-area">
+                <span className="nav-logo">WMS-SYSTEM</span>
+            </div>
 
-                <span>Chào, <strong>{user.hoTen || 'User'}</strong> ({user.role})</span>
-                <button onClick={handleLogout} className="logout-btn">Đăng xuất</button>
+            {/* Phần chức năng bên phải */}
+            <div className="nav-right-area">
+                <button className="menu-toggle-btn" onClick={onToggleSidebar}>☰</button> {/* Nút menu giả lập */}
+                
+                <div className="nav-user-actions">
+                    <NotificationBell />
+
+                    <div className="nav-user-profile">
+                     
+                        <span className="nav-greeting">
+                            Xin Chào: <strong>{user.hoTen || 'admin'}</strong>
+                        </span>
+                    </div>
+
+                    <button onClick={handleLogout} className="btn-logout-custom">
+                        Đăng xuất
+                    </button>
+                </div>
             </div>
         </nav>
     );

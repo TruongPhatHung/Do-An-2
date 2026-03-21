@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
-import './POForm.css'; // Import CSS đã tách
+import { FiPlus, FiTrash2, FiSave, FiArrowLeft } from 'react-icons/fi'; // Cài react-icons
+import './POForm.css';
 
 const POForm = () => {
     const navigate = useNavigate();
@@ -40,7 +41,9 @@ const POForm = () => {
     };
 
     const addRow = () => setItems([...items, { productId: '', quantity: 1, price: 0 }]);
-    const removeRow = (index) => setItems(items.filter((_, i) => i !== index));
+    const removeRow = (index) => {
+        if (items.length > 1) setItems(items.filter((_, i) => i !== index));
+    };
     const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
     const handleSubmit = async (e) => {
@@ -58,7 +61,6 @@ const POForm = () => {
         try {
             await api.post('/orders', payload);
             alert("✅ Đã tạo Đơn đặt hàng thành công!");
-            // SỬA LẠI ĐƯỜNG DẪN /danh-sach-po ĐỂ QUAY VỀ ĐÚNG TRANG
             navigate('/danh-sach-po');
         } catch (error) {
             alert("❌ Lưu đơn hàng thất bại!");
@@ -66,54 +68,90 @@ const POForm = () => {
     };
 
     return (
-        <div className="po-container">
-            <h2 style={{ marginBottom: '20px' }}>📝 Lên Đơn Đặt Hàng (PO)</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="po-header-section">
-                    <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Nhà cung cấp (*):</label>
-                    <select value={supplierId} onChange={handleSupplierChange} required style={{ padding: '8px', borderRadius: '4px' }}>
-                        <option value="">-- Chọn nhà cung cấp --</option>
-                        {suppliers.map(s => <option key={s.maNCC} value={s.maNCC}>{s.tenNCC}</option>)}
-                    </select>
-                </div>
-
-                <table className="po-table">
-                    <thead>
-                        <tr>
-                            <th>Sản phẩm</th>
-                            <th>Số lượng</th>
-                            <th>Đơn giá gốc</th>
-                            <th>Thành tiền</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {items.map((item, index) => (
-                            <tr key={index}>
-                                <td>
-                                    <select value={item.productId} onChange={(e) => handleItemChange(index, 'productId', e.target.value)} required disabled={!supplierId}>
-                                        <option value="">-- Chọn hàng --</option>
-                                        {availableProducts.map(p => <option key={p.maHang} value={p.maHang}>{p.tenHang}</option>)}
-                                    </select>
-                                </td>
-                                <td><input type="number" min="1" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))} disabled={!item.productId} /></td>
-                                <td><input type="number" value={item.price} onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value))} disabled={!item.productId} /></td>
-                                <td style={{ fontWeight: 'bold' }}>{(item.quantity * item.price).toLocaleString()}</td>
-                                <td><button type="button" onClick={() => removeRow(index)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Xóa</button></td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
-                <button type="button" className="btn-add-row" onClick={addRow} disabled={!supplierId}>+ Thêm dòng</button>
-
-                <div className="po-summary">
-                    Tổng cộng: <span style={{ color: '#e74c3c' }}>{totalAmount.toLocaleString()} VNĐ</span>
-                </div>
-
-                <button type="submit" className="btn-submit-po" disabled={!supplierId || availableProducts.length === 0}>
-                    XÁC NHẬN TẠO ĐƠN HÀNG (PO)
+        <div className="po-wrapper">
+            <div className="po-header">
+                <button className="btn-back" onClick={() => navigate(-1)}>
+                    <FiArrowLeft /> Quay lại
                 </button>
+                <h2>📝 Lên Đơn Đặt Hàng (PO)</h2>
+            </div>
+
+            <form onSubmit={handleSubmit} className="po-card">
+                {/* Section 1: Thông tin NCC */}
+                <div className="po-section">
+                    <h4 className="section-title">1. Thông tin nhà cung cấp</h4>
+                    <div className="supplier-select-box">
+                        <label>Chọn nhà cung cấp <span className="required">*</span></label>
+                        <select value={supplierId} onChange={handleSupplierChange} required>
+                            <option value="">-- Click để chọn nhà cung cấp --</option>
+                            {suppliers.map(s => <option key={s.maNCC} value={s.maNCC}>{s.tenNCC} ({s.maNCC})</option>)}
+                        </select>
+                        {!supplierId && <p className="hint-text">Vui lòng chọn NCC trước khi thêm sản phẩm</p>}
+                    </div>
+                </div>
+
+                {/* Section 2: Danh sách hàng hóa */}
+                <div className="po-section">
+                    <h4 className="section-title">2. Chi tiết mặt hàng</h4>
+                    <div className="table-responsive">
+                        <table className="po-modern-table">
+                            <thead>
+                                <tr>
+                                    <th width="40%">Sản phẩm</th>
+                                    <th width="15%">Số lượng</th>
+                                    <th width="20%">Đơn giá (VNĐ)</th>
+                                    <th width="20%">Thành tiền</th>
+                                    <th width="5%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {items.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>
+                                            <select 
+                                                value={item.productId} 
+                                                onChange={(e) => handleItemChange(index, 'productId', e.target.value)} 
+                                                required 
+                                                disabled={!supplierId}
+                                            >
+                                                <option value="">-- Chọn hàng --</option>
+                                                {availableProducts.map(p => <option key={p.maHang} value={p.maHang}>{p.tenHang}</option>)}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="number" min="1" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))} disabled={!item.productId} />
+                                        </td>
+                                        <td>
+                                            <input type="number" value={item.price} onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value))} disabled={!item.productId} />
+                                        </td>
+                                        <td className="col-subtotal">
+                                            {(item.quantity * item.price).toLocaleString()}
+                                        </td>
+                                        <td>
+                                            <button type="button" className="btn-remove" onClick={() => removeRow(index)} title="Xóa dòng">
+                                                <FiTrash2 />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" className="btn-add-row" onClick={addRow} disabled={!supplierId}>
+                        <FiPlus /> Thêm dòng sản phẩm
+                    </button>
+                </div>
+
+                {/* Section 3: Tổng kết & Xác nhận */}
+                <div className="po-footer">
+                    <div className="po-total">
+                        <span>Tổng tiền thanh toán:</span>
+                        <h3 className="amount">{totalAmount.toLocaleString()} đ</h3>
+                    </div>
+                    <button type="submit" className="btn-submit-po" disabled={!supplierId || items[0].productId === ''}>
+                        <FiSave style={{marginRight: '8px'}} /> XÁC NHẬN TẠO ĐƠN HÀNG
+                    </button>
+                </div>
             </form>
         </div>
     );
