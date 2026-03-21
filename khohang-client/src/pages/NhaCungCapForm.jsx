@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import './NhaCungCapForm.css';
@@ -6,21 +6,39 @@ import './NhaCungCapForm.css';
 const NhaCungCapForm = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const isEditMode = !!location.state?.editData; // Kiểm tra xem có đang ở chế độ sửa không
-    
-    // Khởi tạo state. Nếu là sửa, lấy data cũ. Nếu thêm mới, để trống.
+    const isEditMode = !!location.state?.editData;
+
+    const [categories, setCategories] = useState([]);
+
     const [formData, setFormData] = useState(
         location.state?.editData || {
             maNCC: '',
             tenNCC: '',
             diaChi: '',
             email: '',
-            danhSachHangHoa: [{ maHang: '', tenHang: '', giaBan: '' }] // Giá bán để rỗng ban đầu thay vì 0
+            loaiHangId: '',
+            danhSachHangHoa: [{ maHang: '', tenHang: '', giaBan: '' }]
         }
     );
 
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+
+    // --- STATE CHO TÍNH NĂNG "THÊM NHANH LOẠI HÀNG" ---
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [newCategory, setNewCategory] = useState({ maLoai: '', tenLoai: '', moTa: 'Thêm nhanh từ form' });
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await api.get('/categories');
+                setCategories(res.data);
+            } catch (err) {
+                console.error("Lỗi lấy danh mục:", err);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     const handleChangeNCC = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -40,29 +58,57 @@ const NhaCungCapForm = () => {
     };
 
     const removeRow = (index) => {
-        // Đảm bảo luôn còn ít nhất 1 dòng
         if (formData.danhSachHangHoa.length === 1) return;
-        
         const updatedHangHoas = formData.danhSachHangHoa.filter((_, i) => i !== index);
         setFormData({ ...formData, danhSachHangHoa: updatedHangHoas });
     };
 
+    // --- HÀM XỬ LÝ LƯU NHANH LOẠI HÀNG MỚI ---
+    const handleQuickAddCategory = async () => {
+        if (!newCategory.maLoai || !newCategory.tenLoai) {
+            alert("Vui lòng nhập Mã và Tên lĩnh vực mới!");
+            return;
+        }
+        try {
+            const res = await api.post('/categories', newCategory); // Gửi API tạo mới
+
+            // 1. Thêm cái vừa tạo vào danh sách Dropdown
+            setCategories([...categories, res.data]);
+
+            // 2. Tự động CHỌN LUÔN cái vừa tạo cho Form Nhà cung cấp
+            setFormData({ ...formData, loaiHangId: res.data.id });
+
+            // 3. Đóng form thêm nhanh và reset trắng chữ
+            setShowQuickAdd(false);
+            setNewCategory({ maLoai: '', tenLoai: '', moTa: 'Thêm nhanh từ form' });
+
+            alert("Đã thêm Lĩnh vực mới thành công!");
+        } catch (error) {
+            alert("Lỗi! Có thể Mã loại này đã tồn tại trong hệ thống.");
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Bắt lỗi nếu người dùng chưa chọn Loại hàng
+        if (!formData.loaiHangId) {
+            setErrorMessage('❌ Vui lòng chọn Lĩnh Vực / Loại Hàng cho công ty này!');
+            return;
+        }
+
         setIsLoading(true);
         setErrorMessage('');
 
         try {
             if (isEditMode) {
-                // NẾU LÀ SỬA (Gọi API PUT)
                 await api.put(`/suppliers/${formData.id}`, formData);
                 alert('✅ Đã cập nhật thông tin Nhà cung cấp!');
             } else {
-                // NẾU LÀ THÊM MỚI (Gọi API POST)
                 await api.post('/suppliers', formData);
                 alert('✅ Đã lưu Nhà cung cấp và Danh mục hàng hóa!');
             }
-            navigate('/suppliers'); // Chuyển hướng
+            navigate('/suppliers');
         } catch (error) {
             console.error('Lỗi lưu NCC:', error);
             setErrorMessage('❌ Không thể lưu. Vui lòng kiểm tra lại dữ liệu!');
@@ -76,11 +122,10 @@ const NhaCungCapForm = () => {
             <h2 className="ncc-title">
                 {isEditMode ? '🏢 Cập Nhật Nhà Cung Cấp' : '🏢 Thêm Nhà Cung Cấp & Hàng Hóa'}
             </h2>
-            
+
             {errorMessage && <div className="error-alert">{errorMessage}</div>}
 
             <form onSubmit={handleSubmit} className="ncc-form-card">
-                {/* --- PHẦN 1: THÔNG TIN CÔNG TY --- */}
                 <div className="ncc-section">
                     <h3>📦 1. Thông tin Nhà cung cấp</h3>
                     <div className="info-grid">
@@ -88,11 +133,71 @@ const NhaCungCapForm = () => {
                             <label>Mã Nhà Cung Cấp (*)</label>
                             <input name="maNCC" value={formData.maNCC} onChange={handleChangeNCC} required disabled={isEditMode} placeholder="VD: NCC001" />
                         </div>
-                        
+
                         <div className="ncc-input-group">
                             <label>Tên nhà cung cấp (*)</label>
                             <input name="tenNCC" value={formData.tenNCC} onChange={handleChangeNCC} required placeholder="Công ty TNHH..." />
                         </div>
+
+                        {/* ========================================================= */}
+                        {/* KHU VỰC CHỌN VÀ THÊM NHANH LOẠI HÀNG (CẬP NHẬT MỚI) */}
+                        {/* ========================================================= */}
+                        <div className="ncc-input-group" style={{ gridColumn: '1 / -1' }}> {/* Ép nó tràn ra một hàng rộng cho đẹp */}
+                            <label>Lĩnh Vực / Loại Hàng (*)</label>
+
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <select
+                                    name="loaiHangId"
+                                    value={formData.loaiHangId}
+                                    onChange={handleChangeNCC}
+                                    style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                >
+                                    <option value="">-- Chọn lĩnh vực có sẵn --</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>{cat.tenLoai}</option>
+                                    ))}
+                                </select>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setShowQuickAdd(!showQuickAdd)}
+                                    style={{ padding: '8px 15px', backgroundColor: showQuickAdd ? '#95a5a6' : '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                                >
+                                    {showQuickAdd ? '✖ Hủy thêm' : '➕ Thêm Loại Mới'}
+                                </button>
+                            </div>
+
+                            {/* Giao diện Thêm nhanh hiện ra khi bấm nút */}
+                            {showQuickAdd && (
+                                <div style={{ marginTop: '10px', padding: '15px', backgroundColor: '#f8f9fa', border: '1px dashed #3498db', borderRadius: '6px' }}>
+                                    <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#7f8c8d', fontStyle: 'italic' }}>* Nhập thông tin để tạo nhanh một lĩnh vực mới vào hệ thống:</p>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Mã (VD: YTE)"
+                                            value={newCategory.maLoai}
+                                            onChange={e => setNewCategory({ ...newCategory, maLoai: e.target.value })}
+                                            style={{ width: '120px', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Tên lĩnh vực (VD: Thiết bị y tế)..."
+                                            value={newCategory.tenLoai}
+                                            onChange={e => setNewCategory({ ...newCategory, tenLoai: e.target.value })}
+                                            style={{ flex: 1, padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleQuickAddCategory}
+                                            style={{ padding: '8px 15px', backgroundColor: '#2ecc71', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                                        >
+                                            Lưu Lĩnh Vực
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        {/* ========================================================= */}
 
                         <div className="ncc-input-group">
                             <label>Gmail liên hệ</label>
@@ -107,7 +212,6 @@ const NhaCungCapForm = () => {
                 </div>
 
                 {/* --- PHẦN 2: DANH MỤC HÀNG HÓA --- */}
-                {/* Ẩn bảng hàng hóa nếu đang ở chế độ Sửa (để tránh phức tạp hóa logic update danh sách) */}
                 {!isEditMode && (
                     <div className="ncc-section">
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
@@ -128,22 +232,16 @@ const NhaCungCapForm = () => {
                                 <tbody>
                                     {formData.danhSachHangHoa.map((item, index) => (
                                         <tr key={index}>
+                                            <td><input placeholder="Mã" value={item.maHang} onChange={(e) => handleHangHoaChange(index, 'maHang', e.target.value)} /></td>
+                                            <td><input placeholder="Tên sản phẩm" value={item.tenHang} onChange={(e) => handleHangHoaChange(index, 'tenHang', e.target.value)} /></td>
+                                            <td><input type="number" placeholder="0" min="0" value={item.giaBan} onChange={(e) => handleHangHoaChange(index, 'giaBan', e.target.value)} /></td>
                                             <td>
-                                                <input placeholder="Mã" value={item.maHang} onChange={(e) => handleHangHoaChange(index, 'maHang', e.target.value)} />
-                                            </td>
-                                            <td>
-                                                <input placeholder="Tên sản phẩm" value={item.tenHang} onChange={(e) => handleHangHoaChange(index, 'tenHang', e.target.value)} />
-                                            </td>
-                                            <td>
-                                                <input type="number" placeholder="0" min="0" value={item.giaBan} onChange={(e) => handleHangHoaChange(index, 'giaBan', e.target.value)} />
-                                            </td>
-                                            <td>
-                                                <button 
-                                                    type="button" 
-                                                    className="btn-remove-row" 
-                                                    onClick={() => removeRow(index)} 
-                                                    style={{background: '#ff7675', border: 'none', color: 'white', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer'}}
-                                                    disabled={formData.danhSachHangHoa.length === 1} // Khóa nút xóa nếu chỉ còn 1 dòng
+                                                <button
+                                                    type="button"
+                                                    className="btn-remove-row"
+                                                    onClick={() => removeRow(index)}
+                                                    style={{ background: '#ff7675', border: 'none', color: 'white', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
+                                                    disabled={formData.danhSachHangHoa.length === 1}
                                                 >
                                                     ✖
                                                 </button>
@@ -157,10 +255,9 @@ const NhaCungCapForm = () => {
                 )}
 
                 <div className="ncc-btn-group">
-                <button type="button" className="btn-cancel" onClick={() => navigate('/suppliers')}>Hủy bỏ</button>
+                    <button type="button" className="btn-cancel" onClick={() => navigate('/suppliers')}>Hủy bỏ</button>
                     <button type="submit" className="btn-save" disabled={isLoading}>
                         {isLoading ? '⏳ Đang xử lý...' : '💾 Lưu Thông Tin'}
-
                     </button>
                 </div>
             </form>

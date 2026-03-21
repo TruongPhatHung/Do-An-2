@@ -25,4 +25,7 @@ public class NhaCungCap {
     private String email;
     @OneToMany(mappedBy = "nhaCungCap", cascade = CascadeType.ALL)
     private List<SanPhamNCC> danhSachHangHoa;
+    @ManyToOne
+    @JoinColumn(name = "loai_hang_id")
+    private LoaiHang loaiHang;
 }

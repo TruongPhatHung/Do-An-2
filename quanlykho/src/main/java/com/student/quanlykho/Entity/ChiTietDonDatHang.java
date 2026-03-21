@@ -30,4 +30,7 @@ public class ChiTietDonDatHang {
 
     @Column(name = "don_gia")
     private Double donGia; // Giá nhập thỏa thuận
+    @ManyToOne
+    @JoinColumn(name = "loai_hang_id")
+    private LoaiHang loaiHang;
 }

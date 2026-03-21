@@ -162,3 +162,37 @@
     box-shadow: none;
     cursor: not-allowed;
 }
+/* Làm mờ bảng khi chưa chọn NCC */
+.po-table select:disabled, 
+.po-table input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    border-color: #eee;
+}
+
+/* Hiệu ứng cho dòng khi rê chuột vào */
+.po-table tbody tr:hover {
+    background-color: #fcfcfc;
+}
+
+/* Header của Form */
+.po-header-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff3e0; /* Màu cam nhạt báo hiệu khu vực quan trọng */
+    border-radius: 8px;
+    border-left: 5px solid #e67e22;
+}
+
+/* Chỉnh khoảng cách cho cột xóa */
+.btn-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto;
+}

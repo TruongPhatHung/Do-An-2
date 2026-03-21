@@ -32,7 +32,6 @@ public class DonDatHangController {
     @Autowired
     private AuditLogService auditLogService;
 
-    // --- CÁC HÀM GET DỮ LIỆU ---
     @GetMapping
     public List<DonDatHang> getAll() {
         return donDatHangRepository.findAll();
@@ -43,7 +42,6 @@ public class DonDatHangController {
         return donDatHangRepository.findByTrangThaiIn(List.of("Mới Tạo", "Giao Thiếu"));
     }
 
-    // --- HÀM TẠO ĐƠN HÀNG MỚI CÓ GHI LOG ---
     @PostMapping
     @Transactional
     public DonDatHang create(@RequestBody DonHangRequest request) {
@@ -56,46 +54,46 @@ public class DonDatHangController {
 
         donDatHang.setNhaCungCap(nhaCungCap);
 
-        // Biến để tính tổng số lượng đặt cho việc ghi log
-        int tongSoLuong = 0;
-
         List<ChiTietDonDatHang> chiTietDonDatHangs = request.getChiTiets().stream().map(item -> {
-            ChiTietDonDatHang chiTietDonDatHang = new ChiTietDonDatHang();
-            chiTietDonDatHang.setDonDatHang(donDatHang);
+            ChiTietDonDatHang chiTiet = new ChiTietDonDatHang();
+            chiTiet.setDonDatHang(donDatHang);
 
+            // Tìm sản phẩm trong danh mục của Nhà cung cấp này
             SanPhamNCC sanPham = sanPhamNCCRepository.findByMaHangAndNhaCungCap_MaNCC(item.getHangHoa().getMaHang(), nhaCungCap.getMaNCC())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy hàng hóa"));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy hàng hóa: " + item.getHangHoa().getMaHang()));
 
-            chiTietDonDatHang.setMaHang(sanPham.getMaHang());
-            chiTietDonDatHang.setTenHang(sanPham.getTenHang());
-            chiTietDonDatHang.setSoLuongDat(item.getSoLuongDat());
-            chiTietDonDatHang.setDonGia(item.getDonGia());
-            chiTietDonDatHang.setSoLuongDaNhap(0);
+            chiTiet.setMaHang(sanPham.getMaHang());
+            chiTiet.setTenHang(sanPham.getTenHang());
+            chiTiet.setSoLuongDat(item.getSoLuongDat());
+            chiTiet.setDonGia(item.getDonGia());
+            chiTiet.setSoLuongDaNhap(0);
 
-            return chiTietDonDatHang;
+            // 🎯 ĐIỂM QUAN TRỌNG: Lấy loại hàng từ danh mục NCC gán vào chi tiết Đơn hàng
+            // Việc này giúp thằng Nhập kho sau này "nhìn" thấy loại để tự động cập nhật
+            chiTiet.setLoaiHang(sanPham.getLoaiHang());
+
+            return chiTiet;
         }).collect(Collectors.toList());
-
-        for (ChiTietDonDatHang ct : chiTietDonDatHangs) {
-            tongSoLuong += ct.getSoLuongDat();
-        }
 
         donDatHang.setChiTiets(chiTietDonDatHangs);
         DonDatHang saved = donDatHangRepository.save(donDatHang);
 
-        // 🎯 GHI LOG: TẠO ĐƠN ĐẶT HÀNG MỚI (PO)
+        // Tính tổng số lượng để ghi log
+        int tongSoLuong = saved.getChiTiets().stream().mapToInt(ChiTietDonDatHang::getSoLuongDat).sum();
+
+        // GHI LOG
         String moi = String.format("Gửi đến: %s | Gồm %d mặt hàng | Tổng SL đặt: %d",
-                nhaCungCap.getTenNCC(), chiTietDonDatHangs.size(), tongSoLuong);
+                nhaCungCap.getTenNCC(), saved.getChiTiets().size(), tongSoLuong);
         auditLogService.ghiLog("THÊM", "ĐƠN ĐẶT HÀNG (PO)", saved.getMaDon(), "Chưa có", moi);
 
         return saved;
     }
 
-    
+    // --- DTO CLASSES ---
     public static class DonHangRequest {
         private String maDon;
         private NhaCungCapRequest nhaCungCap;
         private List<ChiTietRequest> chiTiets;
-
         public String getMaDon() { return maDon; }
         public void setMaDon(String maDon) { this.maDon = maDon; }
         public NhaCungCapRequest getNhaCungCap() { return nhaCungCap; }
@@ -114,7 +112,6 @@ public class DonDatHangController {
         private HangHoaRequest hangHoa;
         private int soLuongDat;
         private Double donGia;
-
         public HangHoaRequest getHangHoa() { return hangHoa; }
         public void setHangHoa(HangHoaRequest hangHoa) { this.hangHoa = hangHoa; }
         public int getSoLuongDat() { return soLuongDat; }

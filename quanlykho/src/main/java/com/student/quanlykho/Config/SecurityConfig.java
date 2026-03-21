@@ -34,12 +34,7 @@ public class SecurityConfig {
         http.cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-<<<<<<< HEAD
-                       
-                        // Mở cửa cho phép đăng nhập, đăng ký không cần token
-=======
-                        // 1. MỞ CỬA TỰ DO (Không cần đăng nhập)
->>>>>>> 7f8ac94a85e32be5c342862a88c613f7b1d100e8
+
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // 2. QUẢN LÝ TÀI KHOẢN (Chỉ Admin)

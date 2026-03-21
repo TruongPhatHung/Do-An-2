@@ -18,58 +18,62 @@ public class PhieuXuatController {
     private HangHoaRepository hangHoaRepository;
 
     @Autowired
-    private AuditLogService auditLogService; // 📸 GỌI CAMERA GIÁM SÁT
-
-    // Giả sử bạn lưu Phiếu Xuất vào bảng PhieuXuat, bạn Autowired thêm Repository ở đây nhé
-    // @Autowired private PhieuXuatRepository phieuXuatRepository;
+    private AuditLogService auditLogService;
 
     @PostMapping
     @Transactional
     public String xuatKho(@RequestBody XuatKhoRequest request) {
 
-        // 1. Duyệt qua từng mặt hàng cần xuất
+        // Duyệt qua danh sách các mặt hàng yêu cầu xuất
         for (Map.Entry<String, Integer> entry : request.getChiTietXuat().entrySet()) {
             String maHang = entry.getKey();
-            Integer soLuongCanXuat = entry.getValue();
+            Integer soLuongXuat = entry.getValue();
 
-            if (soLuongCanXuat == null || soLuongCanXuat <= 0) continue;
+            if (soLuongXuat == null || soLuongXuat <= 0) continue;
 
+            // 1. Tìm thông tin mặt hàng
             HangHoa hangHoa = hangHoaRepository.findById(maHang)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy mặt hàng: " + maHang));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy mã hàng: " + maHang));
 
+            // 🎯 LẤY THÔNG TIN ĐỂ HIỂN THỊ TRONG LOG (Giúp người xuất đối soát)
+            String tenLoai = (hangHoa.getLoaiHang() != null) ? hangHoa.getLoaiHang().getTenLoai() : "Chưa phân loại";
+
+            // Nếu bạn muốn kiểm tra NCC, trong mô hình này ta có thể lấy NCC gần nhất
+            // cung cấp mặt hàng này (nếu cần thiết) hoặc chỉ ghi nhận thông tin mô tả.
             int tonKhoCu = hangHoa.getSoLuongTon();
 
-            // ⚠️ KIỂM TRA ĐIỀU KIỆN SỐNG CÒN: Tồn kho có đủ để xuất không?
-            if (tonKhoCu < soLuongCanXuat) {
-                throw new RuntimeException("Lỗi: Mặt hàng [" + hangHoa.getTenHang() + "] chỉ còn " + tonKhoCu + " cái, không đủ để xuất " + soLuongCanXuat + " cái!");
+            // 2. KIỂM TRA TỒN KHO (Chặn xuất quá số lượng đang có)
+            if (tonKhoCu < soLuongXuat) {
+                throw new RuntimeException(String.format(
+                        "Lỗi xuất kho: Mặt hàng [%s] - Loại [%s] chỉ còn %d sản phẩm. Không đủ để xuất %d!",
+                        hangHoa.getTenHang(), tenLoai, tonKhoCu, soLuongXuat
+                ));
             }
 
-            // 2. Trừ tồn kho
-            hangHoa.setSoLuongTon(tonKhoCu - soLuongCanXuat);
+            // 3. THỰC HIỆN TRỪ TỒN KHO
+            hangHoa.setSoLuongTon(tonKhoCu - soLuongXuat);
             hangHoaRepository.save(hangHoa);
 
-            // 3. 🎯 GHI LOG CHI TIẾT XUẤT KHO
-            String logCu = String.format("Tồn kho hiện tại: %d", tonKhoCu);
-            String logMoi = String.format("Xuất đi: -%d ➔ Tồn mới: %d (Từ phiếu xuất: %s)",
-                    soLuongCanXuat, hangHoa.getSoLuongTon(), request.getMaPhieuXuat());
+            // 🎯 GHI LOG CHI TIẾT (Bao gồm Loại hàng để dễ theo dõi ngành hàng nào đang xuất nhiều)
+            String logCu = String.format("Loại: %s | Tồn hiện tại: %d", tenLoai, tonKhoCu);
+            String logMoi = String.format("Xuất kho: -%d ➔ Tồn sau xuất: %d (Lý do: %s | Phiếu: %s)",
+                    soLuongXuat, hangHoa.getSoLuongTon(), request.getLyDo(), request.getMaPhieuXuat());
 
             auditLogService.ghiLog("XUẤT KHO", "HÀNG HÓA", maHang, logCu, logMoi);
         }
 
-        // Nếu bạn có Entity PhieuXuat, bạn lưu trạng thái của nó ở đây
-        // phieuXuat.setTrangThai("Đã Xuất");
-        // phieuXuatRepository.save(phieuXuat);
-
-        return "Xuất kho thành công phiếu: " + request.getMaPhieuXuat();
+        return "Đã xác nhận xuất kho thành công cho phiếu: " + request.getMaPhieuXuat();
     }
 
-    // Class nhận dữ liệu từ React (Tương tự Nhập kho)
     public static class XuatKhoRequest {
-        private String maPhieuXuat; // Mã phiếu xuất hoặc mã đơn hàng xuất
-        private Map<String, Integer> chiTietXuat; // Danh sách: Mã hàng -> Số lượng cần xuất
+        private String maPhieuXuat;
+        private String lyDo; // "Xuất bán lẻ", "Trả hàng NCC", "Xuất hủy"...
+        private Map<String, Integer> chiTietXuat;
 
         public String getMaPhieuXuat() { return maPhieuXuat; }
         public void setMaPhieuXuat(String maPhieuXuat) { this.maPhieuXuat = maPhieuXuat; }
+        public String getLyDo() { return lyDo; }
+        public void setLyDo(String lyDo) { this.lyDo = lyDo; }
         public Map<String, Integer> getChiTietXuat() { return chiTietXuat; }
         public void setChiTietXuat(Map<String, Integer> chiTietXuat) { this.chiTietXuat = chiTietXuat; }
     }

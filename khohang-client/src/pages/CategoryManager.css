@@ -1,0 +1,83 @@
+/* --- Khu vực Form Thêm / Sửa --- */
+.category-form-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.category-form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.category-input {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.category-input:focus {
+    border-color: #3498db;
+}
+
+.category-input.flex-1 {
+    flex: 1; /* Phóng to chiếm hết chỗ trống */
+}
+
+.category-input:disabled {
+    background-color: #f4f6f6;
+    cursor: not-allowed;
+    color: #7f8c8d;
+}
+
+/* --- Khu vực Nút bấm (Buttons) --- */
+.btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: background-color 0.2s;
+}
+
+.btn-add { background-color: #27ae60; }
+.btn-add:hover { background-color: #219653; }
+
+.btn-update { background-color: #f39c12; }
+.btn-update:hover { background-color: #d68910; }
+
+.btn-cancel { background-color: #95a5a6; }
+.btn-cancel:hover { background-color: #7f8c8d; }
+
+/* --- Nút bấm nhỏ trên Bảng (Table) --- */
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 13px;
+    margin-right: 8px;
+}
+
+.btn-edit { background-color: #f1c40f; color: #333; }
+.btn-edit:hover { background-color: #f39c12; color: white; }
+
+.btn-delete { background-color: #e74c3c; color: white; }
+.btn-delete:hover { background-color: #c0392b; }
+
+/* --- Các thành phần phụ --- */
+.text-highlight {
+    color: #2980b9;
+    font-weight: bold;
+}
+
+.empty-row {
+    text-align: center;
+    padding: 30px;
+    color: #7f8c8d;
+    font-style: italic;
+}

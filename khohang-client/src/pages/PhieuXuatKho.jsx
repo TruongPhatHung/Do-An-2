@@ -53,8 +53,9 @@ const PhieuXuatKho = () => {
         });
 
         const payload = {
-            lyDo: lyDo,           // Gửi lý do (Backend cần)
-            chiTietXuat: chiTietMap // Gửi dạng Map (Backend cần)
+            maPhieuXuat: randomMaPhieu,  // Thêm dòng này để khớp với Backend
+            lyDo: lyDo,
+            chiTietXuat: chiTietMap
         };
 
         try {

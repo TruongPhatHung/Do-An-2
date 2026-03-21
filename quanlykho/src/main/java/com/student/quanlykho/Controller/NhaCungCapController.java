@@ -1,7 +1,9 @@
 package com.student.quanlykho.Controller;
 
+import com.student.quanlykho.Entity.LoaiHang;
 import com.student.quanlykho.Entity.NhaCungCap;
 import com.student.quanlykho.Entity.SanPhamNCC;
+import com.student.quanlykho.Repository.LoaiHangRepository;
 import com.student.quanlykho.Repository.NhaCungCapRepository;
 import com.student.quanlykho.Repository.SanPhamNCCRepository;
 import com.student.quanlykho.Service.AuditLogService;
@@ -26,6 +28,8 @@ public class NhaCungCapController {
 
     @Autowired
     private SanPhamNCCRepository sanPhamNCCRepository;
+    @Autowired
+    private LoaiHangRepository loaiHangRepository;
 
     @GetMapping
     public List<NhaCungCap> getAll() {
@@ -46,7 +50,11 @@ public class NhaCungCapController {
         ncc.setTenNCC(request.getTenNCC());
         ncc.setDiaChi(request.getDiaChi());
         ncc.setEmail(request.getEmail());
-
+        if (request.getLoaiHangId() != null) {
+            LoaiHang loaiHang = loaiHangRepository.findById(request.getLoaiHangId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy Loại hàng này"));
+            ncc.setLoaiHang(loaiHang);
+        }
         NhaCungCap saved = nhaCungCapRepository.save(ncc);
 
         // Lưu hàng hóa con
@@ -74,6 +82,13 @@ public class NhaCungCapController {
             ncc.setTenNCC(request.getTenNCC());
             ncc.setDiaChi(request.getDiaChi());
             ncc.setEmail(request.getEmail());
+            if (request.getLoaiHangId() != null) {
+                LoaiHang loaiHang = loaiHangRepository.findById(request.getLoaiHangId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy Loại hàng này"));
+                ncc.setLoaiHang(loaiHang);
+            } else {
+                ncc.setLoaiHang(null); // Nếu người dùng bỏ chọn loại hàng
+            }
             NhaCungCap saved = nhaCungCapRepository.save(ncc);
 
             String nccMoi = String.format("Tên: %s, ĐC: %s", saved.getTenNCC(), saved.getDiaChi());
@@ -174,6 +189,7 @@ public class NhaCungCapController {
     // --- Các DTO class (Giữ nguyên) ---
     public static class NhaCungCapRequest {
         private String maNCC, tenNCC, diaChi, email;
+        private Long loaiHangId;
         private List<HangHoaRequest> danhSachHangHoa;
         public String getMaNCC() { return maNCC; }
         public void setMaNCC(String maNCC) { this.maNCC = maNCC; }
@@ -185,6 +201,8 @@ public class NhaCungCapController {
         public void setEmail(String email) { this.email = email; }
         public List<HangHoaRequest> getDanhSachHangHoa() { return danhSachHangHoa; }
         public void setDanhSachHangHoa(List<HangHoaRequest> danhSachHangHoa) { this.danhSachHangHoa = danhSachHangHoa; }
+        public Long getLoaiHangId() { return loaiHangId; }
+        public void setLoaiHangId(Long loaiHangId) { this.loaiHangId = loaiHangId; }
     }
 
     public static class HangHoaRequest {

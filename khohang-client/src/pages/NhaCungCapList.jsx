@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './NhaCungCapList.css';
-import api from '../services/axiosConfig'; 
+import api from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 
 const NhaCungCapList = () => {
@@ -24,20 +24,20 @@ const NhaCungCapList = () => {
     }, [fetchNCC]);
 
     const handleAdd = () => {
-        navigate('/add-supplier'); 
+        navigate('/add-supplier');
     };
 
     // Truyền dữ liệu sang trang Sửa
     const handleEdit = (ncc) => {
-    // Lưu ý: Phải dùng dấu huyền ` và có dấu gạch chéo / trước mã ID
-    navigate(`/edit-supplier/${ncc.id}`);
-};
+        // Lưu ý: Phải dùng dấu huyền ` và có dấu gạch chéo / trước mã ID
+        navigate(`/edit-supplier/${ncc.id}`);
+    };
 
     const handleDelete = async (id, ma) => {
         if (window.confirm(`❗ Bạn có chắc chắn muốn xóa nhà cung cấp mã ${ma} và toàn bộ hàng hóa liên quan không?`)) {
             try {
                 // Backend nhận ID số: /api/suppliers/1
-                await api.delete(`/suppliers/${id}`); 
+                await api.delete(`/suppliers/${id}`);
                 alert("✅ Xóa thành công!");
                 fetchNCC(); // Gọi lại hàm lấy dữ liệu để cập nhật bảng
             } catch (error) {
@@ -47,11 +47,16 @@ const NhaCungCapList = () => {
         }
     };
 
-    const filteredNCC = nhaCungCap.filter(ncc => 
-        (ncc.tenNCC?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-        (ncc.maNCC?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-        (ncc.email?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-    );
+    const filteredNCC = nhaCungCap.filter(ncc => {
+        // --- 1. CẬP NHẬT TÍNH NĂNG TÌM KIẾM CHO PHÉP TÌM THEO TÊN LOẠI HÀNG ---
+        const term = searchTerm.toLowerCase();
+        return (
+            (ncc.tenNCC?.toLowerCase() || "").includes(term) ||
+            (ncc.maNCC?.toLowerCase() || "").includes(term) ||
+            (ncc.email?.toLowerCase() || "").includes(term) ||
+            (ncc.loaiHang?.tenLoai?.toLowerCase() || "").includes(term) // Tìm theo danh mục
+        );
+    });
 
     const totalPages = Math.ceil(filteredNCC.length / itemsPerPage);
     const currentItems = filteredNCC.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -64,11 +69,11 @@ const NhaCungCapList = () => {
                     + Thêm NCC Mới
                 </button>
             </div>
-            
-            <input 
-                type="text" 
+
+            <input
+                type="text"
                 className="search-bar"
-                placeholder="Tìm theo mã, tên hoặc gmail..." 
+                placeholder="Tìm theo mã, tên, email hoặc ngành hàng..."
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             />
@@ -78,20 +83,38 @@ const NhaCungCapList = () => {
                     <tr>
                         <th>Mã NCC</th>
                         <th>Tên Nhà Cung Cấp</th>
+                        {/* --- 2. THÊM CỘT LOẠI HÀNG VÀO TIÊU ĐỀ --- */}
+                        <th>Lĩnh Vực / Loại Hàng</th>
                         <th>Địa Chỉ</th>
                         <th>Gmail</th>
-                        <th style={{ textAlign: 'center' }}>Số Lượng Mặt Hàng</th> {/* Báo hiệu NCC đó có bao nhiêu món */}
+                        <th style={{ textAlign: 'center' }}>Số Lượng Mặt Hàng</th>
                         <th style={{ textAlign: 'center' }}>Thao Tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     {currentItems.map((ncc) => (
-                        <tr key={ncc.id}> 
+                        <tr key={ncc.id}>
                             <td className="text-bold">{ncc.maNCC}</td>
                             <td>{ncc.tenNCC}</td>
+
+                            {/* --- 3. HIỂN THỊ TÊN LOẠI HÀNG CỦA CÔNG TY ĐÓ --- */}
+                            <td>
+                                <span style={{
+                                    backgroundColor: '#e8f4f8',
+                                    color: '#2980b9',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    display: 'inline-block'
+                                }}>
+                                    {ncc.loaiHang ? ncc.loaiHang.tenLoai : 'Chưa phân loại'}
+                                </span>
+                            </td>
+
                             <td>{ncc.diaChi}</td>
                             <td style={{ color: '#2980b9' }}>{ncc.email || 'N/A'}</td>
-                            
+
                             {/* Hiển thị số lượng hàng hóa con */}
                             <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
                                 <span style={{ background: '#ecf0f1', padding: '5px 10px', borderRadius: '15px' }}>
@@ -101,8 +124,8 @@ const NhaCungCapList = () => {
 
                             <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                                 <button className="btn-edit" onClick={() => handleEdit(ncc)}>Sửa</button>
-                                <button 
-                                    className="btn-delete" 
+                                <button
+                                    className="btn-delete"
                                     onClick={() => handleDelete(ncc.id, ncc.maNCC)}
                                 >
                                     Xóa
@@ -112,7 +135,7 @@ const NhaCungCapList = () => {
                     ))}
                     {currentItems.length === 0 && (
                         <tr>
-                            <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+                            <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
                                 Không tìm thấy nhà cung cấp nào.
                             </td>
                         </tr>

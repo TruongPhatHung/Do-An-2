@@ -10,75 +10,85 @@ const Sidebar = () => {
 
     const role = user?.role?.toUpperCase();
 
+    // Hàm tiện ích để tránh lặp lại code class
+    const navClass = ({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item";
+
     return (
         <aside className="sidebar">
             <ul className="sidebar-menu">
-
+                {/* --- NHÓM QUẢN LÝ CHUNG --- */}
                 <li>
-                    <NavLink to="/products" className="sidebar-item">
+                    <NavLink to="/products" className={navClass}>
                         📦 Hàng Hóa
                     </NavLink>
                 </li>
 
                 <li>
-                    <NavLink to="/suppliers" className="sidebar-item">
+                    <NavLink to="/suppliers" className={navClass}>
                         🏢 Nhà Cung Cấp
                     </NavLink>
                 </li>
 
+                <li>
+                    <NavLink to="/categories" className={navClass}>
+                        🏷️ Quản Lý Loại Hàng
+                    </NavLink>
+                </li>
+
+                {/* --- NHÓM MUA HÀNG & ĐƠN HÀNG --- */}
                 {(role === 'ADMIN' || role === 'MUAHANG') && (
                     <li>
-                        <NavLink to="/don-hang" className="sidebar-item">
+                        <NavLink to="/create-po" className={navClass}>
                             📝 Lên Đơn (PO)
                         </NavLink>
                     </li>
                 )}
 
-                {(role === 'ADMIN' || role === 'KHO') && (
-                    <li>
-                        <NavLink to="/nhap-kho" className="sidebar-item">
-                            📥 Nhập Kho
-                        </NavLink>
-                    </li>
-                )}
-
                 <li>
-                    <NavLink to="/danh-sach-po" className="sidebar-item">
+                    <NavLink to="/orders" className={navClass}>
                         📋 Danh Sách Đơn Hàng
                     </NavLink>
                 </li>
 
+                {/* --- NHÓM KHO VẬN --- */}
                 {(role === 'ADMIN' || role === 'KHO') && (
-                    <li>
-                        <NavLink to="/xuat-kho" className="sidebar-item">
-                            📤 Xuất Kho
-                        </NavLink>
-                    </li>
+                    <>
+                        <li>
+                            <NavLink to="/nhap-kho" className={navClass}>
+                                📥 Nhập Kho
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/xuat-kho" className={navClass}>
+                                📤 Xuất Kho
+                            </NavLink>
+                        </li>
+                    </>
                 )}
 
+                {/* --- NHÓM BÁO CÁO & HỆ THỐNG --- */}
                 {(role === 'ADMIN' || role === 'MUAHANG') && (
                     <li>
-                        <NavLink to="/dashboard" className="sidebar-item">
+                        <NavLink to="/dashboard" className={navClass}>
                             📊 Dashboard
                         </NavLink>
                     </li>
                 )}
 
                 {role === 'ADMIN' && (
-                    <li>
-                        <NavLink to="/tai-khoan" className="sidebar-item">
-                            👥 Quản Lý Tài Khoản
-                        </NavLink>
-                    </li>
+                    <>
+                        <li>
+                            <NavLink to="/tai-khoan" className={navClass}>
+                                👥 Quản Lý Tài Khoản
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/admin/logs" className={navClass}>
+                                📜 Nhật Ký Hệ Thống
+                            </NavLink>
+                        </li>
+                    </>
                 )}
-                {role =='ADMIN' &&(
-                    <li>
-                        <NavLink to="/admin/logs" className="sidebar-item">
-                        📜 Nhật Ký Hệ Thống
-                        </NavLink>
-                    </li>
-                )}
-
             </ul>
         </aside>
     );

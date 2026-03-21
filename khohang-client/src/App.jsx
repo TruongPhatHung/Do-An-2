@@ -13,50 +13,58 @@ import Dashboard from './pages/Dashboard';
 import NotificationBell from './components/NotificationBell';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
-import NhaCungCapForm from './pages/NhaCungCapForm'; 
+import NhaCungCapForm from './pages/NhaCungCapForm';
 import QuanLyTaiKhoan from './pages/QuanLyTaiKhoan';
-
 import EditNhaCungCap from './pages/EditNhaCungCap';
-
-
+import CategoryManager from './pages/CategoryManager';
 import PODetail from './pages/PODetail';
 import AdminLogs from './pages/AdminLogs';
-
+import ChiTietHangHoa from './pages/ChiTietHangHoa';
+import SuaHangHoa from './pages/SuaHangHoa';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        {/* Bọc toàn bộ App trong 1 div flex cột */}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          
-          <Navbar /> {/* Thanh ngang trên cùng */}
 
-          {/* Wrapper cho Sidebar và Nội dung chính */}
+          <Navbar />
+
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-            
-            <Sidebar /> {/* Thanh dọc bên trái */}
 
-            {/* Nội dung chính bên phải */}
+            <Sidebar />
+
             <div style={{ flex: 1, padding: '20px', overflowY: 'auto', backgroundColor: '#f4f6f9' }}>
               <Routes>
+                {/* Công khai */}
                 <Route path="/login" element={<Login />} />
-                <Route path="/products" element={<ProtectedRoute><HangHoaList /></ProtectedRoute>} />
-                <Route path="/suppliers" element={<ProtectedRoute><NhaCungCapList /></ProtectedRoute>} />
-                <Route path="/don-hang" element={<POForm />} />
-                <Route path="/nhap-kho" element={<NhapKho />} />
-                <Route path="/danh-sach-po" element={<POList />} />
-                <Route path="/xuat-kho" element={<PhieuXuatKho />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/thong-bao" element={<NotificationBell />} />
-               
                 <Route path="/" element={<Navigate to="/login" />} />
-                <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />
-                <Route path="/add-supplier" element={<ProtectedRoute><NhaCungCapForm/></ProtectedRoute>}/>
+
+                {/* Các trang quản lý - Tất cả đều được bảo vệ */}
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/products" element={<ProtectedRoute><HangHoaList /></ProtectedRoute>} />
+                <Route path="/categories" element={<ProtectedRoute><CategoryManager /></ProtectedRoute>} />
+                
+                <Route path="/edit-product/:id" element={<ProtectedRoute><SuaHangHoa /></ProtectedRoute>} />
+
+                {/* Nhà cung cấp */}
+                <Route path="/suppliers" element={<ProtectedRoute><NhaCungCapList /></ProtectedRoute>} />
+                <Route path="/add-supplier" element={<ProtectedRoute><NhaCungCapForm /></ProtectedRoute>} />
                 <Route path="/edit-supplier/:id" element={<ProtectedRoute><EditNhaCungCap /></ProtectedRoute>} />
 
-                <Route path="/po-detail" element={<PODetail />} />
-                <Route path="/admin/logs" element={<AdminLogs />} />
+                {/* Đơn hàng PO - Đã đổi path để khớp với lệnh navigate('/orders') và navigate('/create-po') */}
+                <Route path="/orders" element={<ProtectedRoute><POList /></ProtectedRoute>} />
+                <Route path="/create-po" element={<ProtectedRoute><POForm /></ProtectedRoute>} />
+                <Route path="/po-detail" element={<ProtectedRoute><PODetail /></ProtectedRoute>} />
+
+                {/* Kho vận */}
+                <Route path="/nhap-kho" element={<ProtectedRoute><NhapKho /></ProtectedRoute>} />
+                <Route path="/xuat-kho" element={<ProtectedRoute><PhieuXuatKho /></ProtectedRoute>} />
+                <Route path="/product-detail/:id" element={<ProtectedRoute><ChiTietHangHoa /></ProtectedRoute>} />
+                {/* Hệ thống */}
+                <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />
+                <Route path="/admin/logs" element={<ProtectedRoute><AdminLogs /></ProtectedRoute>} />
+                <Route path="/thong-bao" element={<ProtectedRoute><NotificationBell /></ProtectedRoute>} />
               </Routes>
             </div>
 

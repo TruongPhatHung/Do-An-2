@@ -27,6 +27,9 @@ public class HangHoa {
     @ManyToOne
     @JoinColumn(name = "ma_ncc")
     private NhaCungCap nhaCungCap;
+    @ManyToOne
+    @JoinColumn(name = "loai_hang_id")
+    private LoaiHang loaiHang;
 
 
     public boolean isCanhBaoHetHang(){

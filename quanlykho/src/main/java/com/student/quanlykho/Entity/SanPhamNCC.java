@@ -25,4 +25,7 @@ public class SanPhamNCC {
     @JoinColumn(name = "nha_cung_cap_id")
     @JsonIgnore
     private NhaCungCap nhaCungCap;
+    @ManyToOne
+    @JoinColumn(name = "loai_hang_id")
+    private LoaiHang loaiHang;
 }

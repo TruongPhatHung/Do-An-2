@@ -88,3 +88,63 @@
 .btn-detail:hover {
     background-color: #2c3e50;
 }
+/* --- THANH TÌM KIẾM VÀ BỘ LỌC --- */
+.search-filter-section {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.search-filter-section input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.search-filter-section select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: white;
+}
+
+/* --- PHÂN TRANG (PAGINATION) --- */
+.pagination {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.page-btn {
+    padding: 8px 14px;
+    border: 1px solid #dee2e6;
+    background-color: white;
+    color: #34495e;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+    font-weight: 500;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #f8f9fa;
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.page-btn.active {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.page-btn:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
