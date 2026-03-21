@@ -1,30 +1,35 @@
+/* src/components/Navbar.css */
+
 .navbar-top {
     display: flex;
-    height: 50px; /* Thanh navbar chuẩn thường cao 50px */
-    background-color: #3c8dbc; /* Màu xanh lam giống mẫu */
+    height: 60px; /* Chỉnh 60px để chứa vừa Avatar của đồng đội */
+    background-color: #2c3e50; /* Dùng màu nền hiện đại của bản mới pull về */
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding-right: 25px;
 }
 
-/* Vùng Logo (Đậm màu hơn một chút giống form) */
+/* Vùng Logo và nút menu bên trái (Khớp với Sidebar của bạn) */
 .nav-brand-area {
     width: 230px; /* Bằng đúng chiều rộng của Sidebar */
-    background-color: #367fa9;
+    background-color: #1a252f; /* Nền tối hơn navbar một chút cho nổi bật */
     display: flex;
     align-items: center;
-    justify-content: center;
+    padding-left: 15px;
     font-weight: 700;
     font-size: 18px;
     letter-spacing: 1px;
 }
 
-/* Vùng chức năng bên phải */
-.nav-right-area {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 15px;
+.nav-logo {
+    color: white;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.nav-logo:hover {
+    color: #3498db;
 }
 
 .menu-toggle-btn {
@@ -33,41 +38,75 @@
     color: white;
     font-size: 20px;
     cursor: pointer;
+    margin-right: 15px;
+    transition: color 0.2s;
 }
 
-.menu-toggle-btn:hover { background-color: #367fa9; }
+.menu-toggle-btn:hover { 
+    color: #3498db; 
+}
 
-.nav-user-actions {
+/* Vùng chức năng bên phải */
+.nav-right-area {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end; /* Đẩy cụm user sang phải */
+    align-items: center;
+}
+
+.nav-user {
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
-/* Profile trên Navbar */
-.nav-user-profile {
+/* Khu vực Avatar và Tên */
+.nav-profile {
     display: flex;
     align-items: center;
-    cursor: pointer;
+    gap: 12px;
+    padding-left: 15px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-
-.nav-greeting {
-    font-size: 14px;
+.nav-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid #3498db;
+    background-color: white;
+    object-fit: cover;
 }
 
-/* Nút đăng xuất */
-.btn-logout-custom {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+.nav-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.nav-name {
+    font-size: 0.9rem;
+}
+
+.nav-role {
+    font-size: 0.75rem;
+    color: #bdc3c7;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Nút Đăng xuất */
+.logout-btn {
+    background-color: #e74c3c;
     color: white;
-    padding: 5px 12px;
+    border: none;
+    padding: 6px 15px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-weight: 500;
     transition: 0.3s;
 }
 
-.btn-logout-custom:hover {
-    background-color: #d9534f; /* Đỏ nhạt khi hover */
-    border-color: #d43f3a;
+.logout-btn:hover {
+    background-color: #c0392b;
 }

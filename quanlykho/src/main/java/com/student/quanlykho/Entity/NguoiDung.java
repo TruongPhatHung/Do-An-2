@@ -24,4 +24,5 @@ public class NguoiDung {
     @Column(name = "email")
     @com.fasterxml.jackson.annotation.JsonProperty("email")
     private String email;
+    private String avatar;
 }

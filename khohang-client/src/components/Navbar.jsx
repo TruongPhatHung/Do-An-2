@@ -13,33 +13,59 @@ const Navbar = ({ onToggleSidebar }) => {
         navigate('/login');
     };
 
+    // Hàm lấy ảnh đại diện dựa trên Role hoặc URL có sẵn
+    const getAvatar = () => {
+        if (user?.avatar) return user.avatar; // Nếu user có link ảnh riêng thì dùng luôn
+
+        const role = user?.role?.toUpperCase();
+        if (role === 'ADMIN') return 'src/components/avarta/Screenshot 2026-03-21 185323.png'; // Icon Admin
+        if (role === 'KHO') return 'src/components/avarta/Screenshot 2026-03-21 185323.png';   // Icon Kho
+        if (role === 'MUAHANG') return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; // Icon Mua hàng
+        return 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; // Icon mặc định
+    };
+
     if (!user) return null;
 
     return (
-        <nav className="navbar-top">
-            {/* Phần Logo bên trái */}
-            <div className="nav-brand-area">
-                <span className="nav-logo">WMS-SYSTEM</span>
+        <nav className="navbar navbar-top">
+            {/* --- BÊN TRÁI: Khu vực Logo (Rộng vừa khít Sidebar) --- */}
+            <div className="nav-brand-area" style={{ display: 'flex', alignItems: 'center' }}>
+                <div 
+                    className="nav-logo" 
+                    onClick={() => navigate('/dashboard')} 
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+                    title="Về trang chủ"
+                >
+                    📦 WMS-SYSTEM
+                </div>
             </div>
 
-            {/* Phần chức năng bên phải */}
-            <div className="nav-right-area">
-                <button className="menu-toggle-btn" onClick={onToggleSidebar}>☰</button> {/* Nút menu giả lập */}
-                
-                <div className="nav-user-actions">
-                    <NotificationBell />
+            {/* --- NÚT MENU: Đưa ra ngoài, nằm ngay cạnh Logo --- */}
+            <button className="menu-toggle-btn" onClick={onToggleSidebar} style={{ margin: '0 15px' }}>
+                ☰
+            </button>
 
-                    <div className="nav-user-profile">
-                     
-                        <span className="nav-greeting">
-                            Xin Chào: <strong>{user.hoTen || 'admin'}</strong>
-                        </span>
+            {/* --- BÊN PHẢI: Thông báo, Profile & Đăng xuất --- */}
+            <div className="nav-right-area nav-user">
+                <NotificationBell />
+
+                <div className="nav-user-profile nav-profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <img
+                        src={getAvatar()}
+                        alt="avatar"
+                        className="nav-avatar"
+                        title={`Tài khoản: ${user.hoTen}`}
+                        style={{ width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                    <div className="nav-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
+                        <span className="nav-name">Chào, <strong>{user.hoTen || 'admin'}</strong></span>
+                        <span className="nav-role" style={{ fontSize: '12px', color: '#666' }}>{user.role}</span>
                     </div>
-
-                    <button onClick={handleLogout} className="btn-logout-custom">
-                        Đăng xuất
-                    </button>
                 </div>
+
+                <button onClick={handleLogout} className="btn-logout-custom logout-btn">
+                    🚪 Đăng xuất
+                </button>
             </div>
         </nav>
     );
