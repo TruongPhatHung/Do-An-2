@@ -9,9 +9,13 @@ const NhaCungCapForm = () => {
     const isEditMode = !!location.state?.editData;
 
     const [categories, setCategories] = useState([]);
-
+    const initialData = location.state?.editData;
     const [formData, setFormData] = useState(
-        location.state?.editData || {
+        initialData ? {
+            ...initialData,
+            // 🎯 FIX LỖI: Dò tìm ID loại hàng từ dữ liệu cũ của Backend để hiển thị lên Dropdown
+            loaiHangId: initialData.loaiHang?.id || initialData.loaiHangId || ''
+        } : {
             maNCC: '',
             tenNCC: '',
             diaChi: '',
@@ -20,6 +24,8 @@ const NhaCungCapForm = () => {
             danhSachHangHoa: [{ maHang: '', tenHang: '', giaBan: '' }]
         }
     );
+    
+  
 
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');

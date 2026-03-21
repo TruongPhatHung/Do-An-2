@@ -4,7 +4,7 @@ const api = axios.create({
 
 
 
-  baseURL: 'http://10.10.32.36:8080/api', // URL của Developer A
+  baseURL: 'http://localhost:8080/api', // URL của Developer A
 
   headers: {
         'Content-Type': 'application/json',

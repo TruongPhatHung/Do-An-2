@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
+import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { FiPlus, FiTrash2, FiSave, FiArrowLeft } from 'react-icons/fi'; // Cài react-icons
 import './POForm.css';
@@ -9,18 +10,48 @@ const POForm = () => {
     const [suppliers, setSuppliers] = useState([]);
     const [supplierId, setSupplierId] = useState('');
     const [items, setItems] = useState([{ productId: '', quantity: 1, price: 0 }]);
+    const location = useLocation();
+    const suggestedMaHang = location.state?.suggestProduct;
 
     useEffect(() => {
         const fetchSuppliers = async () => {
             try {
                 const response = await api.get('/suppliers');
-                setSuppliers(response.data);
+                const dataSuppliers = response.data;
+                setSuppliers(dataSuppliers);
+
+                // 🎯 ĐÂY LÀ ĐOẠN CODE "GÁN DÔ THẰNG LÊN ĐƠN"
+                if (suggestedMaHang) {
+                    let foundSupplierId = null;
+                    let foundProduct = null;
+
+                    // Chạy vòng lặp tìm xem ông Nhà cung cấp nào bán món này
+                    for (const supp of dataSuppliers) {
+                        const product = supp.danhSachHangHoa?.find(p => p.maHang === suggestedMaHang);
+                        if (product) {
+                            foundSupplierId = supp.maNCC;
+                            foundProduct = product;
+                            break;
+                        }
+                    }
+
+                    // Nếu tìm thấy -> Tự động điền ID Nhà cung cấp và ID Mặt hàng vào State của Form
+                    if (foundSupplierId && foundProduct) {
+                        setSupplierId(foundSupplierId); // Tự động chọn NCC
+                        setItems([{
+                            productId: foundProduct.maHang, // Tự động chọn Mã Hàng
+                            quantity: 1,
+                            price: foundProduct.giaBan || 0
+                        }]);
+                    }
+                }
             } catch (error) {
-                console.error("Lỗi tải NCC:", error);
+                console.error("Lỗi:", error);
             }
         };
         fetchSuppliers();
-    }, []);
+    }, [suggestedMaHang]); // Chú ý mảng dependency có chứa suggestedMaHang
+    
 
     const currentSupplier = suppliers.find(s => s.maNCC === supplierId);
     const availableProducts = currentSupplier?.danhSachHangHoa || [];
