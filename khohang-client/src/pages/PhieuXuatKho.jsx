@@ -11,7 +11,7 @@ const PhieuXuatKho = () => {
     const [pendingRequests, setPendingRequests] = useState([]);
     const [selectedRequest, setSelectedRequest] = useState('');
     const [items, setItems] = useState([]);
-    const [lyDo, setLyDo] = useState('Xuất theo lệnh'); // Mặc định là xuất theo lệnh của sếp
+    const [lyDo, setLyDo] = useState('Xuất theo lệnh'); 
 
     // Tải danh sách Hàng trong kho và Danh sách Lệnh yêu cầu xuất
     useEffect(() => {
@@ -48,7 +48,7 @@ const PhieuXuatKho = () => {
                     maHang: ct.hangHoa.maHang,
                     tenHang: ct.hangHoa.tenHang,
                     soLuongYeuCau: ct.soLuongYeuCau,
-                    soLuongDaXuat: ct.soLuongDaXuat || 0, // Trường hợp xuất làm nhiều đợt
+                    soLuongDaXuat: ct.soLuongDaXuat || 0,
                     soLuongTon: stockItem ? stockItem.soLuongTon : 0,
                     // Mặc định điền sẵn số lượng cần xuất (nhưng NV có thể sửa nếu kho thiếu)
                     soLuongThucXuat: ct.soLuongYeuCau - (ct.soLuongDaXuat || 0)
@@ -60,24 +60,22 @@ const PhieuXuatKho = () => {
 
     // Hàm cập nhật số lượng nhặt thực tế của Nhân viên Kho
     const updateQuantity = (index, value) => {
-        const val = parseInt(value);
-        if (isNaN(val) || val < 0) return;
+        const val = parseInt(value) || 0;
+        if (val < 0) return;
         const newItems = [...items];
         newItems[index].soLuongThucXuat = val;
         setItems(newItems);
     };
 
     // Kiểm tra xem phiếu có hợp lệ không (Không được xuất lố tồn kho)
-    const isValidToSubmit = items.length > 0 && !items.some(i => i.soLuongThucXuat > i.soLuongTon);
+    const isValidToSubmit = items.length > 0 && !items.some(i => i.soLuongThucXuat > i.soLuongTon || i.soLuongThucXuat < 0);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Chuyển mảng thành Map { "SP001": 10 } theo định dạng của Backend cũ
-        // Nếu Backend cũ của bạn vẫn dùng format cũ.
         const chiTietMap = {};
         items.forEach(item => {
-            if (item.soLuongThucXuat > 0) { // Chỉ xuất những mặt hàng có số lượng > 0
+            if (item.soLuongThucXuat > 0) { 
                 chiTietMap[item.maHang] = item.soLuongThucXuat;
             }
         });
@@ -87,12 +85,12 @@ const PhieuXuatKho = () => {
             return;
         }
 
+        const randomMaPhieu = "PX-" + Date.now().toString().slice(-6);
+
         const payload = {
-            maPhieuXuat: "PX-" + Date.now(),
-            lyDo: `Xuất cho lệnh: ${selectedRequest}`, // Ghi chú lại mã lệnh để dễ dò
+            maPhieuXuat: randomMaPhieu,
+            lyDo: `Xuất cho lệnh: ${selectedRequest}`, 
             chiTietXuat: chiTietMap
-            // TODO (Backend nâng cao): Bạn cần gửi thêm "maYeuCau" về Backend để nó 
-            // đổi trạng thái YeuCauXuatKho thành "Hoàn Thành"
         };
 
         try {
@@ -120,75 +118,79 @@ const PhieuXuatKho = () => {
                 <button type="button" className="btn-back" onClick={() => navigate(-1)}>
                     <FiArrowLeft /> Quay lại
                 </button>
-                <h2>📤 Tạo Phiếu Xuất Kho (Thực Thi Lệnh)</h2>
+                <div className="header-title-group">
+                    <h2>📤 Tạo Phiếu Xuất Kho (Thực Thi Lệnh)</h2>
+                    <p>Chọn lệnh yêu cầu từ sếp để tiến hành xuất kho</p>
+                </div>
             </div>
 
             <div className="xuatkho-card">
-                {/* 1. KẾT NỐI VỚI LỆNH XUẤT */}
+                {/* KẾT NỐI VỚI LỆNH XUẤT */}
                 <div className="request-section">
                     <label className="section-label">📋 Chọn Lệnh Yêu Cầu Từ Quản Lý:</label>
                     <select
                         value={selectedRequest}
                         onChange={(e) => handleSelectRequest(e.target.value)}
-                        className="select-request"
+                        className="custom-select select-request"
                     >
-                        <option value="">-- Click để chọn Lệnh xuất kho đang chờ --</option>
+                        <option value="">-- Click để chọn Lệnh xuất kho đang chờ xử lý --</option>
                         {pendingRequests.map(req => (
                             <option key={req.maYeuCau} value={req.maYeuCau}>
-                                {req.maYeuCau} - {req.noiNhan} (Hạn: {new Date(req.ngayCanXuat).toLocaleString()})
+                                Lệnh: {req.maYeuCau} | Giao đến: {req.noiNhan} | Hạn: {new Date(req.ngayCanXuat).toLocaleDateString('vi-VN')}
                             </option>
                         ))}
                     </select>
                 </div>
 
-                {selectedRequest && (
+                {selectedRequest ? (
                     <form onSubmit={handleSubmit} className="xuatkho-form">
                         <div className="table-responsive">
                             <table className="xuatkho-modern-table">
                                 <thead>
                                     <tr>
-                                        <th>Mã Hàng</th>
+                                        <th width="15%">Mã Hàng</th>
                                         <th width="35%">Tên Hàng</th>
                                         <th style={{ textAlign: 'center' }}>SL Yêu Cầu</th>
                                         <th style={{ textAlign: 'center' }}>Tồn Kho Thực Tế</th>
-                                        <th width="20%">SL Nhặt (Thực Xuất)</th>
+                                        <th width="20%" style={{ textAlign: 'center' }}>SL Nhặt (Thực Xuất)</th>
                                         <th width="5%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {items.map((item, index) => {
-                                        // Cảnh báo nếu sếp đòi 10 cái mà kho chỉ còn 5
                                         const isShortage = item.soLuongYeuCau > item.soLuongTon;
-                                        // Cảnh báo nếu NV nhặt lố số lượng tồn kho
                                         const isError = item.soLuongThucXuat > item.soLuongTon;
 
                                         return (
-                                            <tr key={item.maHang} className={isShortage ? 'row-warning' : ''}>
-                                                <td className="font-mono">{item.maHang}</td>
-                                                <td>{item.tenHang}</td>
-                                                <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{item.soLuongYeuCau}</td>
-
-                                                {/* Tồn kho thực tế (đỏ nếu kho không đủ trả cho lệnh) */}
-                                                <td style={{ textAlign: 'center' }} className={isShortage ? 'text-danger fw-bold' : 'fw-bold'}>
-                                                    {item.soLuongTon}
-                                                    {isShortage && <FiAlertTriangle style={{ marginLeft: '5px', color: '#ef4444' }} title="Kho thiếu hàng!" />}
+                                            <tr key={item.maHang} className={`${isShortage ? 'row-warning' : ''} ${isError ? 'row-error' : ''}`}>
+                                                <td className="font-mono text-primary fw-bold">{item.maHang}</td>
+                                                <td><strong>{item.tenHang}</strong></td>
+                                                <td style={{ textAlign: 'center', fontSize: '1.1rem' }} className="fw-bold">{item.soLuongYeuCau}</td>
+                                                
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <span className={`stock-badge ${isShortage ? 'badge-danger' : 'badge-success'}`}>
+                                                        {item.soLuongTon}
+                                                        {isShortage && <FiAlertTriangle style={{ marginLeft: '5px' }} title="Kho thiếu hàng!" />}
+                                                    </span>
                                                 </td>
 
-                                                <td>
-                                                    <input
-                                                        type="number" min="0"
-                                                        value={item.soLuongThucXuat === '' ? '' : item.soLuongThucXuat}
-                                                        onChange={(e) => updateQuantity(index, e.target.value)}
-                                                        className={`input-thuc-xuat ${isError ? 'input-error' : ''}`}
-                                                    />
-                                                    {isError && <div className="error-text">Không đủ tồn kho!</div>}
-                                                    {item.soLuongThucXuat < item.soLuongYeuCau && !isError && (
-                                                        <div className="warn-text">Xuất thiếu!</div>
-                                                    )}
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <div className="input-qty-wrapper">
+                                                        <input
+                                                            type="number" min="0"
+                                                            value={item.soLuongThucXuat === '' ? '' : item.soLuongThucXuat}
+                                                            onChange={(e) => updateQuantity(index, e.target.value)}
+                                                            className={`input-qty ${isError ? 'input-qty-error' : ''}`}
+                                                        />
+                                                        {isError && <div className="error-msg">Lố tồn kho!</div>}
+                                                        {item.soLuongThucXuat < item.soLuongYeuCau && !isError && (
+                                                            <div className="warn-msg">Xuất thiếu!</div>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td style={{ textAlign: 'center' }}>
                                                     {item.soLuongThucXuat === item.soLuongYeuCau && !isError && (
-                                                        <FiCheckCircle color="#22c55e" size={20} title="Đã nhặt đủ" />
+                                                        <FiCheckCircle color="#2ecc71" size={22} title="Đã nhặt đủ" />
                                                     )}
                                                 </td>
                                             </tr>
@@ -198,19 +200,16 @@ const PhieuXuatKho = () => {
                             </table>
                         </div>
 
-                        <div className="xuatkho-footer">
-                            <button type="submit" className="btn-submit-xuatkho" disabled={!isValidToSubmit}>
+                        <div className="form-actions xuatkho-footer">
+                            <button type="submit" className="btn-submit-main" disabled={!isValidToSubmit}>
                                 🚚 XÁC NHẬN GIAO HÀNG
                             </button>
                         </div>
                     </form>
-                )}
-
-                {/* Giao diện trống khi chưa chọn lệnh */}
-                {!selectedRequest && (
+                ) : (
                     <div className="empty-state">
                         <img src="https://cdn-icons-png.flaticon.com/512/1157/1157056.png" alt="Empty" />
-                        <p>Vui lòng chọn một lệnh xuất kho ở trên để bắt đầu soạn hàng!</p>
+                        <p>Vui lòng chọn một lệnh yêu cầu xuất ở trên để bắt đầu lấy hàng!</p>
                     </div>
                 )}
             </div>

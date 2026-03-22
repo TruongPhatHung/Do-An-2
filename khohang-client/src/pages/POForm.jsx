@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiTrash2, FiSave, FiArrowLeft, FiCalendar } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiSave, FiArrowLeft } from 'react-icons/fi'; // Đã bỏ FiCalendar
 import './POForm.css';
 
 const POForm = () => {
     const navigate = useNavigate();
     const [suppliers, setSuppliers] = useState([]);
     const [supplierId, setSupplierId] = useState('');
-    const [ngayDuKienGiao, setNgayDuKienGiao] = useState('');
     const [items, setItems] = useState([{ productId: '', quantity: 1, price: 0 }]);
 
     const location = useLocation();
@@ -72,7 +71,6 @@ const POForm = () => {
         const payload = {
             maDon: "PO-" + Date.now(),
             nhaCungCap: { maNCC: supplierId },
-            ngayDuKienGiao: ngayDuKienGiao,
             chiTiets: items.map(item => ({
                 hangHoa: { maHang: item.productId },
                 soLuongDat: item.quantity,
@@ -102,24 +100,14 @@ const POForm = () => {
                 <div className="po-section">
                     <h4 className="po-section-title">1. Thông tin đơn hàng & Nhà cung cấp</h4>
                     <div className="po-form-grid">
-                        <div className="po-form-group">
+                        {/* Xóa style gridColumn đi, nó sẽ tự chia đôi grid và ngắn lại */}
+                        <div className="po-form-group"> 
                             <label>Chọn nhà cung cấp <span className="po-required">*</span></label>
-                            <select className="po-input-control" value={supplierId} onChange={handleSupplierChange} required>
+                            <select style={{ maxWidth: '300px' }} className="po-input-control" value={supplierId} onChange={handleSupplierChange} required>
                                 <option value="">-- Click để chọn nhà cung cấp --</option>
                                 {suppliers.map(s => <option key={s.maNCC} value={s.maNCC}>{s.tenNCC} ({s.maNCC})</option>)}
                             </select>
                             {!supplierId && <p className="po-hint-text">Vui lòng chọn NCC trước khi thêm sản phẩm</p>}
-                        </div>
-
-                        <div className="po-form-group">
-                            <label><FiCalendar className="po-icon" /> Ngày dự kiến giao hàng <span className="po-required">*</span></label>
-                            <input
-                                type="date"
-                                className="po-input-control"
-                                value={ngayDuKienGiao}
-                                onChange={(e) => setNgayDuKienGiao(e.target.value)}
-                                required
-                            />
                         </div>
                     </div>
                 </div>
@@ -171,7 +159,7 @@ const POForm = () => {
                         <span>Tổng tiền thanh toán:</span>
                         <h3 className="po-amount">{totalAmount.toLocaleString()} đ</h3>
                     </div>
-                    <button type="submit" className="po-btn-submit" disabled={!supplierId || !ngayDuKienGiao || items[0].productId === ''}>
+                    <button type="submit" className="po-btn-submit" disabled={!supplierId || items[0].productId === ''}>
                         <FiSave className="po-icon" /> XÁC NHẬN TẠO ĐƠN HÀNG
                     </button>
                 </div>
