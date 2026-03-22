@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './NhaCungCapList.css';
 import api from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
-
+import { toast } from 'react-toastify';
 const NhaCungCapList = () => {
     const [nhaCungCap, setNhaCungCap] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -38,11 +38,14 @@ const NhaCungCapList = () => {
             try {
                 // Backend nhận ID số: /api/suppliers/1
                 await api.delete(`/suppliers/${id}`);
-                alert("✅ Xóa thành công!");
+                toast.success("✅ Xóa thành công!");
                 fetchNCC(); // Gọi lại hàm lấy dữ liệu để cập nhật bảng
+                if (currentItems.length === 1 && currentPage > 1) {
+                    setCurrentPage(prev => prev - 1);
+                }
             } catch (error) {
                 console.error("Lỗi khi xóa:", error);
-                alert("❌ Xóa thất bại! Có thể NCC này đang có đơn hàng liên kết.");
+                toast.error("❌ Xóa thất bại! Có thể NCC này đang có đơn hàng liên kết.");
             }
         }
     };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import './EditNhaCungCap.css';
-
+import { toast } from 'react-toastify';
 const EditNhaCungCap = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -39,7 +39,7 @@ const EditNhaCungCap = () => {
                 setLoading(false);
             } catch (err) {
                 console.error("Lỗi chi tiết từ Backend:", err);
-                alert("❌ Không thể tải thông tin! Hãy kiểm tra lại mã hoặc đăng nhập lại.");
+                toast.error("❌ Không thể tải thông tin! Hãy kiểm tra lại mã hoặc đăng nhập lại.");
                 navigate('/suppliers');
             }
         };
@@ -65,10 +65,10 @@ const EditNhaCungCap = () => {
         e.preventDefault();
         try {
             await api.put(`/suppliers/${id}`, { ...supplier, danhSachHangHoa: products });
-            alert("✅ Cập nhật thành công!");
+            toast.success("✅ Cập nhật thành công!");
             navigate('/suppliers');
         } catch (err) {
-            alert("❌ Lỗi cập nhật: " + (err.response?.data?.message || "Thất bại"));
+            toast.error("❌ Lỗi cập nhật: " + (err.response?.data?.message || "Thất bại"));
         }
     };
 

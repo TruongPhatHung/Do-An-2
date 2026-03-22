@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import './NhaCungCapForm.css';
-
+import { toast } from 'react-toastify';
 const NhaCungCapForm = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -72,25 +72,20 @@ const NhaCungCapForm = () => {
     // --- HÀM XỬ LÝ LƯU NHANH LOẠI HÀNG MỚI ---
     const handleQuickAddCategory = async () => {
         if (!newCategory.maLoai || !newCategory.tenLoai) {
-            alert("Vui lòng nhập Mã và Tên lĩnh vực mới!");
+            toast.warning("⚠️ Vui lòng nhập Mã và Tên lĩnh vực mới!");
             return;
         }
         try {
-            const res = await api.post('/categories', newCategory); // Gửi API tạo mới
+            const res = await api.post('/categories', newCategory);
 
-            // 1. Thêm cái vừa tạo vào danh sách Dropdown
             setCategories([...categories, res.data]);
-
-            // 2. Tự động CHỌN LUÔN cái vừa tạo cho Form Nhà cung cấp
             setFormData({ ...formData, loaiHangId: res.data.id });
-
-            // 3. Đóng form thêm nhanh và reset trắng chữ
             setShowQuickAdd(false);
             setNewCategory({ maLoai: '', tenLoai: '', moTa: 'Thêm nhanh từ form' });
 
-            alert("Đã thêm Lĩnh vực mới thành công!");
+            toast.success("✅ Đã thêm Lĩnh vực mới thành công!");
         } catch (error) {
-            alert("Lỗi! Có thể Mã loại này đã tồn tại trong hệ thống.");
+            toast.error("❌ Lỗi! Có thể Mã loại này đã tồn tại trong hệ thống.");
         }
     };
 
@@ -109,16 +104,18 @@ const NhaCungCapForm = () => {
         try {
             if (isEditMode) {
                 await api.put(`/suppliers/${formData.id}`, formData);
-                alert('✅ Đã cập nhật thông tin Nhà cung cấp!');
+                toast.success('✅ Đã cập nhật thông tin Nhà cung cấp!');
             } else {
                 await api.post('/suppliers', formData);
-                alert('✅ Đã lưu Nhà cung cấp và Danh mục hàng hóa!');
+                toast.success('✅ Đã lưu Nhà cung cấp và Danh mục hàng hóa!');
             }
             navigate('/suppliers');
         } catch (error) {
             console.error('Lỗi lưu NCC:', error);
-            setErrorMessage('❌ Không thể lưu. Vui lòng kiểm tra lại dữ liệu!');
-        } finally {
+            toast.error('❌ Không thể lưu. Vui lòng kiểm tra lại dữ liệu!');
+            // setErrorMessage(...); // <-- Có thể xóa luôn dòng này
+        }
+         finally {
             setIsLoading(false);
         }
     };

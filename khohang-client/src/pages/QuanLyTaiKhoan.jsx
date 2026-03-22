@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import './QuanLyTaiKhoan.css';
-
+import { toast } from 'react-toastify';
 const QuanLyTaiKhoan = () => {
     // 1. TÊN STATE LÀ 'users'
     const [users, setUsers] = useState([]);
@@ -35,12 +35,12 @@ const QuanLyTaiKhoan = () => {
         e.preventDefault();
         try {
             await api.post('/users', newUser);
-            alert("✅ Tạo tài khoản nhân viên thành công!");
+            toast.success("✅ Tạo tài khoản nhân viên thành công!");
             setNewUser(initialFormState);
             setShowAddForm(false);
             fetchUsers();
         } catch (error) {
-            alert("❌ Lỗi: Tên đăng nhập đã tồn tại hoặc dữ liệu không hợp lệ!");
+            toast.error("❌ Lỗi: Tên đăng nhập đã tồn tại hoặc dữ liệu không hợp lệ!");
         }
     };
 
@@ -50,19 +50,18 @@ const QuanLyTaiKhoan = () => {
             await api.put(`/users/${maND}/role`, newRole, {
                 headers: { 'Content-Type': 'application/json' }
             });
-            alert(`✅ Đã đổi quyền thành ${newRole}`);
+            toast.success(`✅ Đã đổi quyền thành ${newRole}`);
             fetchUsers();
         } catch (error) {
-            alert("❌ Cập nhật quyền thất bại!");
+            toast.error("❌ Cập nhật quyền thất bại!");
         }
     };
 
     const handleUpdatePassword = async (maND) => {
         const newPw = window.prompt("🔑 Nhập mật khẩu mới cho nhân viên này:");
         if (newPw === null || newPw.trim() === "") return;
-
         if (newPw.length < 6) {
-            alert("⚠️ Mật khẩu phải có ít nhất 6 ký tự!");
+            toast.error("⚠️ Mật khẩu phải có ít nhất 6 ký tự!");
             return;
         }
 
@@ -70,9 +69,9 @@ const QuanLyTaiKhoan = () => {
             await api.put(`/users/${maND}/password`, newPw, {
                 headers: { 'Content-Type': 'application/json' }
             });
-            alert("✅ Đã cập nhật mật khẩu mới thành công!");
+            toast.success("✅ Đã cập nhật mật khẩu mới thành công!");
         } catch (error) {
-            alert("❌ Lỗi khi đổi mật khẩu!");
+            toast.error("❌ Lỗi khi đổi mật khẩu!");
         }
     };
 
@@ -80,10 +79,10 @@ const QuanLyTaiKhoan = () => {
         if (window.confirm("❗ Bạn có chắc muốn xóa tài khoản này?")) {
             try {
                 await api.delete(`/users/${id}`);
-                alert("✅ Xóa thành công!");
+                toast.success("✅ Xóa thành công!");
                 fetchUsers();
             } catch (error) {
-                alert("❌ Xóa thất bại!");
+                toast.error("❌ Xóa thất bại!");
             }
         }
     };
