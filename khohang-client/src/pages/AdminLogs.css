@@ -1,29 +1,29 @@
+/* Container chính */
 .logs-container {
-    padding: 25px;
-    background-color: #f8f9fa;
+    padding: 20px;
+    background-color: #f9fbfc;
     min-height: 100vh;
 }
 
 .logs-header {
-    margin-bottom: 25px;
-    border-left: 5px solid #2c3e50;
-    padding-left: 15px;
+    margin-bottom: 20px;
 }
 
 .logs-header h2 {
-    margin: 0;
     color: #2c3e50;
+    margin-bottom: 5px;
 }
 
 .logs-header p {
     color: #7f8c8d;
-    margin: 5px 0 0;
+    font-size: 14px;
 }
 
+/* Bảng Lịch sử */
 .logs-table-wrapper {
-    background: white;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     overflow: hidden;
 }
 
@@ -32,65 +32,202 @@
     border-collapse: collapse;
 }
 
-.logs-table th {
-    background-color: #2c3e50;
-    color: white;
+.logs-table th, .logs-table td {
     padding: 15px;
     text-align: left;
-    font-size: 14px;
+    border-bottom: 1px solid #ecf0f1;
 }
 
-.logs-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #edf2f7;
-    font-size: 13.5px;
-    vertical-align: middle;
-}
-
-.user-name {
-    font-weight: 600;
-    color: #2980b9;
-}
-
-/* Badges hành động */
-.action-badge {
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: bold;
+.logs-table th {
+    background-color: #34495e;
     color: white;
-}
-
-.badge-add { background-color: #27ae60; }
-.badge-edit { background-color: #2980b9; }
-.badge-delete { background-color: #e74c3c; }
-
-/* Phần hiển thị Thay đổi */
-.diff-view {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    max-width: 400px;
-}
-
-.old-val {
-    color: #e74c3c;
-    text-decoration: line-through;
-    font-style: italic;
-    word-break: break-all;
-}
-
-.new-val {
-    color: #27ae60;
     font-weight: 600;
-    word-break: break-all;
-}
-
-.arrow {
-    color: #bdc3c7;
-    font-weight: bold;
 }
 
 .logs-table tr:hover {
-    background-color: #fcfcfc;
+    background-color: #f5f7fa;
+}
+
+/* Nhãn Trạng thái (Badge) */
+.action-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.badge-add { background-color: #2ecc71; }
+.badge-edit { background-color: #f39c12; }
+.badge-delete { background-color: #e74c3c; }
+.badge-default { background-color: #95a5a6; }
+
+/* Nút Xem chi tiết */
+.btn-view-detail {
+    background-color: #e8f4f8;
+    color: #2980b9;
+    border: 1px solid #3498db;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-view-detail:hover {
+    background-color: #3498db;
+    color: white;
+}
+
+/* ========================================= */
+/* POPUP MODAL CHI TIẾT THAO TÁC             */
+/* ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background: white;
+    width: 650px;
+    max-width: 90%;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    overflow: hidden;
+    animation: slideDown 0.3s ease-out;
+}
+
+.modal-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #ecf0f1;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 12px;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+/* Khu vực hiển thị khác biệt dữ liệu (Diff View) */
+.diff-container {
+    background-color: #fff;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.diff-header {
+    background-color: #f6f8fa;
+    padding: 10px 15px;
+    font-weight: bold;
+    border-bottom: 1px solid #e1e4e8;
+    color: #24292e;
+}
+
+.diff-content {
+    padding: 15px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap; /* Giữ nguyên định dạng xuống dòng nếu là JSON/Text dài */
+}
+
+/* Style cho các loại thay đổi */
+.diff-added {
+    background-color: #e6ffed;
+    color: #22863a;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #28a745;
+}
+
+.diff-removed {
+    background-color: #ffeef0;
+    color: #cb2431;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #dc3545;
+    text-decoration: line-through;
+}
+
+.diff-changed {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.diff-changed .old {
+    background-color: #ffeef0;
+    color: #cb2431;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #dc3545;
+    text-decoration: line-through;
+}
+
+.diff-changed .arrow {
+    text-align: center;
+    color: #6a737d;
+    font-weight: bold;
+}
+
+.diff-changed .new {
+    background-color: #e6ffed;
+    color: #22863a;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #28a745;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }

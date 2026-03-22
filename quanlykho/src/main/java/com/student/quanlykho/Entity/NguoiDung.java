@@ -3,6 +3,8 @@ package com.student.quanlykho.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "nguoi_dung")
 @Data
@@ -25,4 +27,6 @@ public class NguoiDung {
     @com.fasterxml.jackson.annotation.JsonProperty("email")
     private String email;
     private String avatar;
+    @Column(name = "last_active_time")
+    private LocalDateTime lastActiveTime;
 }
