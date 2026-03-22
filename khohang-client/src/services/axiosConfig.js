@@ -3,8 +3,7 @@ import axios from 'axios';
 const api = axios.create({
 
 
-
-  baseURL: 'http://localhost:8080/api', // URL của Developer A
+  baseURL: 'http://10.10.34.221:8080/api', // URL của Developer A
 
   headers: {
         'Content-Type': 'application/json',

@@ -10,14 +10,13 @@ const Sidebar = () => {
 
     const role = user?.role?.toUpperCase();
 
-    // Hàm tiện ích để tránh lặp lại code class
+    // Hàm tiện ích để bật sáng menu đang được chọn
     const navClass = ({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item";
 
     return (
         <aside className="sidebar">
-            {/* Phần thông tin User giống hình */}
+            {/* Phần thông tin User */}
             <div className="sidebar-user-panel">
-                
                 <div className="user-info">
                     <p>{user.hoTen || 'admin'}</p>
                     <span className="online-status">
@@ -27,77 +26,65 @@ const Sidebar = () => {
             </div>
 
             <ul className="sidebar-menu">
-
-                {/* Trang Chủ (Giả lập theo hình) */}
                 <li>
-                    <NavLink to="/dashboard" className="sidebar-item">
+                    <NavLink to="/dashboard" className={navClass}>
                         <span className="menu-icon">🏠</span> Trang chủ
                     </NavLink>
                 </li>
 
                 <li>
-                    <NavLink to="/products" className="sidebar-item">
+                    <NavLink to="/products" className={navClass}>
                         <span className="menu-icon">📦</span> Hàng Hóa
-
                     </NavLink>
                 </li>
 
                 <li>
-
-                    <NavLink to="/suppliers" className="sidebar-item">
+                    <NavLink to="/suppliers" className={navClass}>
                         <span className="menu-icon">🏢</span> Nhà Cung Cấp
-
                     </NavLink>
                 </li>
 
                 <li>
                     <NavLink to="/categories" className={navClass}>
-                        🏷️ Quản Lý Loại Hàng
+                        <span className="menu-icon">🏷️</span> Quản Lý Loại Hàng
                     </NavLink>
                 </li>
 
                 {/* --- NHÓM MUA HÀNG & ĐƠN HÀNG --- */}
                 {(role === 'ADMIN' || role === 'MUAHANG') && (
                     <li>
-
-                        <NavLink to="/don-hang" className="sidebar-item">
+                        <NavLink to="/don-hang" className={navClass}>
                             <span className="menu-icon">📝</span> Lên Đơn (PO)
-
                         </NavLink>
                     </li>
                 )}
 
-
                 {(role === 'ADMIN' || role === 'KHO') && (
                     <li>
-                        <NavLink to="/nhap-kho" className="sidebar-item">
+                        <NavLink to="/nhap-kho" className={navClass}>
                             <span className="menu-icon">📥</span> Nhập Kho
                         </NavLink>
                     </li>
                 )}
 
                 <li>
-                    <NavLink to="/danh-sach-po" className="sidebar-item">
+                    <NavLink to="/danh-sach-po" className={navClass}>
                         <span className="menu-icon">📋</span> Danh Sách Đơn Hàng
-
                     </NavLink>
                 </li>
 
                 {/* --- NHÓM KHO VẬN --- */}
                 {(role === 'ADMIN' || role === 'KHO') && (
-
                     <li>
-                        <NavLink to="/xuat-kho" className="sidebar-item">
+                        <NavLink to="/xuat-kho" className={navClass}>
                             <span className="menu-icon">📤</span> Xuất Kho
-
                         </NavLink>
                     </li>
                 )}
 
                 {role === 'ADMIN' && (
-
                     <li>
-                        <NavLink to="/tai-khoan" className="sidebar-item">
+                        <NavLink to="/tai-khoan" className={navClass}>
                             <span className="menu-icon">👥</span> Quản Lý Tài Khoản
                         </NavLink>
                     </li>
@@ -105,11 +92,10 @@ const Sidebar = () => {
 
                 {role === 'ADMIN' && (
                     <li>
-                        <NavLink to="/admin/logs" className="sidebar-item">
+                        <NavLink to="/admin/logs" className={navClass}>
                             <span className="menu-icon">📜</span> Nhật Ký Hệ Thống
                         </NavLink>
                     </li>
-
                 )}
             </ul>
         </aside>

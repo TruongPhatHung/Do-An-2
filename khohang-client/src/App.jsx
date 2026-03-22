@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css'; 
+
+import './App.css'; // Quan trọng: Phải import file này
+
 import Login from './pages/Login';
 import HangHoaList from './pages/HangHoaList';
 import { AuthProvider } from './Context/AuthContext';
@@ -17,11 +19,13 @@ import Sidebar from './components/Sidebar';
 import NhaCungCapForm from './pages/NhaCungCapForm';
 import QuanLyTaiKhoan from './pages/QuanLyTaiKhoan';
 import EditNhaCungCap from './pages/EditNhaCungCap';
+
 import CategoryManager from './pages/CategoryManager'; // Mới từ bạn của bạn
 import PODetail from './pages/PODetail';
 import AdminLogs from './pages/AdminLogs';
 import ChiTietHangHoa from './pages/ChiTietHangHoa'; // Mới từ bạn của bạn
 import SuaHangHoa from './pages/SuaHangHoa'; // Mới từ bạn của bạn
+
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -33,18 +37,23 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        {/* Sử dụng layout class để khớp với file App.css đã tạo */}
+        {/* Layout Container chính - Dùng Flex Row để Sidebar nằm trái, Content nằm phải */}
         <div className={`app-container ${isSidebarOpen ? '' : 'sidebar-closed'}`}>
           
+          {/* Truyền state vào Sidebar */}
           <Sidebar isOpen={isSidebarOpen} />
 
+          {/* Khối nội dung bên phải bao gồm Navbar và Page Content */}
           <div className="main-wrapper">
+            {/* Truyền hàm toggle vào Navbar */}
+
             <Navbar onToggleSidebar={toggleSidebar} />
             
             <main className="content-area">
               <Routes>
                 {/* Công khai */}
                 <Route path="/login" element={<Login />} />
+
                 <Route path="/" element={<Navigate to="/login" />} />
 
                 {/* Các trang quản lý - Đã bọc ProtectedRoute đầy đủ */}
@@ -72,6 +81,7 @@ function App() {
                 <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />
                 <Route path="/admin/logs" element={<ProtectedRoute><AdminLogs /></ProtectedRoute>} />
                 <Route path="/thong-bao" element={<ProtectedRoute><NotificationBell /></ProtectedRoute>} />
+
               </Routes>
             </main>
           </div>

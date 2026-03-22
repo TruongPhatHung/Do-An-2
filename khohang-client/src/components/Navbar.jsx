@@ -15,13 +15,13 @@ const Navbar = ({ onToggleSidebar }) => {
 
     // Hàm lấy ảnh đại diện dựa trên Role hoặc URL có sẵn
     const getAvatar = () => {
-        if (user?.avatar) return user.avatar; // Nếu user có link ảnh riêng thì dùng luôn
+        if (user?.avatar) return user.avatar; 
 
         const role = user?.role?.toUpperCase();
-        if (role === 'ADMIN') return 'src/components/avarta/Screenshot 2026-03-21 185323.png'; // Icon Admin
-        if (role === 'KHO') return 'src/components/avarta/Screenshot 2026-03-21 185323.png';   // Icon Kho
-        if (role === 'MUAHANG') return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; // Icon Mua hàng
-        return 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; // Icon mặc định
+        if (role === 'ADMIN') return 'src/components/avarta/Screenshot 2026-03-21 185323.png'; 
+        if (role === 'KHO') return 'src/components/avarta/Screenshot 2026-03-21 185323.png';   
+        if (role === 'MUAHANG') return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
+        return 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; 
     };
 
     if (!user) return null;

@@ -1,9 +1,7 @@
-/* src/components/Navbar.css */
-
 .navbar-top {
     display: flex;
-    height: 60px; /* Chỉnh 60px để chứa vừa Avatar của đồng đội */
-    background-color: #2c3e50; /* Dùng màu nền hiện đại của bản mới pull về */
+    height: 60px; 
+    background-color: #2c3e50; 
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -12,8 +10,8 @@
 
 /* Vùng Logo và nút menu bên trái (Khớp với Sidebar của bạn) */
 .nav-brand-area {
-    width: 230px; /* Bằng đúng chiều rộng của Sidebar */
-    background-color: #1a252f; /* Nền tối hơn navbar một chút cho nổi bật */
+    width: 230px; 
+    background-color: #1a252f; 
     display: flex;
     align-items: center;
     padding-left: 15px;
@@ -50,7 +48,7 @@
 .nav-right-area {
     flex: 1;
     display: flex;
-    justify-content: flex-end; /* Đẩy cụm user sang phải */
+    justify-content: flex-end; 
     align-items: center;
 }
 
