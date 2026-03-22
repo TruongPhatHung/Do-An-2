@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-import './App.css'; // Quan trọng: Phải import file này
+import './App.css';
 
 import Login from './pages/Login';
 import HangHoaList from './pages/HangHoaList';
@@ -20,11 +20,18 @@ import NhaCungCapForm from './pages/NhaCungCapForm';
 import QuanLyTaiKhoan from './pages/QuanLyTaiKhoan';
 import EditNhaCungCap from './pages/EditNhaCungCap';
 
+
 import CategoryManager from './pages/CategoryManager'; // Mới từ bạn của bạn
+
+
 import PODetail from './pages/PODetail';
 import AdminLogs from './pages/AdminLogs';
-import ChiTietHangHoa from './pages/ChiTietHangHoa'; // Mới từ bạn của bạn
-import SuaHangHoa from './pages/SuaHangHoa'; // Mới từ bạn của bạn
+import ChiTietHangHoa from './pages/ChiTietHangHoa';
+import SuaHangHoa from './pages/SuaHangHoa';
+
+// Import đủ rùi nè
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -37,10 +44,17 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        {/* Layout Container chính - Dùng Flex Row để Sidebar nằm trái, Content nằm phải */}
+        {/* 🎯 CẮM ĐIỆN CHO CÁI LOA Ở ĐÂY NÈ! NÓ SẼ HIỆN Ở TẤT CẢ CÁC TRANG */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          theme="colored"
+        />
+
+        {/* Sử dụng layout class để khớp với file App.css đã tạo */}
         <div className={`app-container ${isSidebarOpen ? '' : 'sidebar-closed'}`}>
-          
-          {/* Truyền state vào Sidebar */}
+
+
           <Sidebar isOpen={isSidebarOpen} />
 
           {/* Khối nội dung bên phải bao gồm Navbar và Page Content */}
@@ -48,9 +62,10 @@ function App() {
             {/* Truyền hàm toggle vào Navbar */}
 
             <Navbar onToggleSidebar={toggleSidebar} />
-            
+
             <main className="content-area">
               <Routes>
+
                 {/* Công khai */}
                 <Route path="/login" element={<Login />} />
 

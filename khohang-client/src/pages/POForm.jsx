@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { FiPlus, FiTrash2, FiSave, FiArrowLeft } from 'react-icons/fi'; // Cài react-icons
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { FiPlus, FiTrash2, FiSave, FiArrowLeft } from 'react-icons/fi';
 import './POForm.css';
 
 const POForm = () => {
@@ -20,12 +20,11 @@ const POForm = () => {
                 const dataSuppliers = response.data;
                 setSuppliers(dataSuppliers);
 
-                // 🎯 ĐÂY LÀ ĐOẠN CODE "GÁN DÔ THẰNG LÊN ĐƠN"
+                // 🎯 ĐOẠN CODE TỰ ĐỘNG ĐIỀN TỪ CHUÔNG THÔNG BÁO
                 if (suggestedMaHang) {
                     let foundSupplierId = null;
                     let foundProduct = null;
 
-                    // Chạy vòng lặp tìm xem ông Nhà cung cấp nào bán món này
                     for (const supp of dataSuppliers) {
                         const product = supp.danhSachHangHoa?.find(p => p.maHang === suggestedMaHang);
                         if (product) {
@@ -35,23 +34,21 @@ const POForm = () => {
                         }
                     }
 
-                    // Nếu tìm thấy -> Tự động điền ID Nhà cung cấp và ID Mặt hàng vào State của Form
                     if (foundSupplierId && foundProduct) {
-                        setSupplierId(foundSupplierId); // Tự động chọn NCC
+                        setSupplierId(foundSupplierId);
                         setItems([{
-                            productId: foundProduct.maHang, // Tự động chọn Mã Hàng
+                            productId: foundProduct.maHang,
                             quantity: 1,
                             price: foundProduct.giaBan || 0
                         }]);
                     }
                 }
             } catch (error) {
-                console.error("Lỗi:", error);
+                console.error("Lỗi tải nhà cung cấp:", error);
             }
         };
         fetchSuppliers();
-    }, [suggestedMaHang]); // Chú ý mảng dependency có chứa suggestedMaHang
-    
+    }, [suggestedMaHang]);
 
     const currentSupplier = suppliers.find(s => s.maNCC === supplierId);
     const availableProducts = currentSupplier?.danhSachHangHoa || [];
@@ -72,9 +69,11 @@ const POForm = () => {
     };
 
     const addRow = () => setItems([...items, { productId: '', quantity: 1, price: 0 }]);
+
     const removeRow = (index) => {
         if (items.length > 1) setItems(items.filter((_, i) => i !== index));
     };
+
     const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
     const handleSubmit = async (e) => {
@@ -91,17 +90,18 @@ const POForm = () => {
 
         try {
             await api.post('/orders', payload);
-            alert("✅ Đã tạo Đơn đặt hàng thành công!");
+            toast.success("✅ Đã tạo Đơn đặt hàng thành công!");
             navigate('/danh-sach-po');
         } catch (error) {
-            alert("❌ Lưu đơn hàng thất bại!");
+            toast.error("❌ Lưu đơn hàng thất bại! (Bị lỗi phân quyền 403)");
+            console.error(error);
         }
     };
 
     return (
         <div className="po-wrapper">
             <div className="po-header">
-                <button className="btn-back" onClick={() => navigate(-1)}>
+                <button type="button" className="btn-back" onClick={() => navigate(-1)}>
                     <FiArrowLeft /> Quay lại
                 </button>
                 <h2>📝 Lên Đơn Đặt Hàng (PO)</h2>
@@ -139,10 +139,10 @@ const POForm = () => {
                                 {items.map((item, index) => (
                                     <tr key={index}>
                                         <td>
-                                            <select 
-                                                value={item.productId} 
-                                                onChange={(e) => handleItemChange(index, 'productId', e.target.value)} 
-                                                required 
+                                            <select
+                                                value={item.productId}
+                                                onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
+                                                required
                                                 disabled={!supplierId}
                                             >
                                                 <option value="">-- Chọn hàng --</option>
@@ -150,10 +150,31 @@ const POForm = () => {
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" min="1" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))} disabled={!item.productId} />
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={item.quantity === undefined || isNaN(item.quantity) ? '' : item.quantity}
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value);
+                                                    handleItemChange(index, 'quantity', isNaN(val) ? 1 : val);
+                                                }}
+                                                disabled={!item.productId}
+                                                style={{ textAlign: 'center' }}
+                                                required
+                                            />
                                         </td>
                                         <td>
-                                            <input type="number" value={item.price} onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value))} disabled={!item.productId} />
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={item.price === undefined || isNaN(item.price) ? '' : item.price}
+                                                onChange={(e) => {
+                                                    const val = parseFloat(e.target.value);
+                                                    handleItemChange(index, 'price', isNaN(val) ? 0 : val);
+                                                }}
+                                                disabled={!item.productId}
+                                                required
+                                            />
                                         </td>
                                         <td className="col-subtotal">
                                             {(item.quantity * item.price).toLocaleString()}
@@ -180,7 +201,7 @@ const POForm = () => {
                         <h3 className="amount">{totalAmount.toLocaleString()} đ</h3>
                     </div>
                     <button type="submit" className="btn-submit-po" disabled={!supplierId || items[0].productId === ''}>
-                        <FiSave style={{marginRight: '8px'}} /> XÁC NHẬN TẠO ĐƠN HÀNG
+                        <FiSave style={{ marginRight: '8px' }} /> XÁC NHẬN TẠO ĐƠN HÀNG
                     </button>
                 </div>
             </form>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import './PhieuXuatKho.css';
-
+import { toast } from 'react-toastify';
 const PhieuXuatKho = () => {
     const [inventory, setInventory] = useState([]);
     const [items, setItems] = useState([]);
@@ -60,14 +60,14 @@ const PhieuXuatKho = () => {
 
         try {
             await api.post('/phieu-xuat', payload);
-            alert("Xuất kho thành công! Số lượng tồn đã được trừ tự động.");
+            toast.success("Xuất kho thành công! Số lượng tồn đã được trừ tự động.");
             setItems([]); // Xóa danh sách sau khi xong
             
             // Tải lại kho để cập nhật số lượng mới nhất trên giao diện
             const res = await api.get('/products');
             setInventory(res.data);
         } catch (error) { 
-            alert("Lỗi xuất kho! Có thể do hàng trong kho không đủ."); 
+            toast.error("Lỗi xuất kho! Có thể do hàng trong kho không đủ."); 
         }
     };
 

@@ -1,24 +1,24 @@
+// File: src/services/axiosConfig.js
 import axios from 'axios';
 
 const api = axios.create({
+    baseURL: 'http://10.10.34.221:8080/api', // Chỉnh lại cho đúng port Backend của bạn
+});
 
 
-  baseURL: 'http://10.10.34.221:8080/api', // URL của Developer A
+// 🎯 ĐÂY LÀ ĐOẠN CODE SẼ GIẢI CỨU LỖI 403 CỦA BẠN
+api.interceptors.request.use(
+    (config) => {
+        // Lấy token từ két sắt localStorage
+        const token = localStorage.getItem('token'); 
+        if (token) {
+            // Gắn vào Header của mỗi request
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
 
-  headers: {
-        'Content-Type': 'application/json',
     },
+    (error) => Promise.reject(error)
+);
 
-
-});
-
-// Tự động đính kèm Token vào Header mỗi khi gọi API
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-     //config.headers['Authorization'] = token;
-  }
-  return config;
-});
 export default api;

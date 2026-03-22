@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './NhaCungCapList.css';
 import api from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
-
+import { toast } from 'react-toastify';
 const NhaCungCapList = () => {
     const [nhaCungCap, setNhaCungCap] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [expandedRowId, setExpandedRowId] = useState(null); // State quản lý dòng đang mở rộng
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
     const navigate = useNavigate();
 
     const fetchNCC = useCallback(async () => {
@@ -36,11 +36,16 @@ const NhaCungCapList = () => {
         if (window.confirm(`❗ Bạn có chắc chắn muốn xóa nhà cung cấp mã ${ma} và toàn bộ hàng hóa liên quan không?`)) {
             try {
                 await api.delete(`/suppliers/${id}`);
-                alert("✅ Xóa thành công!");
-                fetchNCC();
+
+                toast.success("✅ Xóa thành công!");
+                fetchNCC(); // Gọi lại hàm lấy dữ liệu để cập nhật bảng
+                if (currentItems.length === 1 && currentPage > 1) {
+                    setCurrentPage(prev => prev - 1);
+                }
+
             } catch (error) {
                 console.error("Lỗi khi xóa:", error);
-                alert("❌ Xóa thất bại! Có thể NCC này đang có đơn hàng liên kết.");
+                toast.error("❌ Xóa thất bại! Có thể NCC này đang có đơn hàng liên kết.");
             }
         }
     };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import './NhaCungCapForm.css'; // Dùng chung CSS form cho đẹp
-
+import { toast } from 'react-toastify';
 const SuaHangHoa = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -44,7 +44,7 @@ const SuaHangHoa = () => {
                 setLoading(false);
             } catch (error) {
                 console.error("Lỗi:", error);
-                alert("❌ Không thể tải dữ liệu hàng hóa!");
+                toast.error("❌ Không thể tải dữ liệu hàng hóa!");
                 navigate('/products');
             }
         };
@@ -55,10 +55,10 @@ const SuaHangHoa = () => {
         e.preventDefault();
         try {
             await api.put(`/products/${id}`, formData);
-            alert("✅ Cập nhật thông tin hàng hóa thành công!");
+            toast.success("✅ Cập nhật thông tin hàng hóa thành công!");
             navigate('/products');
         } catch (error) {
-            alert("❌ Lỗi cập nhật: " + (error.response?.data?.message || "Thất bại"));
+            toast.error("❌ Lỗi cập nhật: " + (error.response?.data?.message || "Thất bại"));
         }
     };
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import './AdminLogs.css'; // Vẫn giữ để xài chung style cái Bảng (Table)
 import './CategoryManager.css'; // Import file CSS mới tạo
-
+import { toast } from 'react-toastify';
 const CategoryManager = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -39,10 +39,10 @@ const CategoryManager = () => {
         try {
             if (isEditing) {
                 await api.put(`/categories/${formData.id}`, formData);
-                alert('Cập nhật thành công!');
+                toast.success('Cập nhật thành công!');
             } else {
                 await api.post('/categories', formData);
-                alert('Thêm danh mục thành công!');
+                toast.success('Thêm danh mục thành công!');
             }
             // Reset form và tải lại danh sách
             setFormData({ id: null, maLoai: '', tenLoai: '', moTa: '' });
@@ -50,7 +50,7 @@ const CategoryManager = () => {
             fetchCategories();
         } catch (error) {
             console.error("Lỗi lưu danh mục:", error);
-            alert('Có lỗi xảy ra, vui lòng thử lại!');
+            toast.error('Có lỗi xảy ra, vui lòng thử lại!');
         }
     };
 
@@ -65,11 +65,11 @@ const CategoryManager = () => {
         if (window.confirm(`Bạn có chắc muốn xóa danh mục [${tenLoai}] không?`)) {
             try {
                 await api.delete(`/categories/${id}`);
-                alert('Đã xóa thành công!');
+                toast.success('Đã xóa thành công!');
                 fetchCategories();
             } catch (error) {
                 console.error("Lỗi xóa:", error);
-                alert('Không thể xóa! Có thể danh mục này đang chứa hàng hóa hoặc nhà cung cấp.');
+                toast.error('Không thể xóa! Có thể danh mục này đang chứa hàng hóa hoặc nhà cung cấp.');
             }
         }
     };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import './NhapKho.css';
-
+import { toast } from 'react-toastify';
 const NhapKho = () => {
     const [pendingPOs, setPendingPOs] = useState([]);
     const [selectedPO, setSelectedPO] = useState(null);
@@ -50,14 +50,14 @@ const NhapKho = () => {
 
         try {
             await api.post('/phieu-nhap', payload);
-            alert("✅ Xác nhận nhập kho thành công!");
+            toast.success("✅ Xác nhận nhập kho thành công!");
             setSelectedPO(null);
             
             // Tải lại danh sách PO (để nếu PO đó đã giao đủ thì nó sẽ biến mất khỏi danh sách)
             const response = await api.get('/orders/importable');
             setPendingPOs(response.data);
         } catch (error) {
-            alert("❌ Lỗi khi lưu phiếu nhập: " + (error.response?.data?.message || "Lỗi hệ thống"));
+            toast.error("❌ Lỗi khi lưu phiếu nhập: " + (error.response?.data?.message || "Lỗi hệ thống"));
         }
     };
 
