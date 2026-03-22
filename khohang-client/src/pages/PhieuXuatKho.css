@@ -52,3 +52,34 @@
     font-size: 12px;
     display: block;
 }
+.xuatkho-container { padding: 25px; background: #f8fafc; min-height: 100vh; }
+.xuatkho-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+.xuatkho-header h2 { margin: 0; color: #1e293b; font-weight: 800; }
+
+.xuatkho-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+.request-section { margin-bottom: 25px; background: #f0f9ff; padding: 20px; border-radius: 8px; border: 1px solid #bae6fd; }
+.section-label { display: block; font-weight: bold; color: #0369a1; margin-bottom: 10px; font-size: 15px; }
+.select-request { width: 100%; padding: 12px; border: 1px solid #7dd3fc; border-radius: 8px; font-size: 15px; outline: none; background: white; }
+
+.xuatkho-modern-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.xuatkho-modern-table th { background: #f8fafc; padding: 15px; color: #64748b; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; text-align: left; }
+.xuatkho-modern-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+.font-mono { font-family: monospace; color: #0f172a; font-weight: 600; }
+.fw-bold { font-weight: bold; }
+.text-danger { color: #ef4444; }
+.row-warning { background-color: #fffbeb; }
+
+.input-thuc-xuat { width: 100px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center; font-weight: bold; }
+.input-error { border-color: #ef4444 !important; background-color: #fee2e2; color: #b91c1c; }
+.error-text { color: #ef4444; font-size: 11px; font-weight: bold; margin-top: 5px; }
+.warn-text { color: #f59e0b; font-size: 11px; font-weight: bold; margin-top: 5px; }
+
+.empty-state { text-align: center; padding: 50px 20px; color: #94a3b8; }
+.empty-state img { width: 120px; opacity: 0.5; margin-bottom: 15px; }
+
+.xuatkho-footer { display: flex; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+.btn-submit-xuatkho { background: #10b981; color: white; border: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+.btn-submit-xuatkho:hover:not(:disabled) { background: #059669; transform: translateY(-2px); }
+.btn-submit-xuatkho:disabled { background: #cbd5e1; cursor: not-allowed; }

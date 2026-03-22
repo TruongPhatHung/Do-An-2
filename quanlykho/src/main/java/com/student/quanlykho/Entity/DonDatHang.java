@@ -3,6 +3,7 @@ package com.student.quanlykho.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,4 +30,6 @@ public class DonDatHang {
 
     @OneToMany(mappedBy = "donDatHang")
     private List<PhieuNhap> donDatHang;
+    @Column(name = "ngay_du_kien_giao")
+    private LocalDate ngayDuKienGiao;
 }

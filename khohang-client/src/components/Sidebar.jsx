@@ -64,9 +64,19 @@ const Sidebar = () => {
                         <NavLink to="/nhap-kho" className={navClass}>
                             <span className="menu-icon">📥</span> Nhập Kho
                         </NavLink>
+                        {/* Thêm menu Lập lệnh xuất kho */}
+                        
                     </li>
                 )}
-
+                {/* Lập lệnh xuat */}
+                {(role === 'ADMIN' || role === 'KHO') && (
+                    <li>
+                        <NavLink to="/lap-lenh-xuat" className={navClass}>
+                            <span className="menu-icon">📥</span> Lập Lệnh Xuất
+                        </NavLink>
+                    </li>
+                )}
+                
                 <li>
                     <NavLink to="/danh-sach-po" className={navClass}>
                         <span className="menu-icon">📋</span> Danh Sách Đơn Hàng

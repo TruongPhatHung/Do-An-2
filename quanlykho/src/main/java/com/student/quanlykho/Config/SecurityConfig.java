@@ -73,6 +73,9 @@ public class SecurityConfig {
                         // --- CHỐT CHẶN CUỐI CÙNG ---
                         // Tất cả các API khác (nếu lỡ quên chưa khai báo ở trên) đều bắt buộc phải có Token
                         .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+                        // 9. QUẢN LÝ YÊU CẦU XUẤT KHO (Lệnh xuất)
+                        .requestMatchers(HttpMethod.GET, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
+                        .requestMatchers(HttpMethod.POST, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "QUANLYKHO")
 
                         .anyRequest().authenticated()
 

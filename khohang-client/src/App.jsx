@@ -20,7 +20,7 @@ import NhaCungCapForm from './pages/NhaCungCapForm';
 import QuanLyTaiKhoan from './pages/QuanLyTaiKhoan';
 import EditNhaCungCap from './pages/EditNhaCungCap';
 
-
+import YeuCauXuatForm from './pages/YeuCauXuatForm';
 import CategoryManager from './pages/CategoryManager'; // Mới từ bạn của bạn
 
 
@@ -91,6 +91,9 @@ function App() {
                 {/* Kho vận */}
                 <Route path="/nhap-kho" element={<ProtectedRoute><NhapKho /></ProtectedRoute>} />
                 <Route path="/xuat-kho" element={<ProtectedRoute><PhieuXuatKho /></ProtectedRoute>} />
+
+                {/* YeuCauXuat */}
+                <Route path="/lap-lenh-xuat" element={<ProtectedRoute><YeuCauXuatForm /></ProtectedRoute>} />
 
                 {/* Hệ thống */}
                 <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />

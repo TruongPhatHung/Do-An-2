@@ -12,7 +12,7 @@ const HangHoaList = () => {
     const navigate = useNavigate();
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 20;
 
     useEffect(() => {
         const fetchHangHoa = async () => {

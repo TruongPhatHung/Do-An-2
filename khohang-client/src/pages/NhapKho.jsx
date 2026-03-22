@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import './NhapKho.css';
 import { toast } from 'react-toastify';
+import { FiCheckCircle, FiAlertTriangle, FiCalendar, FiSave } from 'react-icons/fi';
+
 const NhapKho = () => {
     const [pendingPOs, setPendingPOs] = useState([]);
     const [selectedPO, setSelectedPO] = useState(null);
     const [thucNhap, setThucNhap] = useState({});
+    const [ngayNhapThucTe, setNgayNhapThucTe] = useState(new Date().toISOString().split('T')[0]);
 
-    // Lấy danh sách PO chờ nhập từ Backend
     useEffect(() => {
         const fetchPendingPOs = async () => {
             try {
@@ -23,12 +25,11 @@ const NhapKho = () => {
     const handleSelectPO = (e) => {
         const po = pendingPOs.find(p => p.maDon === e.target.value);
         setSelectedPO(po);
-        setThucNhap({}); // Reset lại form nhập khi đổi đơn khác
+        setThucNhap({});
     };
 
     const handleInputChange = (maHang, value, maxAllowed) => {
         let val = parseInt(value) || 0;
-        // Không cho phép nhập lố số lượng cần giao
         if (val > maxAllowed) val = maxAllowed;
         if (val < 0) val = 0;
         setThucNhap({ ...thucNhap, [maHang]: val });
@@ -36,104 +37,130 @@ const NhapKho = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // Kiểm tra xem user đã nhập số lượng cho món nào chưa
+
         const isAnyItemInputted = Object.values(thucNhap).some(val => val > 0);
         if (!isAnyItemInputted) {
-            return alert("Vui lòng nhập số lượng thực nhận ít nhất 1 mặt hàng!");
+            return toast.warn("Vui lòng nhập số lượng thực nhận ít nhất 1 mặt hàng!");
         }
 
         const payload = {
-            maDonHang: selectedPO.maDon, 
-            chiTietNhap: thucNhap      
+            maDonHang: selectedPO.maDon,
+            ngayNhap: ngayNhapThucTe,
+            chiTietNhap: thucNhap
         };
 
         try {
             await api.post('/phieu-nhap', payload);
             toast.success("✅ Xác nhận nhập kho thành công!");
             setSelectedPO(null);
-            
-            // Tải lại danh sách PO (để nếu PO đó đã giao đủ thì nó sẽ biến mất khỏi danh sách)
+
             const response = await api.get('/orders/importable');
             setPendingPOs(response.data);
         } catch (error) {
-            toast.error("❌ Lỗi khi lưu phiếu nhập: " + (error.response?.data?.message || "Lỗi hệ thống"));
+            toast.error("❌ Lỗi khi lưu phiếu nhập!");
         }
+    };
+
+    const renderDeliveryStatus = () => {
+        if (!selectedPO.ngayDuKienGiao) return <span className="status-unknown">Chưa hẹn ngày</span>;
+
+        const duKien = new Date(selectedPO.ngayDuKienGiao).getTime();
+        const thucTe = new Date(ngayNhapThucTe).getTime();
+
+        if (thucTe > duKien) {
+            return <span className="status-late"><FiAlertTriangle className="icon-align" /> Trễ hạn giao</span>;
+        }
+        return <span className="status-ontime"><FiCheckCircle className="icon-align" /> Đúng tiến độ</span>;
     };
 
     return (
         <div className="nhapkho-container">
-            <h2>📥 Tiếp Nhận Hàng Nhập Kho</h2>
-            <div className="po-selector">
-                <label style={{ fontWeight: 'bold' }}>📌 Chọn Đơn Đặt Hàng:</label>
-                <select onChange={handleSelectPO} value={selectedPO?.maDon || ''} className="form-control" style={{ marginLeft: '10px', padding: '8px', width: '300px' }}>
-                    <option value="">-- Chọn đơn hàng đang chờ giao --</option>
-                    {pendingPOs.map(po => (
-                        <option key={po.maDon} value={po.maDon}>{po.maDon} - Công ty {po.nhaCungCap?.tenNCC}</option>
-                    ))}
-                </select>
-            </div>
+            <h2 className="nhapkho-title">📥 Tiếp Nhận Hàng Nhập Kho</h2>
 
-            {selectedPO && (
-                <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-                    <div style={{ marginBottom: '10px', padding: '10px', background: '#e3f2fd', borderRadius: '5px' }}>
-                        <strong>Đơn hàng:</strong> {selectedPO.maDon} | <strong>Nhà cung cấp:</strong> {selectedPO.nhaCungCap?.tenNCC}
+            <div className="nhapkho-card">
+                <div className="nhapkho-top-bar">
+                    <div className="nhapkho-form-group">
+                        <label>📌 Chọn Đơn Hàng (PO) cần nhập:</label>
+                        <select className="nhapkho-input" onChange={handleSelectPO} value={selectedPO?.maDon || ''}>
+                            <option value="">-- Click chọn đơn hàng đang chờ giao --</option>
+                            {pendingPOs.map(po => (
+                                <option key={po.maDon} value={po.maDon}>{po.maDon} - Công ty {po.nhaCungCap?.tenNCC}</option>
+                            ))}
+                        </select>
                     </div>
 
-                    <table className="nhapkho-table">
-                        <thead>
-                            <tr>
-                                <th>Mã Hàng</th>
-                                <th>Tên Sản Phẩm</th>
-                                <th style={{ textAlign: 'center' }}>Số Lượng Đặt</th>
-                                <th style={{ textAlign: 'center' }}>Đã Nhận Trước Đó</th>
-                                <th style={{ textAlign: 'center', color: '#e67e22' }}>Cần Giao Thêm</th>
-                                <th style={{ background: '#27ae60', color: 'white', textAlign: 'center' }}>Thực Nhận Lần Này</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {selectedPO.chiTiets?.map((item) => {
-                                // Tính toán số lượng cần giao thêm
-                                const conLai = item.soLuongDat - (item.soLuongDaNhap || 0);
-                                
-                                // Nếu món này đã giao đủ rồi thì ẩn đi, không cần nhập nữa
-                                if (conLai <= 0) return null; 
+                    <div className="nhapkho-form-group">
+                        <label><FiCalendar className="icon-align" /> Ngày Nhập Thực Tế:</label>
+                        <input
+                            type="date"
+                            className="nhapkho-input"
+                            value={ngayNhapThucTe}
+                            onChange={(e) => setNgayNhapThucTe(e.target.value)}
+                        />
+                    </div>
+                </div>
 
-                                return (
-                                    <tr key={item.maHang}>
-                                        <td style={{ fontWeight: 'bold' }}>{item.maHang}</td>
-                                        <td style={{ textAlign: 'left' }}>{item.tenHang}</td>
-                                        
-                                        {/* SỬA LỖI Ở ĐÂY: Hiển thị đúng số lượng đã đặt (soLuongDat) */}
-                                        <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{item.soLuongDat}</td>
-                                        
-                                        <td style={{ textAlign: 'center' }}>{item.soLuongDaNhap || 0}</td>
-                                        
-                                        <td style={{ textAlign: 'center', color: '#e67e22', fontWeight: 'bold' }}>{conLai}</td>
-                                        
-                                        <td style={{ textAlign: 'center' }}>
-                                            <input 
-                                                type="number" 
-                                                className="input-nhap"
-                                                value={thucNhap[item.maHang] === 0 ? '' : (thucNhap[item.maHang] || '')}
-                                                onChange={(e) => handleInputChange(item.maHang, e.target.value, conLai)}
-                                                placeholder={`Tối đa ${conLai}`}
-                                                style={{ width: '80px', textAlign: 'center', padding: '5px' }}
-                                            />
-                                        </td>
+                {selectedPO && (
+                    <form onSubmit={handleSubmit}>
+                        <div className="nhapkho-info-box">
+                            <div className="info-left">
+                                <p><strong>Mã Đơn:</strong> {selectedPO.maDon}</p>
+                                <p><strong>Nhà Cung Cấp:</strong> {selectedPO.nhaCungCap?.tenNCC}</p>
+                            </div>
+                            <div className="info-right">
+                                <p><strong>Dự kiến giao:</strong> {selectedPO.ngayDuKienGiao ? new Date(selectedPO.ngayDuKienGiao).toLocaleDateString('vi-VN') : 'N/A'}</p>
+                                <p><strong>Trạng thái:</strong> {renderDeliveryStatus()}</p>
+                            </div>
+                        </div>
+
+                        <div className="nhapkho-table-responsive">
+                            <table className="nhapkho-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã Hàng</th>
+                                        <th>Tên Sản Phẩm</th>
+                                        <th className="text-center">Số Lượng Đặt</th>
+                                        <th className="text-center">Đã Nhận</th>
+                                        <th className="text-center text-warning">Còn Thiếu</th>
+                                        <th className="text-center bg-success">Thực Nhận Lần Này</th>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                    
-                    <div style={{ textAlign: 'right', marginTop: '20px' }}>
-                        <button type="submit" className="btn-confirm" style={{ padding: '10px 20px', background: '#27ae60', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px' }}>
-                            💾 HOÀN TẤT NHẬP KHO
-                        </button>
-                    </div>
-                </form>
-            )}
+                                </thead>
+                                <tbody>
+                                    {selectedPO.chiTiets?.map((item) => {
+                                        const conLai = item.soLuongDat - (item.soLuongDaNhap || 0);
+                                        if (conLai <= 0) return null;
+
+                                        return (
+                                            <tr key={item.maHang}>
+                                                <td className="fw-bold">{item.maHang}</td>
+                                                <td>{item.tenHang}</td>
+                                                <td className="text-center fw-bold">{item.soLuongDat}</td>
+                                                <td className="text-center text-muted">{item.soLuongDaNhap || 0}</td>
+                                                <td className="text-center text-warning fw-bold">{conLai}</td>
+                                                <td className="text-center bg-success-light">
+                                                    <input
+                                                        type="number"
+                                                        className="nhapkho-input-number"
+                                                        value={thucNhap[item.maHang] === 0 ? '' : (thucNhap[item.maHang] || '')}
+                                                        onChange={(e) => handleInputChange(item.maHang, e.target.value, conLai)}
+                                                        placeholder={`Tối đa ${conLai}`}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="nhapkho-footer">
+                            <button type="submit" className="btn-submit-nhapkho">
+                                <FiSave className="icon-align" /> HOÀN TẤT NHẬP KHO
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
         </div>
     );
 };
