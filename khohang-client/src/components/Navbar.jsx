@@ -23,6 +23,7 @@ const Navbar = ({ onToggleSidebar }) => {
         if (role === 'MUAHANG') return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
         return 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; 
     };
+    console.log("Dữ liệu user lấy được:", user);
 
     if (!user) return null;
 
@@ -58,7 +59,7 @@ const Navbar = ({ onToggleSidebar }) => {
                         style={{ width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover' }}
                     />
                     <div className="nav-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
-                        <span className="nav-name">Chào, <strong>{user.hoTen || 'admin'}</strong></span>
+                        <span className="nav-name">Chào, <strong>{user?.displayName || 'Người dùng'}</strong></span>
                         <span className="nav-role" style={{ fontSize: '12px', color: '#666' }}>{user.role}</span>
                     </div>
                 </div>

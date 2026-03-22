@@ -1,24 +1,28 @@
-/* Container rộng hơn, chiếm toàn bộ không gian của thẻ cha */
+/* Container rộng và tự động co giãn */
 .ncc-container { 
-    padding: 25px 30px; 
+   padding: 25px 30px; 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    margin: 15px; /* Giảm margin để bảng rộng hơn */
-    width: auto;
-    min-height: calc(100vh - 100px); /* Kéo dài vùng trắng xuống dưới */
+    margin: 0; /* Bỏ margin auto để không bị co cụm vào giữa */
+    width: 100%; 
+    max-width: 100% !important; /* Bắt buộc dãn tối đa 100% không gian */
+    min-height: calc(100vh - 80px); 
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* Header */
 .ncc-header-section {
     display: flex; 
+    flex-wrap: wrap; /* Cho phép rớt dòng nếu màn hình quá nhỏ */
     justify-content: space-between; 
     align-items: center; 
     margin-bottom: 25px;
     border-bottom: 2px solid #f4f6f8;
     padding-bottom: 15px;
+    gap: 15px;
 }
 
 .ncc-header-section h2 {
@@ -34,7 +38,7 @@
 
 .search-bar {
     width: 100%;
-    max-width: 500px;
+    max-width: 100%; /* Phủ đầy bề ngang rảnh rỗi trên mobile */
     padding: 12px 20px;
     border: 1px solid #dcdfe6;
     border-radius: 25px;
@@ -42,6 +46,7 @@
     font-size: 14px;
     transition: all 0.3s;
     background-color: #f8fafc;
+    box-sizing: border-box;
 }
 
 .search-bar:focus {
@@ -52,33 +57,51 @@
 
 /* Bảng Dữ Liệu */
 .table-responsive {
-    overflow-x: auto;
+    width: 100%;
     border-radius: 8px;
     box-shadow: 0 0 0 1px #e2e8f0; 
+    /* Ẩn hoàn toàn scroll ngang */
+    overflow: hidden; 
 }
 
 .ncc-table { 
     width: 100%; 
     border-collapse: collapse; 
     background-color: white;
+    table-layout: fixed; /* BẮT BUỘC: Ép bảng phải chia chính xác 100% width, không được nở ra */
 }
+
+/* Chia % không gian cho từng cột - Tổng đúng 100% */
+.ncc-table th:nth-child(1) { width: 10%; } /* Mã NCC */
+.ncc-table th:nth-child(2) { width: 18%; } /* Tên Nhà Cung Cấp */
+.ncc-table th:nth-child(3) { width: 15%; } /* Lĩnh Vực */
+.ncc-table th:nth-child(4) { width: 20%; } /* Địa Chỉ */
+.ncc-table th:nth-child(5) { width: 15%; } /* Gmail */
+.ncc-table th:nth-child(6) { width: 10%; } /* Số Lượng */
+.ncc-table th:nth-child(7) { width: 12%; } /* Thao Tác */
 
 .ncc-table th { 
     background-color: #0084ff; 
     color: #ffffff;
-    padding: 15px 15px; 
+    padding: 10px 8px; 
     text-align: left; 
     font-weight: 600;
     border: none;
-    white-space: nowrap;
+    white-space: normal; 
+    word-wrap: break-word;
 }
 
 .ncc-table td { 
-    padding: 15px 15px; 
+    padding: 10px 8px; 
     text-align: left; 
     border-bottom: 1px solid #edf2f7;
     color: #4a5568;
     vertical-align: middle;
+    white-space: normal;
+    /* Ép tất cả văn bản (đặc biệt là link, email dài) phải rớt dòng */
+    word-wrap: break-word; 
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 /* Hiệu ứng hover cho dòng chính */
@@ -86,12 +109,40 @@
     background-color: #f8fafc;
 }
 
-/* Nút Toggle xem mặt hàng */
+/* ======= CSS NÚT THAO TÁC (Cột cuối) ======= */
+/* Để khi thu nhỏ màn hình, các nút Sửa/Xóa sẽ tự rớt xuống thành 2 dòng thay vì đẩy giãn bảng */
+.ncc-table td:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px; /* Khoảng cách giữa các nút */
+    align-items: center;
+}
+
+.btn-edit, .btn-delete {
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 13px; /* Thu nhỏ chữ 1 chút để dễ vừa trên đt */
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+    flex: 1 1 auto; /* Cho phép nút tự động co giãn */
+    text-align: center;
+}
+
+.btn-edit { background-color: #f59e0b; color: white; margin: 0; }
+.btn-edit:hover { background-color: #d97706; }
+
+.btn-delete { background-color: #ef4444; color: white; margin: 0; }
+.btn-delete:hover { background-color: #dc2626; }
+
+/* Các nút khác */
 .item-count-wrapper {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; /* Sửa lại left align cho đẹp */
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    flex-wrap: wrap; /* Rớt dòng nếu chật */
 }
 
 .btn-toggle-items {
@@ -106,21 +157,34 @@
     transition: all 0.2s;
 }
 
-.btn-toggle-items:hover {
-    background-color: #cbd5e1;
-    color: #0f172a;
+.btn-toggle-items:hover { background-color: #cbd5e1; color: #0f172a; }
+
+.btn-add-main {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
+    white-space: nowrap; /* Nút thêm mới không được rớt dòng */
 }
+.btn-add-main:hover { background-color: #059669; }
 
 /* ======= CSS CHO DÒNG MỞ RỘNG (SUB-TABLE) ======= */
 .expanded-row td {
-    padding: 0 !important; /* Loại bỏ padding mặc định để căn chỉnh sub-table */
-    background-color: #f8fafc; /* Nền xám nhạt để phân biệt với bảng chính */
-    border-bottom: 2px solid #0084ff !important; /* Tạo đường viền xanh ngăn cách rõ rệt */
+    padding: 0 !important; 
+    background-color: #f8fafc; 
+    border-bottom: 2px solid #0084ff !important; 
+    display: table-cell !important; /* Reset lại display flex của td:last-child ở trên */
 }
 
 .sub-table-container {
-    padding: 15px 30px 25px 30px;
+    padding: 15px; /* Giảm padding cho mobile */
     animation: fadeIn 0.3s ease-in-out;
+    box-sizing: border-box;
 }
 
 .sub-table-container h4 {
@@ -138,39 +202,34 @@
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     border: 1px solid #e2e8f0;
+    table-layout: auto; /* Sub-table có thể auto vì ít cột */
 }
 
 .sub-table th, .sub-table td {
-    padding: 10px 15px;
+    padding: 8px 10px;
     border-bottom: 1px solid #e2e8f0;
-    font-size: 14px;
+    font-size: 13px;
+    word-break: break-word;
 }
 
-.sub-table th {
-    background-color: #e0f2fe;
-    color: #0369a1;
-    font-weight: 600;
-}
-
-.sub-table tr:last-child td {
-    border-bottom: none;
-}
+.sub-table th { background-color: #e0f2fe; color: #0369a1; font-weight: 600; }
+.sub-table tr:last-child td { border-bottom: none; }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
 }
-/* ================================================= */
 
+/* ================================================= */
 .text-bold { font-weight: bold; color: #2c3e50; }
-.email-cell { color: #0084ff; font-weight: 500; }
+.email-cell { color: #0084ff; font-weight: 500; word-break: break-all; } /* Đảm bảo email siêu dài bị cắt vỡ */
 
 .badge-category {
     background-color: #e6f2ff;
     color: #007bff;
-    padding: 6px 12px;
+    padding: 4px 8px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     display: inline-block;
 }
@@ -178,61 +237,25 @@
 .badge-count {
     background-color: #f1f5f9;
     color: #334155;
-    padding: 6px 15px;
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     display: inline-block;
 }
 
-.btn-add-main {
-    background-color: #10b981;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
-}
-.btn-add-main:hover { background-color: #059669; }
-
-.btn-edit {
-    background-color: #f59e0b;
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    margin-right: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.btn-edit:hover { background-color: #d97706; }
-
-.btn-delete {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.btn-delete:hover { background-color: #dc2626; }
-
+/* Phân trang */
 .pagination {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     margin-top: 25px;
     gap: 8px;
+    flex-wrap: wrap; /* Cho phép nút rớt dòng nếu màn hình nhỏ */
 }
 
 .page-btn {
-    padding: 8px 14px;
+    padding: 8px 12px;
     border: 1px solid #e2e8f0;
     background-color: white;
     color: #4a5568;
@@ -242,20 +265,10 @@
     transition: all 0.2s;
 }
 
-.page-btn:hover:not(:disabled) {
-    background-color: #f8fafc;
-    border-color: #cbd5e1;
-}
+.page-btn:hover:not(:disabled) { background-color: #f8fafc; border-color: #cbd5e1; }
+.page-btn.active { background-color: #0084ff; color: white; border-color: #0084ff; }
+.page-btn:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
 
-.page-btn.active {
-    background-color: #0084ff;
-    color: white;
-    border-color: #0084ff;
-}
-
-.page-btn:disabled {
-    background-color: #f1f5f9;
-    color: #94a3b8;
-    cursor: not-allowed;
-    border-color: #e2e8f0;
-}
+/* Bỏ màu nền riêng biệt cho cột cuối cùng */
+.ncc-table th:last-child { background-color: #0084ff; }
+.ncc-table td:last-child { background-color: transparent; }
