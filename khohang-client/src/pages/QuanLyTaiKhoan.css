@@ -226,37 +226,3 @@
 .role-select.role-admin { background-color: #fce4ec; color: #c62828; border-color: #c62828;}
 .role-select.role-kho, .role-select.role-quanlykho { background-color: #e8f5e9; color: #2e7d32; border-color: #2e7d32;}
 .role-select.role-muahang { background-color: #e3f2fd; color: #1565c0; border-color: #1565c0;}
-/* ========================================= */
-/* HIỆU ỨNG TRẠNG THÁI ONLINE / OFFLINE      */
-/* ========================================= */
-.status-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 4px;
-}
-
-.status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-/* Đang Online (Sáng đèn xanh lá + nhấp nháy) */
-.status-dot.online {
-    background-color: #2ecc71;
-    box-shadow: 0 0 8px #2ecc71;
-    animation: pulse-green 2s infinite;
-}
-
-/* Offline (Màu xám) */
-.status-dot.offline {
-    background-color: #bdc3c7;
-}
-
-@keyframes pulse-green {
-    0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.5); }
-    70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
-}

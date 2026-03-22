@@ -91,7 +91,7 @@ const POForm = () => {
         try {
             await api.post('/orders', payload);
             toast.success("✅ Đã tạo Đơn đặt hàng thành công!");
-            navigate('/danh-sach-po');
+            navigate('/orders');
         } catch (error) {
             toast.error("❌ Lưu đơn hàng thất bại! (Bị lỗi phân quyền 403)");
             console.error(error);

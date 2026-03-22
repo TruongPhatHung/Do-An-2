@@ -19,12 +19,23 @@ const QuanLyTaiKhoan = () => {
     const [newUser, setNewUser] = useState(initialFormState);
 
     useEffect(() => {
+        // 1. Gọi lần đầu khi vào trang
         fetchUsers();
+
+        // 2. Thiết lập "máy đếm nhịp" cứ 30 giây hỏi server 1 lần
+        const interval = setInterval(() => {
+            fetchUsers();
+            console.log("Đang cập nhật trạng thái online...");
+        }, 30000); // 30000ms = 30s
+
+        // 3. Quan trọng: Xóa bộ đếm khi rời khỏi trang để tránh tốn tài nguyên
+        return () => clearInterval(interval);
     }, []);
 
     const fetchUsers = async () => {
         try {
             const res = await api.get('/users');
+            console.log("Dữ liệu từ Server trả về nè:", res.data);
             setUsers(res.data);
         } catch (error) {
             console.error("Lỗi tải danh sách:", error);

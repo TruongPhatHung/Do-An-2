@@ -1,8 +1,7 @@
-// File: src/services/axiosConfig.js
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://10.10.34.221:8080/api', // Chỉnh lại cho đúng port Backend của bạn
+    baseURL: 'http://localhost:8080/api', // Chỉnh lại cho đúng port Backend của bạn
 });
 
 
@@ -10,7 +9,7 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         // Lấy token từ két sắt localStorage
-        const token = localStorage.getItem('token'); 
+        const token = localStorage.getItem('token');
         if (token) {
             // Gắn vào Header của mỗi request
             config.headers['Authorization'] = `Bearer ${token}`;
