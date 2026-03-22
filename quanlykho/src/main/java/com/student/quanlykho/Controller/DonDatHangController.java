@@ -2,9 +2,11 @@ package com.student.quanlykho.Controller;
 
 import com.student.quanlykho.Entity.ChiTietDonDatHang;
 import com.student.quanlykho.Entity.DonDatHang;
+import com.student.quanlykho.Entity.HangHoa; // 🎯 Thêm import này
 import com.student.quanlykho.Entity.NhaCungCap;
 import com.student.quanlykho.Entity.SanPhamNCC;
 import com.student.quanlykho.Repository.DonDatHangRepository;
+import com.student.quanlykho.Repository.HangHoaRepository; // 🎯 Thêm import này
 import com.student.quanlykho.Repository.NhaCungCapRepository;
 import com.student.quanlykho.Repository.SanPhamNCCRepository;
 import com.student.quanlykho.Service.AuditLogService;
@@ -28,6 +30,10 @@ public class DonDatHangController {
 
     @Autowired
     private SanPhamNCCRepository sanPhamNCCRepository;
+
+    // 🎯 1. Bổ sung HangHoaRepository để kiểm tra kho tổng
+    @Autowired
+    private HangHoaRepository hangHoaRepository;
 
     @Autowired
     private AuditLogService auditLogService;
@@ -62,13 +68,30 @@ public class DonDatHangController {
             SanPhamNCC sanPham = sanPhamNCCRepository.findByMaHangAndNhaCungCap_MaNCC(item.getHangHoa().getMaHang(), nhaCungCap.getMaNCC())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy hàng hóa: " + item.getHangHoa().getMaHang()));
 
+            // ====================================================================
+            // 🎯 2. ĐOẠN CODE "THẦN THÁNH" XỬ LÝ LỖI KHÓA NGOẠI:
+            // Nếu mã hàng này chưa từng tồn tại trong kho tổng -> Tự động thêm vào
+            // ====================================================================
+            if (!hangHoaRepository.existsById(sanPham.getMaHang())) {
+                HangHoa newProduct = new HangHoa();
+                newProduct.setMaHang(sanPham.getMaHang());
+                newProduct.setTenHang(sanPham.getTenHang());
+                newProduct.setLoaiHang(sanPham.getLoaiHang()); // Lấy loại từ bên NCC sang
+                newProduct.setSoLuongTon(0); // Tồn kho ban đầu là 0
+                newProduct.setSoLuongToiThieu(10); // Mức cảnh báo tối thiểu (Mặc định)
+                newProduct.setGiaNhap(item.getDonGia()); // Lấy giá từ đơn đặt
+                newProduct.setDonViTinh("Cái"); // Mặc định đơn vị tính
+
+                hangHoaRepository.save(newProduct); // Lưu vào bảng hang_hoa trước để không bị lỗi Foreign Key!
+            }
+            // ====================================================================
+
             chiTiet.setMaHang(sanPham.getMaHang());
             chiTiet.setTenHang(sanPham.getTenHang());
             chiTiet.setSoLuongDat(item.getSoLuongDat());
             chiTiet.setDonGia(item.getDonGia());
             chiTiet.setSoLuongDaNhap(0);
 
-            // 🎯 ĐIỂM QUAN TRỌNG: Lấy loại hàng từ danh mục NCC gán vào chi tiết Đơn hàng
             // Việc này giúp thằng Nhập kho sau này "nhìn" thấy loại để tự động cập nhật
             chiTiet.setLoaiHang(sanPham.getLoaiHang());
 
