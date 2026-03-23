@@ -23,28 +23,29 @@ const Navbar = ({ onToggleSidebar }) => {
         if (role === 'MUAHANG') return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
         return 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; 
     };
+    
     console.log("Dữ liệu user lấy được:", user);
 
     if (!user) return null;
 
     return (
         <nav className="navbar navbar-top">
-            {/* --- BÊN TRÁI: Khu vực Logo (Rộng vừa khít Sidebar) --- */}
-            <div className="nav-brand-area" style={{ display: 'flex', alignItems: 'center' }}>
-                <div 
-                    className="nav-logo" 
-                    onClick={() => navigate('/dashboard')} 
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
-                    title="Về trang chủ"
-                >
-                    📦 WMS-SYSTEM
-                </div>
+            
+            {/* --- BÊN TRÁI: Nút Menu --- */}
+            <div className="nav-left-area">
+                <button className="menu-toggle-btn" onClick={onToggleSidebar} title="Đóng/Mở Sidebar">
+                    ☰
+                </button>
             </div>
 
-            {/* --- NÚT MENU: Đưa ra ngoài, nằm ngay cạnh Logo --- */}
-            <button className="menu-toggle-btn" onClick={onToggleSidebar} style={{ margin: '0 15px' }}>
-                ☰
-            </button>
+            {/* --- Ở GIỮA: Logo WMS-SYSTEM --- */}
+            <div 
+                className="nav-center-area" 
+                onClick={() => navigate('/dashboard')} 
+                title="Về trang chủ"
+            >
+                📦 WMS-SYSTEM
+            </div>
 
             {/* --- BÊN PHẢI: Thông báo, Profile & Đăng xuất --- */}
             <div className="nav-right-area nav-user">
@@ -59,8 +60,8 @@ const Navbar = ({ onToggleSidebar }) => {
                         style={{ width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover' }}
                     />
                     <div className="nav-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
-                        <span className="nav-name">Chào, <strong>{user?.displayName || 'Người dùng'}</strong></span>
-                        <span className="nav-role" style={{ fontSize: '12px', color: '#666' }}>{user.role}</span>
+                        <span className="nav-name">Chào, <strong>{user.role || 'Người dùng'}</strong></span>
+                        <span className="nav-role" style={{ fontSize: '12px', color: '#666' }}></span>
                     </div>
                 </div>
 
@@ -68,6 +69,7 @@ const Navbar = ({ onToggleSidebar }) => {
                     🚪 Đăng xuất
                 </button>
             </div>
+            
         </nav>
     );
 };

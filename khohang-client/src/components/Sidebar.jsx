@@ -18,7 +18,7 @@ const Sidebar = () => {
             {/* Phần thông tin User */}
             <div className="sidebar-user-panel">
                 <div className="user-info">
-                    <p>{user.hoTen || 'admin'}</p>
+                    <p>{user?.displayName  || 'admin'}</p>
                     <span className="online-status">
                         <span className="status-dot"></span> Online
                     </span>

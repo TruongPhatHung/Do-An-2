@@ -4,31 +4,38 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell
 } from 'recharts';
-import * as XLSX from 'xlsx'; // <--- IMPORT THƯ VIỆN Ở ĐÂY
+import * as XLSX from 'xlsx';
 import './Dashboard.css';
 
 const Dashboard = () => {
+    // Tồn kho state
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ tongMatHang: 0, tongSoLuong: 0, tongTienNhap: 0 });
 
-    // Bộ màu chuyên nghiệp hơn
-    const COLORS = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'];
+    // Xuất kho state
+    const [exportStats, setExportStats] = useState({ tongPhieuXuat: 0, tongSoLuongXuat: 0 });
+    const [exportDataForChart, setExportDataForChart] = useState([]);
 
-    // HÀM QUAN TRỌNG: Rút gọn tên sản phẩm để không làm nát biểu đồ
+    const COLORS = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#6f42c1', '#fd7e14'];
+
     const truncateName = (name) => {
+        if (!name) return '';
         return name.length > 20 ? name.substring(0, 20) + '...' : name;
     };
 
     const fetchDashboardData = async () => {
         try {
-            const response = await api.get('/products'); 
-            const allData = response.data;
+            setLoading(true);
+            
+            // 1. API Lấy Dữ Liệu Sản Phẩm Tồn Kho
+            const responseProducts = await api.get('/products'); 
+            const allProducts = responseProducts.data;
 
             let tongSL = 0;
             let tongTien = 0;
 
-            const processedData = allData.map(item => {
+            const processedProducts = allProducts.map(item => {
                 const soLuong = item.soLuongTon || 0;
                 const giaNhap = item.giaNhap || 0; 
                 const thanhTien = soLuong * giaNhap;
@@ -37,18 +44,70 @@ const Dashboard = () => {
 
                 return {
                     ...item,
-                    shortName: truncateName(item.tenHang), // Tên hiển thị trên chart
+                    shortName: truncateName(item.tenHang),
                     thanhTien: thanhTien
                 };
             });
 
             setStats({
-                tongMatHang: processedData.length,
+                tongMatHang: processedProducts.length,
                 tongSoLuong: tongSL,
                 tongTienNhap: tongTien
             });
 
-            setItems(processedData.filter(item => item.soLuongTon > 0).sort((a, b) => b.thanhTien - a.thanhTien));
+            setItems(processedProducts.filter(item => item.soLuongTon > 0).sort((a, b) => b.thanhTien - a.thanhTien));
+
+            // 2. Lấy Dữ Liệu Phiếu Xuất Kho
+            try {
+                const responseExports = await api.get('/phieu-xuat');
+                const allExports = responseExports.data;
+                
+                let tongSLXuat = 0;
+                const itemExportCount = {};
+
+                allExports.forEach(phieu => {
+                    if (phieu.chiTietXuat) {
+                        // Nếu backend lưu dạng Object { "MaHang": SoLuong }
+                        if (!Array.isArray(phieu.chiTietXuat)) {
+                             Object.keys(phieu.chiTietXuat).forEach(maHang => {
+                                 const sl = parseInt(phieu.chiTietXuat[maHang]) || 0;
+                                 tongSLXuat += sl;
+                                 itemExportCount[maHang] = (itemExportCount[maHang] || 0) + sl;
+                             });
+                        } 
+                        // Nếu backend trả về mảng Array
+                        else {
+                             phieu.chiTietXuat.forEach(ct => {
+                                 const sl = parseInt(ct.soLuongThucXuat || ct.soLuong) || 0;
+                                 const maHang = ct.hangHoa?.maHang || ct.maHang;
+                                 tongSLXuat += sl;
+                                 if (maHang) itemExportCount[maHang] = (itemExportCount[maHang] || 0) + sl;
+                             });
+                        }
+                    }
+                });
+
+                setExportStats({
+                    tongPhieuXuat: allExports.length,
+                    tongSoLuongXuat: tongSLXuat
+                });
+
+                // Chuẩn bị data cho biểu đồ xuất (Top 5)
+                const chartData = Object.keys(itemExportCount).map(maHang => {
+                    const productInfo = allProducts.find(p => p.maHang === maHang);
+                    return {
+                        maHang: maHang,
+                        tenHang: productInfo ? truncateName(productInfo.tenHang) : maHang,
+                        soLuongDaXuat: itemExportCount[maHang]
+                    }
+                }).sort((a, b) => b.soLuongDaXuat - a.soLuongDaXuat).slice(0, 5);
+
+                setExportDataForChart(chartData);
+
+            } catch (error) {
+                console.error("Lỗi lấy dữ liệu phiếu xuất:", error);
+            }
+
             setLoading(false);
         } catch (error) {
             console.error("Lỗi Dashboard API:", error);
@@ -60,19 +119,16 @@ const Dashboard = () => {
         fetchDashboardData();
     }, []);
 
-    // ===== HÀM XUẤT EXCEL =====
     const handleExportExcel = () => {
-        // 1. Chuẩn bị dữ liệu định dạng đẹp cho Excel
         const excelData = items.map((item, index) => ({
             "STT": index + 1,
             "Mã Hàng": item.maHang,
-            "Tên Mặt Hàng": item.tenHang, // Dùng tên đầy đủ, không cắt ngắn
+            "Tên Mặt Hàng": item.tenHang,
             "Số Lượng Tồn": item.soLuongTon,
             "Giá Nhập (VNĐ)": item.giaNhap,
             "Thành Tiền (VNĐ)": item.thanhTien
         }));
 
-        // 2. Thêm một dòng tổng cộng ở cuối
         excelData.push({
             "STT": "",
             "Mã Hàng": "",
@@ -82,24 +138,15 @@ const Dashboard = () => {
             "Thành Tiền (VNĐ)": stats.tongTienNhap
         });
 
-        // 3. Tạo Worksheet và Workbook
         const worksheet = XLSX.utils.json_to_sheet(excelData);
-        
-        // Căn chỉnh độ rộng cột cho đẹp
         worksheet['!cols'] = [
-            { wch: 5 },   // STT
-            { wch: 15 },  // Mã hàng
-            { wch: 40 },  // Tên
-            { wch: 15 },  // Số lượng
-            { wch: 20 },  // Giá nhập
-            { wch: 20 }   // Thành tiền
+            { wch: 5 }, { wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 20 }, { wch: 20 }
         ];
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoKho");
 
-        // 4. Xuất file với tên chứa ngày giờ hiện tại
-        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // Dạng YYYYMMDD
+        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
         XLSX.writeFile(workbook, `BaoCao_TonKho_${dateStr}.xlsx`);
     };
 
@@ -110,28 +157,22 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard-wrapper">
-           {/* ĐÃ SỬA HEADER Ở ĐÂY */}
             <header className="db-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h2>📊 Phân Tích Kho Hàng Thực Thời</h2>
                     <p>Cập nhật lần cuối: {new Date().toLocaleTimeString()}</p>
                 </div>
                 
-                {/* NÚT XUẤT EXCEL */}
-                <button 
-                    onClick={handleExportExcel} 
-                    className="btn-export-excel"
-                    title="Tải xuống báo cáo chi tiết"
-                >
+                <button onClick={handleExportExcel} className="btn-export-excel" title="Tải xuống báo cáo chi tiết">
                     <span style={{ marginRight: '8px' }}>📗</span> Xuất Báo Cáo
                 </button>
             </header>
             
-            {/* 1. THỐNG KÊ TỔNG QUAN (Card thiết kế lại) */}
+            {/* THỐNG KÊ TỔNG QUAN */}
             <div className="db-stats-grid">
                 <div className="stat-card blue">
                     <div className="stat-content">
-                        <h6>TỔNG MẶT HÀNG</h6>
+                        <h6>TỔNG MẶT HÀNG TỒN</h6>
                         <div className="stat-value">{stats.tongMatHang}</div>
                     </div>
                     <div className="stat-icon-bg">📦</div>
@@ -150,10 +191,25 @@ const Dashboard = () => {
                     </div>
                     <div className="stat-icon-bg">💰</div>
                 </div>
+                {/* 2 Card Mới Cho Phiếu Xuất */}
+                <div className="stat-card purple">
+                    <div className="stat-content">
+                        <h6>TỔNG PHIẾU XUẤT</h6>
+                        <div className="stat-value">{exportStats.tongPhieuXuat}</div>
+                    </div>
+                    <div className="stat-icon-bg">📄</div>
+                </div>
+                <div className="stat-card red">
+                    <div className="stat-content">
+                        <h6>TỔNG HÀNG ĐÃ XUẤT</h6>
+                        <div className="stat-value">{exportStats.tongSoLuongXuat.toLocaleString()}</div>
+                    </div>
+                    <div className="stat-icon-bg">📤</div>
+                </div>
             </div>
 
             <div className="db-main-grid">
-                {/* 2. BIỂU ĐỒ CỘT */}
+                {/* BIỂU ĐỒ 1: Tồn Kho */}
                 <div className="db-chart-container">
                     <h5>📉 Top 7 Sản Phẩm Tồn Kho Nhiều Nhất</h5>
                     <ResponsiveContainer width="100%" height={300}>
@@ -162,12 +218,12 @@ const Dashboard = () => {
                             <XAxis dataKey="maHang" tick={{fill: '#888', fontSize: 12}} axisLine={false} tickLine={false} />
                             <YAxis axisLine={false} tickLine={false} />
                             <Tooltip cursor={{fill: '#f8f9fc'}} />
-                            <Bar dataKey="soLuongTon" fill="#4e73df" radius={[4, 4, 0, 0]} barSize={35} />
+                            <Bar dataKey="soLuongTon" name="Số Lượng Tồn" fill="#4e73df" radius={[4, 4, 0, 0]} barSize={35} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* 3. BIỂU ĐỒ TRÒN (Đã sửa lỗi hiển thị) */}
+                {/* BIỂU ĐỒ 2: Cơ cấu vốn */}
                 <div className="db-chart-container">
                     <h5>🍩 Cơ Cấu Vốn (Top 5 Giá Trị)</h5>
                     <ResponsiveContainer width="100%" height={300}>
@@ -178,7 +234,7 @@ const Dashboard = () => {
                                 innerRadius={60} outerRadius={85}
                                 paddingAngle={5}
                                 dataKey="thanhTien"
-                                nameKey="shortName" // Dùng tên đã rút gọn
+                                nameKey="shortName"
                             >
                                 {topValueItems.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
@@ -189,11 +245,29 @@ const Dashboard = () => {
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
+                
+                {/* BIỂU ĐỒ 3 (MỚI): Top Sản phẩm xuất kho */}
+                <div className="db-chart-container span-full">
+                    <h5>🚀 Top 5 Sản Phẩm Xuất Nhiều Nhất (Theo Số Lượng)</h5>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={exportDataForChart} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
+                            <XAxis type="number" axisLine={false} tickLine={false} />
+                            <YAxis type="category" dataKey="tenHang" width={180} tick={{fill: '#888', fontSize: 12}} axisLine={false} tickLine={false} />
+                            <Tooltip cursor={{fill: '#f8f9fc'}} />
+                            <Bar dataKey="soLuongDaXuat" name="Số lượng đã xuất" fill="#e74a3b" radius={[0, 4, 4, 0]} barSize={30}>
+                                {exportDataForChart.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
-            {/* 4. BẢNG CHI TIẾT */}
+            {/* BẢNG CHI TIẾT */}
             <div className="db-table-wrapper">
-                <h5>📋 Danh Sách Chi Tiết Giá Trị Hàng Hóa</h5>
+                <h5>📋 Danh Sách Chi Tiết Giá Trị Hàng Hóa Tồn Kho</h5>
                 <table className="db-modern-table">
                     <thead>
                         <tr>

@@ -38,7 +38,7 @@
 /* Stats Cards */
 .db-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(5, 1fr); /* 5 cột bằng nhau */
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -68,6 +68,31 @@
     grid-template-columns: 7fr 5fr;
     gap: 1.5rem;
     margin-bottom: 2rem;
+}
+/* Thêm màu cho 2 card mới */
+.stat-card.purple { border-left-color: #6f42c1; }
+.stat-card.purple .stat-value { color: #6f42c1; }
+
+.stat-card.red { border-left-color: #e74a3b; }
+.stat-card.red .stat-value { color: #e74a3b; }
+/* Tiện ích để chart thứ 3 (Chart Ngang) nằm trọn 1 dòng phía dưới */
+.span-full {
+    grid-column: 1 / -1;
+}
+
+/* Tùy chỉnh responsive nếu xem trên màn hình nhỏ */
+@media (max-width: 1200px) {
+    .db-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 768px) {
+    .db-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .db-main-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .db-chart-container {
