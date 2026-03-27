@@ -8,7 +8,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url('../src/components/avarta/2023_10_1.png'); 
+    background-image: url('../src/components/avarta/Screenshot-2023-05-24-111059.png'); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -62,10 +62,14 @@
 }
 
 .login-header p {
-    color: #f8fafc; /* Làm sáng màu chữ mô tả */
-    font-size: 15px;
-    margin: 0;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Đổ bóng giúp chữ nổi bật */
+    color: #ffffff; /* Trắng tinh để sáng nhất có thể */
+    font-size: 18px; /* Tăng size từ 15px lên 18px */
+    font-weight: 600; /* Làm đậm nét chữ */
+    margin: 10px 0 0 0; /* Đẩy cách icon avatar ra một chút */
+    letter-spacing: 1px; /* Giãn chữ ra cho thoáng và sang hơn */
+    text-transform: uppercase; /* In hoa toàn bộ để nhấn mạnh sự trang trọng */
+    /* Kết hợp đổ bóng đen để tách khỏi nền + phát sáng xanh (glow) nhẹ xung quanh */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 15px rgba(59, 130, 246, 0.6);
 }
 
 /* Hiển thị lỗi */

@@ -33,7 +33,7 @@ const Login = () => {
                     <div className="avatar-container">
                         <i className="fas fa-user-circle user-avatar-icon"></i>
                     </div>
-                    <p>Đăng nhập để quản lý hệ thống</p>
+                    <p>Đăng nhập</p>
                 </div>
 
                 {error && <div className="error-message">{error}</div>}
