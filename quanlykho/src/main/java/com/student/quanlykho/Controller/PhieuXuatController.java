@@ -1,12 +1,15 @@
 package com.student.quanlykho.Controller;
 
 import com.student.quanlykho.Entity.HangHoa;
+import com.student.quanlykho.Entity.PhieuXuat;
 import com.student.quanlykho.Repository.HangHoaRepository;
+import com.student.quanlykho.Repository.PhieuXuatRepository;
 import com.student.quanlykho.Service.AuditLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,6 +22,8 @@ public class PhieuXuatController {
 
     @Autowired
     private AuditLogService auditLogService;
+    @Autowired
+    private PhieuXuatRepository phieuXuatRepository;
 
     @PostMapping
     @Transactional
@@ -63,6 +68,12 @@ public class PhieuXuatController {
         }
 
         return "Đã xác nhận xuất kho thành công cho phiếu: " + request.getMaPhieuXuat();
+    }
+    // Thêm hàm GET này vào PhieuXuatController
+    @GetMapping
+    public List<PhieuXuat> getAllPhieuXuat() {
+        // Lấy tất cả danh sách phiếu xuất, sắp xếp phiếu mới nhất lên đầu
+        return phieuXuatRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "ngayXuat"));
     }
 
     public static class XuatKhoRequest {
