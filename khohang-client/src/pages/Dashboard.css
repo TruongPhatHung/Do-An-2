@@ -121,24 +121,28 @@
 
 .db-modern-table {
     width: 100%;
+    min-width: 900px; /* THÊM MỚI: Ép bảng có chiều rộng tối thiểu để không bị bóp méo cột */
     border-collapse: collapse;
 }
 
 .db-modern-table th {
     background: #f8f9fc;
-    color: #4e73df;
+    color: #2c3e50; /* ĐÃ SỬA: Đổi từ #4e73df sang màu xanh đen đậm để chữ sắc nét hơn */
     font-weight: 700;
     padding: 1rem;
     font-size: 0.85rem;
     text-transform: uppercase;
     border-bottom: 2px solid #e3e6f0;
+    white-space: nowrap; 
 }
 
+/* Đổi màu nội dung bên trong bảng cho đen hơn */
 .db-modern-table td {
     padding: 1rem;
     border-bottom: 1px solid #e3e6f0;
     font-size: 0.9rem;
-    color: #5a5c69;
+    color: #333333; /* ĐÃ SỬA: Đổi từ #5a5c69 sang #333333 (đen xám đậm) để tăng độ tương phản */
+    vertical-align: middle; 
 }
 
 .badge {
@@ -147,8 +151,19 @@
     font-size: 0.8rem;
     color: #fff;
 }
+/* Ép màu chữ cột cuối cùng (SL XUẤT) thành màu đen và in đậm */
+.db-modern-table td:last-child {
+    color: #000000 !important; /* Dùng !important để ghi đè mọi class màu khác */
+    font-weight: 700;
+}
 .bg-success { background-color: #1cc88a; }
 .bg-danger { background-color: #e74a3b; }
 .text-right { text-align: right; }
 .text-center { text-align: center; }
-.text-primary { color: #4e73df; }
+.text-primary { color: #2e59d9; } /* Đậm hơn so với #4e73df cũ */
+/* Ép màu đen cho cột cuối cùng VÀ mọi thẻ con bên trong nó */
+.db-modern-table td:last-child,
+.db-modern-table td:last-child * {
+    color: #2c3e50 !important; /* Dùng màu xám đen/đen để dễ nhìn */
+    font-weight: 700 !important;
+}

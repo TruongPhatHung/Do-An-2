@@ -1,14 +1,14 @@
 .navbar-top {
     display: flex;
-    justify-content: space-between; /* Đẩy phần trái và phải ra 2 biên */
+    justify-content: space-between; 
     align-items: center;
-    position: relative; /* Bắt buộc để căn giữa tuyệt đối cho Logo */
+    position: relative; 
     height: 60px; 
     background-color: #2c3e50; 
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    padding: 0 25px; /* Padding hai bên cho cân đối */
+    padding: 0 25px; 
 }
 
 /* Vùng chức năng bên trái (chỉ chứa nút menu) */
@@ -21,7 +21,7 @@
     background: transparent;
     border: none;
     color: white;
-    font-size: 22px; /* Tăng kích thước nút xíu cho dễ bấm */
+    font-size: 22px; 
     cursor: pointer;
     transition: color 0.2s;
 }
@@ -32,7 +32,7 @@
 
 /* --- Vùng Logo nằm chính giữa Navbar --- */
 .nav-center-area {
-    position: absolute; /* Giúp nó luôn nằm chính giữa màn hình dù 2 bên dài/ngắn khác nhau */
+    position: absolute; 
     left: 50%;
     transform: translateX(-50%);
     font-weight: 800;
@@ -59,7 +59,28 @@
 .nav-user {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px; /* Giảm gap một chút để các icon đứng gần nhau hơn */
+}
+
+/* --- Nút Làm Mới (Refresh) --- */
+.refresh-btn {
+    background: transparent;
+    border: none;
+    color: #ecf0f1;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+    color: #3498db;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: rotate(180deg); /* Hiệu ứng xoay tròn khi hover */
 }
 
 /* Khu vực Avatar và Tên */
@@ -107,6 +128,7 @@
     cursor: pointer;
     font-weight: 600;
     transition: 0.3s;
+    margin-left: 10px; /* Cách profile một chút */
 }
 
 .logout-btn:hover {

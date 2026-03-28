@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import { toast } from 'react-toastify';
-import { FiEye, FiSearch, FiCalendar, FiX, FiBox } from 'react-icons/fi';
+import { FiSearch } from 'react-icons/fi';
 import './LichSuXuatKho.css';
 
 const LichSuXuatKho = () => {
     const [phieuXuats, setPhieuXuats] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPhieu, setSelectedPhieu] = useState(null);
+    
+    // Sử dụng hook navigate để chuyển trang
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchPhieuXuats();
@@ -57,7 +60,6 @@ const LichSuXuatKho = () => {
                     </thead>
                     <tbody>
                         {filteredPhieuXuats.map((px) => {
-                            // 🎯 Tính lại tổng tiền nếu phiếu cũ bị Null (0đ)
                             const displayTotal = px.tongTien || px.chiTiets?.reduce((sum, ct) => {
                                 const giaChuan = ct.donGia || ct.hangHoa?.giaBan || ct.hangHoa?.giaNhap || 0;
                                 return sum + (giaChuan * ct.soLuongXuat);
@@ -74,7 +76,13 @@ const LichSuXuatKho = () => {
                                         {displayTotal.toLocaleString('vi-VN')} đ
                                     </td>
                                     <td className="text-center">
-                                        <button className="btn-view-detail" onClick={() => setSelectedPhieu(px)}>Xem</button>
+                                        {/* Chuyển hướng kèm theo dữ liệu px qua state */}
+                                        <button 
+                                            className="btn-view-detail" 
+                                            onClick={() => navigate(`/chi-tiet-phieu-xuat/${px.maPhieuXuat}`, { state: { phieu: px } })}
+                                        >
+                                            Xem
+                                        </button>
                                     </td>
                                 </tr>
                             );
@@ -82,63 +90,6 @@ const LichSuXuatKho = () => {
                     </tbody>
                 </table>
             </div>
-
-            {selectedPhieu && (
-                <div className="lsxk-modal-overlay" onClick={() => setSelectedPhieu(null)}>
-                    <div className="lsxk-modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3><FiBox style={{ marginRight: '8px' }} /> Chi Tiết {selectedPhieu.maPhieuXuat}</h3>
-                            <button className="btn-close-modal" onClick={() => setSelectedPhieu(null)}>
-                                <FiX size={24} />
-                            </button>
-                        </div>
-
-                        <div className="modal-info">
-                            <p><strong>Ngày xuất:</strong> {new Date(selectedPhieu.ngayXuat).toLocaleString('vi-VN')}</p>
-                            <p><strong>Lý do:</strong> {selectedPhieu.lyDoXuat}</p>
-                            <p><strong>Người xuất:</strong> {selectedPhieu.nguoiDung ? selectedPhieu.nguoiDung.hoTen : 'Không rõ'}</p>
-                        </div>
-                        <table className="modal-table">
-                            <thead>
-                                <tr>
-                                    <th>Mã Hàng</th>
-                                    <th>Tên Sản Phẩm</th>
-                                    <th className="text-right">Đơn Giá</th>
-                                    <th className="text-center">Số Lượng</th>
-                                    <th className="text-right">Thành Tiền</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {selectedPhieu.chiTiets?.map((ct, index) => {
-                                    // 🎯 Fallback: Lấy giá lưu trong phiếu. Nếu không có thì lấy giá nhập từ thông tin hàng hóa
-                                    const displayPrice = ct.donGia || ct.hangHoa?.giaBan || ct.hangHoa?.giaNhap || 0;
-                                    const subTotal = displayPrice * ct.soLuongXuat;
-
-                                    return (
-                                        <tr key={index}>
-                                            <td className="fw-bold">{ct.hangHoa?.maHang}</td>
-                                            <td>{ct.hangHoa?.tenHang}</td>
-
-                                            <td className="text-right text-muted">
-                                                {displayPrice.toLocaleString('vi-VN')} đ
-                                            </td>
-
-                                            <td className="text-center fw-bold text-success">{ct.soLuongXuat}</td>
-
-                                            <td className="text-right fw-bold">
-                                                {subTotal.toLocaleString('vi-VN')} đ
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                        <div className="modal-footer">
-                            <button className="btn-close-bottom" onClick={() => setSelectedPhieu(null)}>Đóng</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

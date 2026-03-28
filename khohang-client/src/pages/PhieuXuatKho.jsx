@@ -16,7 +16,8 @@ const PhieuXuatKho = () => {
     // 🎯 THÊM STATE ĐỂ ĐỒNG BỘ VỚI BACKEND
     const [tenNguoiNhan, setTenNguoiNhan] = useState('');
     const [mucDich, setMucDich] = useState('Xuất bán khách hàng'); // Có chứa chữ "bán" để BE bốc Giá Bán
-const refreshData = async () => {
+
+    const refreshData = async () => {
         try {
             const resStock = await api.get('/products');
             setInventory(resStock.data);
@@ -29,6 +30,7 @@ const refreshData = async () => {
             console.error("Lỗi tải lại dữ liệu:", error);
         }
     };
+
     // Tải danh sách Hàng trong kho và Danh sách Lệnh yêu cầu xuất
     useEffect(() => {
         const init = async () => {
@@ -45,6 +47,7 @@ const refreshData = async () => {
         };
         init();
     }, [location.state]);
+
     // Khi chọn 1 Lệnh Xuất -> Tự động đổ hàng và thông tin ra form
     const handleSelectRequest = (maYeuCau, currentRequests = pendingRequests, currentInventory = inventory) => {
         setSelectedRequest(maYeuCau);
@@ -77,6 +80,7 @@ const refreshData = async () => {
             }
         }
     };
+
     const updateQuantity = (index, value) => {
         const val = parseInt(value) || 0;
         if (val < 0) return;
@@ -85,7 +89,11 @@ const refreshData = async () => {
         setItems(newItems);
     };
 
-    const isValidToSubmit = items.length > 0 && !items.some(i => i.soLuongThucXuat > i.soLuongTon || i.soLuongThucXuat < 0);
+    // Kiểm tra điều kiện để mở khóa nút Submit (Không cho lố tồn kho và lố yêu cầu)
+    const isValidToSubmit = items.length > 0 && !items.some(i => {
+        const conNo = i.soLuongYeuCau - i.soLuongDaXuat;
+        return i.soLuongThucXuat > i.soLuongTon || i.soLuongThucXuat < 0 || i.soLuongThucXuat > conNo;
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -104,7 +112,7 @@ const refreshData = async () => {
 
         const randomMaPhieu = "PX-" + Date.now().toString().slice(-6);
 
-        // 🎯 ĐỒNG BỘ PAYLOAD VỚI DTO CỦA BACKEND
+        // ĐỒNG BỘ PAYLOAD VỚI DTO CỦA BACKEND
         const payload = {
             maPhieuXuat: randomMaPhieu,
             lyDo: `${mucDich} (Lệnh: ${selectedRequest})`, // Gửi đúng từ khóa "bán", "trả", "hủy" để BE tính tiền
@@ -121,7 +129,6 @@ const refreshData = async () => {
             setItems([]);
             setTenNguoiNhan('');
             
-
             // Tải lại dữ liệu
             const resStock = await api.get('/products');
             setInventory(resStock.data);
@@ -155,7 +162,6 @@ const refreshData = async () => {
                         className="custom-select select-request"
                     >
                         <option value="">-- Click để chọn Lệnh xuất kho --</option>
-                        {/* 🎯 Lọc thêm 1 lần nữa ở Frontend cho chắc chắn */}
                         {pendingRequests
                             .filter(req => req.trangThai !== "Hoàn Thành")
                             .map(req => (
@@ -169,7 +175,7 @@ const refreshData = async () => {
                 {selectedRequest ? (
                     <form onSubmit={handleSubmit} className="xuatkho-form">
 
-                        {/* 🎯 THÊM KHUNG THÔNG TIN XUẤT KHO */}
+                        {/* THÊM KHUNG THÔNG TIN XUẤT KHO */}
                         <div className="info-export-box" style={{ display: 'flex', gap: '20px', marginBottom: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                             <div style={{ flex: 1 }}>
                                 <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>
@@ -215,7 +221,7 @@ const refreshData = async () => {
                                 <tbody>
                                     {items.map((item, index) => {
                                         const conNo = item.soLuongYeuCau - item.soLuongDaXuat;
-                                        // 🎯 Nếu món này đã giao đủ (conNo <= 0), có thể ẩn dòng này đi hoặc làm mờ
+                                        // Nếu món này đã giao đủ (conNo <= 0), ẩn dòng này đi
                                         if (conNo <= 0) return null;
 
                                         return (
@@ -226,14 +232,30 @@ const refreshData = async () => {
                                                 <td className="text-center text-success">{item.soLuongDaXuat}</td>
                                                 <td className="text-center">{item.soLuongTon}</td>
                                                 <td>
-                                                    <input
-                                                        type="number"
-                                                        value={item.soLuongThucXuat}
-                                                        onChange={(e) => updateQuantity(index, e.target.value)}
-                                                        className="input-qty"
-                                                        // Không cho nhặt quá số lượng còn nợ
-                                                        max={conNo}
-                                                    />
+                                                    <div className="input-qty-wrapper">
+                                                        <input
+                                                            type="number"
+                                                            value={item.soLuongThucXuat}
+                                                            onChange={(e) => updateQuantity(index, e.target.value)}
+                                                            className={`input-qty ${item.soLuongThucXuat > item.soLuongTon || item.soLuongThucXuat > conNo ? 'input-qty-error' : item.soLuongThucXuat > 0 && item.soLuongThucXuat < conNo ? 'input-qty-warn' : ''}`}
+                                                            max={conNo}
+                                                        />
+                                                        
+                                                        {/* Lỗi vượt Tồn Kho */}
+                                                        {item.soLuongThucXuat > item.soLuongTon && (
+                                                            <span className="error-msg" style={{color: 'red', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '500'}}>❌ Vượt tồn kho!</span>
+                                                        )}
+                                                        
+                                                        {/* Lỗi vượt số nợ */}
+                                                        {item.soLuongThucXuat > conNo && item.soLuongThucXuat <= item.soLuongTon && (
+                                                            <span className="error-msg" style={{color: 'red', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '500'}}>❌ Vượt SL yêu cầu!</span>
+                                                        )}
+
+                                                        {/* 🎯 CẢNH BÁO GIAO THIẾU (Số lượng > 0 và < số nợ) */}
+                                                        {item.soLuongThucXuat > 0 && item.soLuongThucXuat < conNo && item.soLuongThucXuat <= item.soLuongTon && (
+                                                            <span className="warn-msg" style={{color: '#d97706', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '600'}}>⚠️ Giao thiếu</span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );

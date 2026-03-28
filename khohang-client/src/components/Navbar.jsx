@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
 import NotificationBell from './NotificationBell';
+import { FiRefreshCw } from 'react-icons/fi'; // Import icon làm mới
 import './Navbar.css';
 
 const Navbar = ({ onToggleSidebar }) => {
@@ -23,9 +24,12 @@ const Navbar = ({ onToggleSidebar }) => {
         if (role === 'MUAHANG') return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
         return 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; 
     };
-    
-    console.log("Dữ liệu user lấy được:", user);
 
+    // Hàm xử lý làm mới trang
+    const handleRefresh = () => {
+        window.location.reload();
+    };
+    
     if (!user) return null;
 
     return (
@@ -47,10 +51,22 @@ const Navbar = ({ onToggleSidebar }) => {
                 📦 WMS-SYSTEM
             </div>
 
-            {/* --- BÊN PHẢI: Thông báo, Profile & Đăng xuất --- */}
+            {/* --- BÊN PHẢI: Refresh, Thông báo, Profile & Đăng xuất --- */}
             <div className="nav-right-area nav-user">
+                
+                {/* Nút Làm Mới */}
+                <button 
+                    className="refresh-btn" 
+                    onClick={handleRefresh}
+                    title="Làm mới trang"
+                >
+                    <FiRefreshCw />
+                </button>
+
+                {/* Nút Thông Báo */}
                 <NotificationBell />
 
+                {/* Profile */}
                 <div className="nav-user-profile nav-profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <img
                         src={getAvatar()}

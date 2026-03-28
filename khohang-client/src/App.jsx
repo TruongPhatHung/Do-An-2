@@ -35,6 +35,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import LichSuXuatKho from './pages/LichSuXuatKho';
 import DonGiaoThieu from './pages/DonGiaoThieu';
 
+import ChiTietPhieuXuat from './pages/ChiTietPhieuXuat';
+
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
@@ -94,6 +96,7 @@ function App() {
                 <Route path="/nhap-kho" element={<ProtectedRoute><NhapKho /></ProtectedRoute>} />
                 <Route path="/xuat-kho" element={<ProtectedRoute><PhieuXuatKho /></ProtectedRoute>} />
                 <Route path="/lich-su-xuat-kho" element={<ProtectedRoute><LichSuXuatKho /></ProtectedRoute>} />
+                <Route path="//chi-tiet-phieu-xuat/:id" element={<ProtectedRoute><ChiTietPhieuXuat /></ProtectedRoute>} />
 
                 {/* YeuCauXuat */}
                 <Route path="/lap-lenh-xuat" element={<ProtectedRoute><YeuCauXuatForm /></ProtectedRoute>} />
