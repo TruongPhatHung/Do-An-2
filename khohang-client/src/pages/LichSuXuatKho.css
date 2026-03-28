@@ -47,3 +47,7 @@
 .modal-footer { padding: 15px 25px; background: #f8fafc; text-align: right; border-top: 1px solid #e2e8f0; }
 .btn-close-bottom { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
 .btn-close-bottom:hover { background: #475569; }
+/* Thêm class này vào file CSS */
+.text-orange-dark { 
+    color: #d97706; 
+}

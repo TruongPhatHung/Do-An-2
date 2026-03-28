@@ -7,7 +7,7 @@ import './LichSuXuatKho.css';
 const LichSuXuatKho = () => {
     const [phieuXuats, setPhieuXuats] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPhieu, setSelectedPhieu] = useState(null); // Lưu phiếu đang được xem chi tiết
+    const [selectedPhieu, setSelectedPhieu] = useState(null);
 
     useEffect(() => {
         fetchPhieuXuats();
@@ -22,7 +22,6 @@ const LichSuXuatKho = () => {
         }
     };
 
-    // Lọc tìm kiếm theo Mã phiếu hoặc Lý do
     const filteredPhieuXuats = phieuXuats.filter(px =>
         px.maPhieuXuat.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (px.lyDoXuat && px.lyDoXuat.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -47,50 +46,43 @@ const LichSuXuatKho = () => {
                 <table className="lsxk-table">
                     <thead>
                         <tr>
-                            <th>Mã Phiếu Xuất</th>
+                            <th>Mã Phiếu</th>
                             <th>Ngày Xuất</th>
                             <th>Người Xuất</th>
-                            <th>Lý Do Xuất</th>
-                            <th className="text-center">Số Loại Hàng</th>
+                            <th>Nơi Nhận / Khách Hàng</th>
+                            <th>Lý Do</th>
+                            <th className="text-right">Tổng Giá Trị</th>
                             <th className="text-center">Chi Tiết</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredPhieuXuats.length > 0 ? (
-                            filteredPhieuXuats.map((px) => (
+                        {filteredPhieuXuats.map((px) => {
+                            // 🎯 Tính lại tổng tiền nếu phiếu cũ bị Null (0đ)
+                            const displayTotal = px.tongTien || px.chiTiets?.reduce((sum, ct) => {
+                                const giaChuan = ct.donGia || ct.hangHoa?.giaBan || ct.hangHoa?.giaNhap || 0;
+                                return sum + (giaChuan * ct.soLuongXuat);
+                            }, 0) || 0;
+
+                            return (
                                 <tr key={px.maPhieuXuat}>
                                     <td className="fw-bold text-primary">{px.maPhieuXuat}</td>
-                                    <td>
-                                        <div className="date-badge">
-                                            <FiCalendar /> {new Date(px.ngayXuat).toLocaleString('vi-VN')}
-                                        </div>
-                                    </td>
+                                    <td><div className="date-badge">{new Date(px.ngayXuat).toLocaleDateString('vi-VN')}</div></td>
                                     <td>{px.nguoiDung ? px.nguoiDung.hoTen : 'Hệ thống'}</td>
-                                    <td><span className="reason-badge">{px.lyDoXuat || 'Không có'}</span></td>
-                                    <td className="text-center fw-bold">{px.chiTiets?.length || 0}</td>
+                                    <td className="fw-bold">{px.tenNguoiNhan || 'Khách lẻ'}</td>
+                                    <td><span className="reason-badge">{px.lyDoXuat}</span></td>
+                                    <td className="text-right fw-bold text-orange-dark">
+                                        {displayTotal.toLocaleString('vi-VN')} đ
+                                    </td>
                                     <td className="text-center">
-                                        <button
-                                            className="btn-view-detail"
-                                            onClick={() => setSelectedPhieu(px)}
-                                            title="Xem chi tiết"
-                                        >
-                                            <FiEye /> Xem
-                                        </button>
+                                        <button className="btn-view-detail" onClick={() => setSelectedPhieu(px)}>Xem</button>
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="6" className="text-center text-muted" style={{ padding: '30px' }}>
-                                    Không tìm thấy dữ liệu xuất kho nào.
-                                </td>
-                            </tr>
-                        )}
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
 
-            {/* MODAL HIỂN THỊ CHI TIẾT PHIẾU XUẤT */}
             {selectedPhieu && (
                 <div className="lsxk-modal-overlay" onClick={() => setSelectedPhieu(null)}>
                     <div className="lsxk-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -106,28 +98,41 @@ const LichSuXuatKho = () => {
                             <p><strong>Lý do:</strong> {selectedPhieu.lyDoXuat}</p>
                             <p><strong>Người xuất:</strong> {selectedPhieu.nguoiDung ? selectedPhieu.nguoiDung.hoTen : 'Không rõ'}</p>
                         </div>
-
                         <table className="modal-table">
                             <thead>
                                 <tr>
                                     <th>Mã Hàng</th>
                                     <th>Tên Sản Phẩm</th>
-                                    <th className="text-center">Số Lượng Xuất</th>
+                                    <th className="text-right">Đơn Giá</th>
+                                    <th className="text-center">Số Lượng</th>
+                                    <th className="text-right">Thành Tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {selectedPhieu.chiTiets?.map((ct, index) => (
-                                    <tr key={index}>
-                                        <td className="fw-bold">{ct.hangHoa?.maHang}</td>
-                                        <td>{ct.hangHoa?.tenHang}</td>
-                                        <td className="text-center fw-bold text-success">
-                                            {ct.soLuongXuat}
-                                        </td>
-                                    </tr>
-                                ))}
+                                {selectedPhieu.chiTiets?.map((ct, index) => {
+                                    // 🎯 Fallback: Lấy giá lưu trong phiếu. Nếu không có thì lấy giá nhập từ thông tin hàng hóa
+                                    const displayPrice = ct.donGia || ct.hangHoa?.giaBan || ct.hangHoa?.giaNhap || 0;
+                                    const subTotal = displayPrice * ct.soLuongXuat;
+
+                                    return (
+                                        <tr key={index}>
+                                            <td className="fw-bold">{ct.hangHoa?.maHang}</td>
+                                            <td>{ct.hangHoa?.tenHang}</td>
+
+                                            <td className="text-right text-muted">
+                                                {displayPrice.toLocaleString('vi-VN')} đ
+                                            </td>
+
+                                            <td className="text-center fw-bold text-success">{ct.soLuongXuat}</td>
+
+                                            <td className="text-right fw-bold">
+                                                {subTotal.toLocaleString('vi-VN')} đ
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
-
                         <div className="modal-footer">
                             <button className="btn-close-bottom" onClick={() => setSelectedPhieu(null)}>Đóng</button>
                         </div>

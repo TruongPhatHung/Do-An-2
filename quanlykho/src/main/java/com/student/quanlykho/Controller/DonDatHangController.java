@@ -79,8 +79,13 @@ public class DonDatHangController {
                 newProduct.setLoaiHang(sanPham.getLoaiHang()); // Lấy loại từ bên NCC sang
                 newProduct.setSoLuongTon(0); // Tồn kho ban đầu là 0
                 newProduct.setSoLuongToiThieu(10); // Mức cảnh báo tối thiểu (Mặc định)
-                newProduct.setGiaNhap(item.getDonGia()); // Lấy giá từ đơn đặt
+                newProduct.setGiaNhap(item.getDonGia());
+                newProduct.setGiaBan(item.getDonGia() * 1.2);
+
+
+                // Lấy giá từ đơn đặt
                 newProduct.setDonViTinh("Cái"); // Mặc định đơn vị tính
+
 
                 hangHoaRepository.save(newProduct); // Lưu vào bảng hang_hoa trước để không bị lỗi Foreign Key!
             }

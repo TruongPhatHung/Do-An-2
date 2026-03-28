@@ -34,11 +34,15 @@ public class YeuCauXuatKhoController {
         return yeuCauXuatKhoRepository.findAll();
     }
 
-    // 2. Lấy các yêu cầu ĐANG CHỜ XUẤT (Dành cho màn hình làm việc của Nhân viên kho)
+    // 2. 🎯 ĐÃ SỬA: Lấy các yêu cầu ĐANG CHỜ XUẤT + GIAO THIẾU
     @GetMapping("/pending")
     public List<YeuCauXuatKho> getPendingRequests() {
-        // Chỉ lấy những đơn chưa hoàn thành
-        return yeuCauXuatKhoRepository.findByTrangThaiInOrderByNgayCanXuatAsc(List.of("Chờ Xuất", "Đang Xử Lý"));
+        // Chúng ta chỉ lấy:
+        // 1. Chờ Xuất: Đơn mới tinh chưa nhặt món nào.
+        // 2. Giao Thiếu: Đơn đã nhặt một ít, còn nợ lại.
+        return yeuCauXuatKhoRepository.findByTrangThaiInOrderByNgayCanXuatAsc(
+                List.of("Chờ Xuất", "Giao Thiếu")
+        );
     }
 
     // 3. Quản lý tạo Lệnh yêu cầu xuất kho mới
@@ -59,12 +63,9 @@ public class YeuCauXuatKhoController {
                     .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy mặt hàng " + item.getMaHang() + " trong kho!"));
 
             // =================================================================
-            // 🎯 LOGIC BẢO VỆ KHO: Kiểm tra xem kho còn đủ hàng để xuất không?
+            // 🎯 ĐÃ SỬA: Gỡ bỏ lớp chặn Exception để cho phép tính năng "Giao Thiếu" hoạt động.
+            // Sếp vẫn tạo được lệnh để chốt số lượng với khách, kho thiếu thì sẽ chuyển trạng thái "Giao Thiếu" sau.
             // =================================================================
-            if (hh.getSoLuongTon() < item.getSoLuongYeuCau()) {
-                throw new RuntimeException("CẢNH BÁO THIẾU HÀNG: Mặt hàng [" + hh.getTenHang() + "] chỉ còn tồn "
-                        + hh.getSoLuongTon() + " cái. Không thể yêu cầu xuất " + item.getSoLuongYeuCau() + " cái!");
-            }
 
             ChiTietYeuCauXuat ct = new ChiTietYeuCauXuat();
             ct.setYeuCauXuatKho(ycx);
