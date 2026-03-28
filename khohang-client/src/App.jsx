@@ -32,7 +32,7 @@ import SuaHangHoa from './pages/SuaHangHoa';
 // Import đủ rùi nè
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import LichSuXuatKho from './pages/LichSuXuatKho';
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -91,6 +91,7 @@ function App() {
                 {/* Kho vận */}
                 <Route path="/nhap-kho" element={<ProtectedRoute><NhapKho /></ProtectedRoute>} />
                 <Route path="/xuat-kho" element={<ProtectedRoute><PhieuXuatKho /></ProtectedRoute>} />
+                <Route path="/lich-su-xuat-kho" element={<ProtectedRoute><LichSuXuatKho /></ProtectedRoute>} />
 
                 {/* YeuCauXuat */}
                 <Route path="/lap-lenh-xuat" element={<ProtectedRoute><YeuCauXuatForm /></ProtectedRoute>} />

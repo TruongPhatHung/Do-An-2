@@ -64,6 +64,9 @@ const Sidebar = () => {
                         <NavLink to="/nhap-kho" className={navClass}>
                             <span className="menu-icon">📥</span> Nhập Kho
                         </NavLink>
+                        <NavLink to ="/lich-su-xuat-kho" className={navClass}>
+                            <span className="menu-icon">📥</span> Lich Su Xuất Kho
+                        </NavLink>
                         {/* Thêm menu Lập lệnh xuất kho */}
                         
                     </li>
