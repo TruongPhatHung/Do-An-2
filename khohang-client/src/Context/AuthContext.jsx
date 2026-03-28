@@ -11,7 +11,9 @@ export const AuthProvider = ({ children }) => {
         try {
             // Gửi request tới Backend Spring Boot
             console.log("Sending login request...");
-                const response = await fetch('http://localhost:8080/api/auth/login', {
+
+                const response = await fetch('http://10.10.53.240:8080/api/auth/login', {
+
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

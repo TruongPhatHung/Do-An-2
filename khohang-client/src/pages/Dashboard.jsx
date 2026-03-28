@@ -164,7 +164,7 @@ const Dashboard = () => {
                 </div>
                 
                 <button onClick={handleExportExcel} className="btn-export-excel" title="Tải xuống báo cáo chi tiết">
-                    <span style={{ marginRight: '8px' }}>📗</span> Xuất Báo Cáo
+                    <span style={{ marginRight: '8px' }}>📊</span> Xuất Báo Cáo
                 </button>
             </header>
             

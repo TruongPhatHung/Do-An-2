@@ -70,7 +70,7 @@ const POList = () => {
                     <h2>Danh Sách Đơn Đặt Hàng (PO)</h2>
                 </div>
                 <button className="btn-create-po" onClick={() => navigate('/don-hang')}>
-                    <i className="fas fa-plus"></i> + Tạo Đơn Hàng Mới
+                    <i className="fas fa-plus"></i> Tạo Đơn Hàng Mới
                 </button>
             </div>
 

@@ -66,7 +66,7 @@ const Navbar = ({ onToggleSidebar }) => {
                 </div>
 
                 <button onClick={handleLogout} className="btn-logout-custom logout-btn">
-                    🚪 Đăng xuất
+                    Đăng xuất
                 </button>
             </div>
             
