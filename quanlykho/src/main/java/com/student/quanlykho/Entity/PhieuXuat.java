@@ -27,4 +27,9 @@
         // Một phiếu xuất có nhiều chi tiết
         @OneToMany(mappedBy = "phieuXuat", cascade = CascadeType.ALL)
         private List<ChiTietPhieuXuat> chiTiets;
+        @Column(name = "ten_nguoi_nhan")
+        private String tenNguoiNhan; // VD: Anh A, Công ty B, Xưởng 1...
+
+        @Column(name = "tong_tien")
+        private Double tongTien;
     }

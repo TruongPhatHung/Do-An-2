@@ -33,6 +33,7 @@ import SuaHangHoa from './pages/SuaHangHoa';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LichSuXuatKho from './pages/LichSuXuatKho';
+import DonGiaoThieu from './pages/DonGiaoThieu';
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -87,6 +88,7 @@ function App() {
                 <Route path="/don-hang" element={<ProtectedRoute><POForm /></ProtectedRoute>} />
                 <Route path="/danh-sach-po" element={<ProtectedRoute><POList /></ProtectedRoute>} />
                 <Route path="/po-detail" element={<ProtectedRoute><PODetail /></ProtectedRoute>} />
+                <Route path="/don-giao-thieu" element={<ProtectedRoute><DonGiaoThieu /></ProtectedRoute>} />
 
                 {/* Kho vận */}
                 <Route path="/nhap-kho" element={<ProtectedRoute><NhapKho /></ProtectedRoute>} />

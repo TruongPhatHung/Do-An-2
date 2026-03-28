@@ -37,6 +37,8 @@ public class YeuCauXuatKho {
     @OneToMany(mappedBy = "yeuCauXuatKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("yeuCauXuatKho")
     private List<ChiTietYeuCauXuat> chiTiets;
+    @Column(name = "ngay_hen_giao_bu")
+    private java.time.LocalDate ngayHenGiaoBu;
 
     @PrePersist
     protected void onCreate() {
@@ -44,5 +46,11 @@ public class YeuCauXuatKho {
         if (this.trangThai == null) {
             this.trangThai = "Chờ Xuất"; // Mặc định khi mới tạo
         }
+    }
+    public int getTongSoLuongYeuCau() {
+        if (this.chiTiets == null) return 0;
+        return this.chiTiets.stream()
+                .mapToInt(ct -> ct.getSoLuongYeuCau())
+                .sum();
     }
 }

@@ -22,5 +22,7 @@ public class ChiTietPhieuXuat {
 
     @Column(name = "so_luong_xuat")
     private int soLuongXuat;
+    @Column(name = "don_gia")
+    private Double donGia;
 
 }

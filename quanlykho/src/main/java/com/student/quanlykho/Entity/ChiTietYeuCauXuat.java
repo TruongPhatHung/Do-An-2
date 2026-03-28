@@ -21,10 +21,11 @@ public class ChiTietYeuCauXuat {
     private HangHoa hangHoa;
 
     @Column(name = "so_luong_yeu_cau", nullable = false)
-    private int soLuongYeuCau;
+    private Integer soLuongYeuCau;
 
     @Column(name = "so_luong_da_xuat")
-    private int soLuongDaXuat; // Dùng để theo dõi xem kho đã nhặt đủ hàng chưa
+
+    private Integer soLuongDaXuat; // Dùng để theo dõi xem kho đã nhặt đủ hàng chưa
 
     @PrePersist
     protected void onCreate() {

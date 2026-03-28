@@ -1,5 +1,6 @@
 package com.student.quanlykho.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -15,6 +16,7 @@ public class NhaCungCap {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Thêm dòng này để DB tự tăng số
     private Long id;
     @Column(name = "ma_ncc")
+
     private String maNCC;
     @Column(name = "ten_ncc")
     @JsonProperty("tenNCC")

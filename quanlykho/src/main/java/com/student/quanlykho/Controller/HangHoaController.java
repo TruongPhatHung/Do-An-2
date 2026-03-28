@@ -51,6 +51,7 @@ public class HangHoaController {
         hh.setSoLuongTon(request.getSoLuongTon() != null ? request.getSoLuongTon() : 0);
         hh.setSoLuongToiThieu(request.getSoLuongToiThieu() != null ? request.getSoLuongToiThieu() : 0);
         hh.setGiaNhap(request.getGiaNhap());
+        hh.setGiaBan(request.getGiaBan());
 
         if (request.getLoaiHangId() != null) {
             LoaiHang lh = loaiHangRepository.findById(request.getLoaiHangId())
@@ -79,6 +80,7 @@ public class HangHoaController {
             hangHoa.setTenHang(request.getTenHang());
             hangHoa.setSoLuongTon(request.getSoLuongTon());
             hangHoa.setGiaNhap(request.getGiaNhap());
+            hangHoa.setGiaBan(request.getGiaBan());
             hangHoa.setDonViTinh(request.getDonViTinh());
             hangHoa.setSoLuongToiThieu(request.getSoLuongToiThieu());
 
@@ -118,6 +120,7 @@ public class HangHoaController {
         private Integer soLuongTon;
         private Integer soLuongToiThieu;
         private Double giaNhap;
+        private Double giaBan;
         private Long loaiHangId;
 
         public String getMaHang() { return maHang; }
@@ -132,6 +135,8 @@ public class HangHoaController {
         public void setSoLuongToiThieu(Integer soLuongToiThieu) { this.soLuongToiThieu = soLuongToiThieu; }
         public Double getGiaNhap() { return giaNhap; }
         public void setGiaNhap(Double giaNhap) { this.giaNhap = giaNhap; }
+        public Double getGiaBan() { return giaBan; }
+        public void setGiaBan(Double giaBan) { this.giaBan = giaBan; }
         public Long getLoaiHangId() { return loaiHangId; }
         public void setLoaiHangId(Long loaiHangId) { this.loaiHangId = loaiHangId; }
     }

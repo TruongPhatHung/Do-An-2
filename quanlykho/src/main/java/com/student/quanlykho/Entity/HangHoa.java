@@ -21,6 +21,8 @@ public class HangHoa {
 
    @Column(name = "gia_nhap")
     private Double giaNhap;
+    @Column(name = "gia_ban")
+    private Double giaBan;
 
    @Column(name = "so_luong_toi_thieu")
     private int soLuongToiThieu;
