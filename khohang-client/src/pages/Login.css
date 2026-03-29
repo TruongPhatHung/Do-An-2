@@ -96,7 +96,6 @@
     color: #ffffff !important; /* Ép buộc nhận màu trắng tinh */
     font-size: 15px;
     font-weight: 400; /* Tăng độ đậm lên để chữ nét hơn */
-    
     letter-spacing: 0.5px;
 }
 
@@ -107,7 +106,7 @@
 }
 
 .input-wrapper input {
-   width: 100%;
+    width: 100%;
     padding: 14px 45px 14px 15px; 
     border: 1.5px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
@@ -116,7 +115,6 @@
     background-color: rgba(255, 255, 255, 0.15); 
     transition: all 0.3s ease;
     box-sizing: border-box;
-    
 }
 
 /* Màu chữ placeholder */
@@ -141,6 +139,7 @@
     align-items: center;
     pointer-events: none;
 }
+
 /* Chỉnh lại màu các icon (User / Mắt) cho sáng sủa hơn */
 .input-icon, .toggle-password {
     color: #f8fafc; 
@@ -152,7 +151,6 @@
     position: absolute;
     right: 14px;
     cursor: pointer;
-    color: #cbd5e1;
     display: flex;
     align-items: center;
     padding: 5px;
@@ -182,16 +180,43 @@
     transition: transform 0.2s, box-shadow 0.2s;
     letter-spacing: 0.5px;
     box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    /* 🎯 MỚI THÊM ĐỂ HIỂN THỊ SPINNER */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
-.login-button:hover {
+.login-button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
 }
 
-.login-button:active {
+.login-button:active:not(:disabled) {
     transform: translateY(0);
 }
+
+/* 🎯 MỚI THÊM TRẠNG THÁI DISABLED (KHI LOADING) */
+.login-button:disabled {
+    background: rgba(255, 255, 255, 0.3);
+    color: #e2e8f0;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 /* =========================================
    CSS CHO ICON FONT AWESOME
 ========================================= */
@@ -209,6 +234,7 @@
 .user-avatar-icon:hover {
     transform: scale(1.05); /* Hiệu ứng phóng to nhẹ khi di chuột vào */
 }
+
 /* =========================================
    FIX LỖI NỀN TRẮNG KHI TRÌNH DUYỆT AUTOFILL
 ========================================= */

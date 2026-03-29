@@ -29,4 +29,6 @@ public class NguoiDung {
     private String avatar;
     @Column(name = "last_active_time")
     private LocalDateTime lastActiveTime;
+    @Column(name = "is_online")
+    private Boolean isOnline = false;
 }

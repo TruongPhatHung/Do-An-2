@@ -7,15 +7,22 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // 🎯 Chặn click nhiều lần
 
     const { login, error } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        const success = await login(username, password);
-        if (success) {
-            navigate('/products');
+        setIsLoading(true); // Bật icon xoay xoay
+
+        try {
+            const success = await login(username, password);
+            if (success) {
+                navigate('/dashboard'); // 🎯 Chuyển hướng về trang chủ Dashboard
+            }
+        } finally {
+            setIsLoading(false); // Tắt icon xoay xoay
         }
     };
 
@@ -26,9 +33,9 @@ const Login = () => {
     return (
         <div className="login-container">
             <div className="login-overlay"></div>
-            
+
             <div className="login-box">
-              <div className="login-header">
+                <div className="login-header">
                     {/* Dùng icon user-circle của Font Awesome */}
                     <div className="avatar-container">
                         <i className="fas fa-user-circle user-avatar-icon"></i>
@@ -48,8 +55,9 @@ const Login = () => {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
+                                disabled={isLoading}
                             />
-                            {/* Icon User đặt sau input và được CSS đẩy sang phải */}
+                            {/* Icon User đặt sau input */}
                             <span className="input-icon">
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -68,9 +76,10 @@ const Login = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
+                                disabled={isLoading}
                             />
-                            
-                            {/* Icon ẩn/hiện mật khẩu (Con mắt) nằm bên phải */}
+
+                            {/* Icon ẩn/hiện mật khẩu (Con mắt) */}
                             <span className="toggle-password" onClick={togglePasswordVisibility} title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>
                                 {showPassword ? (
                                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -88,8 +97,15 @@ const Login = () => {
                     </div>
 
                     <div className="button-group">
-                        <button type="submit" className="login-button">
-                            ĐĂNG NHẬP
+                        {/* 🎯 Nút Submit tự động mờ đi và xoay vòng khi đang xử lý */}
+                        <button type="submit" className="login-button" disabled={isLoading || !username || !password}>
+                            {isLoading ? (
+                                <>
+                                    <span className="spinner"></span> ĐANG XỬ LÝ...
+                                </>
+                            ) : (
+                                "ĐĂNG NHẬP"
+                            )}
                         </button>
                     </div>
                 </form>

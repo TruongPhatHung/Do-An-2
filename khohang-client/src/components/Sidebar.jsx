@@ -18,7 +18,7 @@ const Sidebar = () => {
             {/* Phần thông tin User */}
             <div className="sidebar-user-panel">
                 <div className="user-info">
-                    <p>{user?.displayName  || 'admin'}</p>
+                    <p>{user?.displayName || 'Admin'}</p>
                     <span className="online-status">
                         <span className="status-dot"></span> Online
                     </span>
@@ -26,73 +26,27 @@ const Sidebar = () => {
             </div>
 
             <ul className="sidebar-menu">
+                {/* ================= CHUNG ================= */}
                 <li>
                     <NavLink to="/dashboard" className={navClass}>
                         <span className="menu-icon">🏠</span> Trang chủ
                     </NavLink>
                 </li>
-
                 <li>
                     <NavLink to="/products" className={navClass}>
                         <span className="menu-icon">📦</span> Hàng Hóa
                     </NavLink>
                 </li>
-
                 <li>
                     <NavLink to="/suppliers" className={navClass}>
                         <span className="menu-icon">🏢</span> Nhà Cung Cấp
                     </NavLink>
                 </li>
-
                 <li>
                     <NavLink to="/categories" className={navClass}>
                         <span className="menu-icon">🏷️</span> Quản Lý Loại Hàng
                     </NavLink>
                 </li>
-
-                {/* --- NHÓM MUA HÀNG & ĐƠN HÀNG --- */}
-                {(role === 'ADMIN' || role === 'MUAHANG') && (
-                    <li>
-                        <NavLink to="/don-hang" className={navClass}>
-                            <span className="menu-icon">📝</span> Lên Đơn (PO)
-                        </NavLink>
-                        
-                    </li>
-                    
-                )}
-
-                {(role === 'ADMIN' || role === 'KHO') && (
-                    <li>
-                        <NavLink to="/nhap-kho" className={navClass}>
-                            <span className="menu-icon">📥</span> Nhập Kho
-                        </NavLink>
-                        <NavLink to ="/lich-su-xuat-kho" className={navClass}>
-                            <span className="menu-icon">📥</span> Lịch Sử Xuất Kho
-                        </NavLink>
-                        <NavLink to ="/lich-su-yeu-cau-mua" className={navClass}>
-                            <span className="menu-icon">📥</span> Lịch Sử Yêu Cầu Mua
-                        </NavLink>
-                        <NavLink to="/lich-su-yeu-cau-xuat" className={navClass}>
-                            <span className="menu-icon">📥</span> Lịch Sử Yêu Cầu Xuất
-                        </NavLink>
-
-                        {/* Thêm menu Lập lệnh xuất kho */}
-                        
-                    </li>
-                )}
-                {/* Lập lệnh xuat */}
-                {(role === 'ADMIN' || role === 'KHO') && (
-                    <li>
-                        <NavLink to="/lap-lenh-xuat" className={navClass}>
-                            <span className="menu-icon">📥</span> Lập Lệnh Xuất
-                        </NavLink>
-
-                        <NavLink to="/lap-lenh-yeu-cau-mua" className={navClass}>
-                            <span className="menu-icon">📥</span> Lập Lệnh Yêu Cầu Mua
-                        </NavLink>
-                    </li>
-                )}
-                
                 <li>
                     <NavLink to="/danh-sach-po" className={navClass}>
                         <span className="menu-icon">📋</span> Danh Sách Đơn Hàng
@@ -100,40 +54,89 @@ const Sidebar = () => {
                 </li>
                 <li>
                     <NavLink to="/don-giao-thieu" className={navClass}>
-                        <span className="menu-icon">📋</span> Đơn Giao Thiếu
+                        <span className="menu-icon">⚠️</span> Đơn Giao Thiếu
                     </NavLink>
                 </li>
 
-                {/* --- NHÓM KHO VẬN --- */}
+                {/* ================= MUA HÀNG ================= */}
+                {(role === 'ADMIN' || role === 'MUAHANG') && (
+                    <li>
+                        <NavLink to="/don-hang" className={navClass}>
+                            <span className="menu-icon">🛒</span> Lên Đơn (PO)
+                        </NavLink>
+                    </li>
+                )}
+
+                {/* ================= KHO VẬN ================= */}
                 {(role === 'ADMIN' || role === 'KHO') && (
-                    <li>
-                        <NavLink to="/xuat-kho" className={navClass}>
-                            <span className="menu-icon">📤</span> Xuất Kho
-                        </NavLink>
-                    </li>
+                    <>
+                        {/* Nhóm Thao tác Kho */}
+                        <li>
+                            <NavLink to="/nhap-kho" className={navClass}>
+                                <span className="menu-icon">📥</span> Nhập Kho
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/xuat-kho" className={navClass}>
+                                <span className="menu-icon">📤</span> Xuất Kho
+                            </NavLink>
+                        </li>
+
+                        {/* Nhóm Lập Lệnh */}
+                        <li>
+                            <NavLink to="/lap-lenh-yeu-cau-mua" className={navClass}>
+                                <span className="menu-icon">📝</span> Lập Yêu Cầu Mua
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/lap-lenh-xuat" className={navClass}>
+                                <span className="menu-icon">🚚</span> Lập Lệnh Xuất
+                            </NavLink>
+                        </li>
+
+                        {/* Nhóm Lịch Sử */}
+                        <li>
+                            <NavLink to="/lich-su-xuat-kho" className={navClass}>
+                                <span className="menu-icon">📜</span> Lịch Sử Xuất Kho
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/lich-su-yeu-cau-mua" className={navClass}>
+                                <span className="menu-icon">🕒</span> LS Yêu Cầu Mua
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/lich-su-yeu-cau-xuat" className={navClass}>
+                                <span className="menu-icon">🕒</span> LS Yêu Cầu Xuất
+                            </NavLink>
+                        </li>
+                    </>
                 )}
 
+                {/* ================= GIÁM ĐỐC / ADMIN ================= */}
                 {role === 'ADMIN' && (
-                    <li>
-                        <NavLink to="/tai-khoan" className={navClass}>
-                            <span className="menu-icon">👥</span> Quản Lý Tài Khoản
-                        </NavLink>
-                        <NavLink to="/duyet-yeu-cau-mua" className={navClass}>
-                            <span className="menu-icon">👥</span> Duyết Yêu Cầu Mua
-                        </NavLink>
-                        <NavLink to="/duyet-yeu-cau-xuat" className={navClass}>
-                            <span className="menu-icon">👥</span> Duyết Yêu Cầu Xuat
-                        </NavLink>
-                        
-                    </li>
-                )}
-
-                {role === 'ADMIN' && (
-                    <li>
-                        <NavLink to="/admin/logs" className={navClass}>
-                            <span className="menu-icon">📜</span> Nhật Ký Hệ Thống
-                        </NavLink>
-                    </li>
+                    <>
+                        <li>
+                            <NavLink to="/duyet-yeu-cau-mua" className={navClass}>
+                                <span className="menu-icon">👑</span> Duyệt Yêu Cầu Mua
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/duyet-yeu-cau-xuat" className={navClass}>
+                                <span className="menu-icon">👑</span> Duyệt Lệnh Xuất
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/tai-khoan" className={navClass}>
+                                <span className="menu-icon">👥</span> Quản Lý Tài Khoản
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/admin/logs" className={navClass}>
+                                <span className="menu-icon">⚙️</span> Nhật Ký Hệ Thống
+                            </NavLink>
+                        </li>
+                    </>
                 )}
             </ul>
         </aside>

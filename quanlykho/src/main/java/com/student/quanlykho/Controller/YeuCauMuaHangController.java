@@ -14,7 +14,8 @@ import java.util.List;
 @RequestMapping("/api/yeu-cau-mua")
 @CrossOrigin(origins = "*")
 public class YeuCauMuaHangController {
-
+    @Autowired
+    private ThongBaoRepository thongBaoRepository;
     @Autowired
     private YeuCauMuaHangRepository yeuCauMuaHangRepository;
 
@@ -57,7 +58,19 @@ public class YeuCauMuaHangController {
         }
 
         ycm.setChiTiets(dsChiTiet);
-        return yeuCauMuaHangRepository.save(ycm);
+        YeuCauMuaHang saved = yeuCauMuaHangRepository.save(ycm);
+
+        // ============================================
+        // 🔔 TẠO VÀ LƯU THÔNG BÁO CHO SẾP (RUNG CHUÔNG)
+        // ============================================
+        ThongBao tb = new ThongBao();
+        tb.setTieuDe("💰 Đề xuất mua hàng mới!");
+        tb.setNoiDung("Nhân viên " + saved.getNguoiYeuCau() + " vừa lập đề xuất mua (" + saved.getMaYeuCau() + "). Vui lòng kiểm tra và phê duyệt.");
+        tb.setNguoiNhan("ADMIN"); // Sếp đăng nhập bằng role ADMIN sẽ nhận được
+        tb.setDuongDan("/duyet-yeu-cau-mua"); // Click vào chuông bay thẳng tới trang duyệt
+        thongBaoRepository.save(tb);
+        return saved;
+
     }
 
     // ========================================================
@@ -94,7 +107,26 @@ public class YeuCauMuaHangController {
             ycm.setLyDoTuChoi(request.getLyDoTuChoi());
         }
 
-        return yeuCauMuaHangRepository.save(ycm);
+        YeuCauMuaHang saved = yeuCauMuaHangRepository.save(ycm);
+
+        // ============================================
+        // 🔔 2. GỬI THÔNG BÁO CHO KHO KHI SẾP DUYỆT / TỪ CHỐI
+        // ============================================
+        ThongBao tb = new ThongBao();
+        if ("Đã Duyệt".equals(saved.getTrangThai())) {
+            tb.setTieuDe("✅ Yêu cầu mua hàng đã được duyệt!");
+            tb.setNoiDung("Sếp đã phê duyệt phiếu " + saved.getMaYeuCau() + " của bạn. Phòng Mua hàng sẽ sớm xử lý.");
+        } else {
+            tb.setTieuDe("❌ Yêu cầu mua hàng bị từ chối!");
+            tb.setNoiDung("Sếp đã từ chối phiếu " + saved.getMaYeuCau() + " với lý do: " + saved.getLyDoTuChoi());
+        }
+
+        // Gửi trả lại đúng người đã tạo phiếu
+        tb.setNguoiNhan(saved.getNguoiYeuCau());
+        tb.setDuongDan("/lich-su-yeu-cau-mua"); // Kho click vào sẽ bay tới trang Lịch sử
+        thongBaoRepository.save(tb);
+
+        return saved;
     }
     @PutMapping("/{maYeuCau}/hoan-thanh")
     @Transactional

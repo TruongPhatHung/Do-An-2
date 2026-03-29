@@ -2,8 +2,10 @@ package com.student.quanlykho.Controller;
 
 import com.student.quanlykho.Entity.ChiTietYeuCauXuat;
 import com.student.quanlykho.Entity.HangHoa;
+import com.student.quanlykho.Entity.ThongBao;
 import com.student.quanlykho.Entity.YeuCauXuatKho;
 import com.student.quanlykho.Repository.HangHoaRepository;
+import com.student.quanlykho.Repository.ThongBaoRepository;
 import com.student.quanlykho.Repository.YeuCauXuatKhoRepository;
 import com.student.quanlykho.Service.AuditLogService;
 import jakarta.transaction.Transactional;
@@ -20,7 +22,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/yeu-cau-xuat")
 @CrossOrigin(origins = "*")
 public class YeuCauXuatKhoController {
-
+    @Autowired
+    private ThongBaoRepository thongBaoRepository;
     @Autowired
     private YeuCauXuatKhoRepository yeuCauXuatKhoRepository;
 
@@ -83,6 +86,12 @@ public class YeuCauXuatKhoController {
         String logMoi = String.format("Nơi nhận: %s | Số mặt hàng: %d | Hạn xuất: %s",
                 saved.getNoiNhan(), chiTiets.size(), saved.getNgayCanXuat());
         auditLogService.ghiLog("THÊM", "LỆNH XUẤT KHO", saved.getMaYeuCau(), "Chưa có", logMoi);
+        ThongBao tb = new ThongBao();
+        tb.setTieuDe("Lệnh xuất kho mới!");
+        tb.setNoiDung("Nhân viên " + request.getNguoiTao() + " vừa lập lệnh xuất " + saved.getMaYeuCau() + " đang chờ bạn duyệt.");
+        tb.setNguoiNhan("ADMIN"); // Gửi thẳng cho role Sếp
+        tb.setDuongDan("/duyet-yeu-cau-xuat"); // Link để sếp bấm vào là bay thẳng tới trang duyệt
+        thongBaoRepository.save(tb);
 
         return saved;
     }

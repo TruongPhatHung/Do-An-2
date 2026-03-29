@@ -82,6 +82,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/trao-doi", "/api/trao-doi/**").permitAll()
                         // --- CHỐT CHẶN CUỐI CÙNG ---
                         .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+                        .requestMatchers("/api/thong-bao", "/api/thong-bao/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // GẮN CÁI KHIÊN JWT VÀO ĐÂY!

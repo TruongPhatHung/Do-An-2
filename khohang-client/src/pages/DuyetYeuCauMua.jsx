@@ -6,12 +6,11 @@ import './DuyetYeuCauMua.css';
 
 const DuyetYeuCauMua = () => {
     const [yeuCaus, setYeuCaus] = useState([]);
-    const [filterStatus, setFilterStatus] = useState('Chờ Duyệt'); // Mặc định mở lên là thấy đơn cần duyệt
+    const [filterStatus, setFilterStatus] = useState('Chờ Duyệt');
     const [selectedYeuCau, setSelectedYeuCau] = useState(null);
     const [lyDoTuChoi, setLyDoTuChoi] = useState('');
     const [showRejectModal, setShowRejectModal] = useState(false);
 
-    // Tải danh sách yêu cầu dựa theo bộ lọc
     const fetchYeuCaus = async () => {
         try {
             const url = filterStatus ? `/yeu-cau-mua?trangThai=${filterStatus}` : '/yeu-cau-mua';
@@ -26,7 +25,6 @@ const DuyetYeuCauMua = () => {
         fetchYeuCaus();
     }, [filterStatus]);
 
-    // Xử lý Duyệt đơn
     const handleApprove = async (maYeuCau) => {
         if (!window.confirm(`Xác nhận DUYỆT yêu cầu ${maYeuCau}?`)) return;
 
@@ -37,13 +35,12 @@ const DuyetYeuCauMua = () => {
             });
             toast.success("✅ Đã duyệt yêu cầu thành công!");
             setSelectedYeuCau(null);
-            fetchYeuCaus(); // Tải lại danh sách
+            fetchYeuCaus();
         } catch (error) {
             toast.error(error.response?.data?.message || "Lỗi khi duyệt đơn!");
         }
     };
 
-    // Xử lý Từ chối đơn
     const handleReject = async (e) => {
         e.preventDefault();
         if (!lyDoTuChoi.trim()) {
@@ -60,7 +57,7 @@ const DuyetYeuCauMua = () => {
             setShowRejectModal(false);
             setLyDoTuChoi('');
             setSelectedYeuCau(null);
-            fetchYeuCaus(); // Tải lại danh sách
+            fetchYeuCaus();
         } catch (error) {
             toast.error(error.response?.data?.message || "Lỗi khi từ chối đơn!");
         }
@@ -80,7 +77,23 @@ const DuyetYeuCauMua = () => {
         <div className="dyc-container">
             <div className="dyc-header">
                 <div>
-                    <h2>👑 Duyệt Yêu Cầu Mua Hàng (Dành cho Sếp)</h2>
+                    <h2 style={{ display: 'flex', alignItems: 'center' }}>
+                        👑 Duyệt Yêu Cầu Mua Hàng (Sếp)
+                        {/* 🎯 ĐÂY LÀ CHỖ HIỂN THỊ SỐ LƯỢNG ĐƠN CẦN DUYỆT NÈ SẾP */}
+                        {filterStatus === 'Chờ Duyệt' && yeuCaus.length > 0 && (
+                            <span style={{
+                                backgroundColor: '#ef4444',
+                                color: 'white',
+                                fontSize: '1rem',
+                                padding: '4px 12px',
+                                borderRadius: '20px',
+                                marginLeft: '12px',
+                                fontWeight: 'bold'
+                            }}>
+                                {yeuCaus.length} đơn
+                            </span>
+                        )}
+                    </h2>
                     <p>Kiểm tra và phê duyệt các đề xuất mua vật tư từ Quản lý kho</p>
                 </div>
                 <div className="dyc-filter-box">
@@ -103,7 +116,7 @@ const DuyetYeuCauMua = () => {
                             <th>Người Đề Xuất</th>
                             <th>Nhà Cung Cấp</th>
                             <th className="text-center">Trạng Thái</th>
-                            <th className="text-center">Chi Tiết</th>
+                            <th className="text-center">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -116,7 +129,7 @@ const DuyetYeuCauMua = () => {
                                 <td className="text-center">{getStatusBadge(yc.trangThai)}</td>
                                 <td className="text-center">
                                     <button className="dyc-btn-view" onClick={() => setSelectedYeuCau(yc)}>
-                                        <FiEye /> Xem
+                                        <FiEye /> Xem chi tiết
                                     </button>
                                 </td>
                             </tr>
@@ -137,19 +150,23 @@ const DuyetYeuCauMua = () => {
                     <div className="dyc-modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="dyc-modal-header">
                             <h3>Chi tiết Yêu cầu: {selectedYeuCau.maYeuCau}</h3>
-                            <button className="btn-close" onClick={() => setSelectedYeuCau(null)}><FiX size={24} /></button>
+                            <button className="btn-close" style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setSelectedYeuCau(null)}>
+                                <FiX size={24} color="#94a3b8" />
+                            </button>
                         </div>
                         <div className="dyc-modal-body">
-                            <div className="info-grid">
-                                <p><strong>Nhà cung cấp:</strong> {selectedYeuCau.nhaCungCap?.tenNCC}</p>
-                                <p><strong>Người tạo:</strong> {selectedYeuCau.nguoiYeuCau}</p>
-                                <p><strong>Trạng thái:</strong> {getStatusBadge(selectedYeuCau.trangThai)}</p>
-                                <p><strong>Ghi chú từ Kho:</strong> <span className="text-highlight">{selectedYeuCau.ghiChu}</span></p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                                <p><strong>🏢 Nhà cung cấp:</strong> {selectedYeuCau.nhaCungCap?.tenNCC}</p>
+                                <p><strong>👤 Người tạo:</strong> {selectedYeuCau.nguoiYeuCau}</p>
+                                <p><strong>📌 Trạng thái:</strong> {getStatusBadge(selectedYeuCau.trangThai)}</p>
+                                <p><strong>📝 Ghi chú từ Kho:</strong> <span style={{ color: '#3b82f6', fontStyle: 'italic' }}>{selectedYeuCau.ghiChu || 'Không có'}</span></p>
                             </div>
 
                             {selectedYeuCau.trangThai === 'Từ Chối' && (
-                                <div className="reject-reason-box">
-                                    <strong>Lý do từ chối:</strong> {selectedYeuCau.lyDoTuChoi}
+                                <div className="reject-reason-box" style={{ backgroundColor: '#fef2f2', padding: '15px', borderRadius: '8px', borderLeft: '4px solid #ef4444', marginBottom: '20px' }}>
+                                    <strong style={{ color: '#991b1b' }}>🚫 Lý do từ chối:</strong>
+                                    <p style={{ margin: '5px 0 0 0', color: '#b91c1c' }}>{selectedYeuCau.lyDoTuChoi}</p>
                                 </div>
                             )}
 
@@ -175,14 +192,13 @@ const DuyetYeuCauMua = () => {
                             </table>
                         </div>
 
-                        {/* CHỈ HIỆN NÚT DUYỆT/TỪ CHỐI KHI TRẠNG THÁI LÀ CHỜ DUYỆT */}
                         {selectedYeuCau.trangThai === 'Chờ Duyệt' && (
                             <div className="dyc-modal-footer">
                                 <button className="btn-reject" onClick={() => setShowRejectModal(true)}>
-                                    <FiXCircle /> TỪ CHỐI
+                                    <FiXCircle style={{ marginRight: '5px' }} /> TỪ CHỐI
                                 </button>
                                 <button className="btn-approve" onClick={() => handleApprove(selectedYeuCau.maYeuCau)}>
-                                    <FiCheckCircle /> PHÊ DUYỆT ĐƠN NÀY
+                                    <FiCheckCircle style={{ marginRight: '5px' }} /> PHÊ DUYỆT
                                 </button>
                             </div>
                         )}
@@ -193,26 +209,33 @@ const DuyetYeuCauMua = () => {
             {/* MODAL NHẬP LÝ DO TỪ CHỐI */}
             {showRejectModal && (
                 <div className="dyc-modal-overlay">
-                    <div className="dyc-modal-content reject-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="dyc-modal-content reject-modal" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
                         <div className="dyc-modal-header">
-                            <h3 style={{ color: '#ef4444' }}>Từ chối yêu cầu {selectedYeuCau?.maYeuCau}</h3>
-                            <button className="btn-close" onClick={() => setShowRejectModal(false)}><FiX size={24} /></button>
+                            <h3 style={{ color: '#ef4444', margin: 0 }}>Từ chối yêu cầu {selectedYeuCau?.maYeuCau}</h3>
+                            <button className="btn-close" style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setShowRejectModal(false)}>
+                                <FiX size={24} color="#94a3b8" />
+                            </button>
                         </div>
                         <form onSubmit={handleReject} className="dyc-modal-body">
-                            <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>
+                            <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block', color: '#334155' }}>
                                 Vui lòng nhập lý do từ chối để Kho rút kinh nghiệm:
                             </label>
                             <textarea
                                 rows="4"
                                 className="reject-textarea"
+                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ef4444', outline: 'none' }}
                                 placeholder="VD: Ngân sách tháng này đã hết, Tồn kho Tivi còn nhiều..."
                                 value={lyDoTuChoi}
                                 onChange={(e) => setLyDoTuChoi(e.target.value)}
                                 autoFocus
                             ></textarea>
-                            <div className="dyc-modal-footer" style={{ marginTop: '20px' }}>
-                                <button type="button" className="btn-cancel" onClick={() => setShowRejectModal(false)}>Hủy</button>
-                                <button type="submit" className="btn-reject-confirm">Xác nhận Từ Chối</button>
+                            <div className="dyc-modal-footer" style={{ marginTop: '20px', padding: '0', background: 'transparent', border: 'none' }}>
+                                <button type="button" className="btn-cancel" style={{ background: '#94a3b8', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => setShowRejectModal(false)}>
+                                    QUAY LẠI
+                                </button>
+                                <button type="submit" className="btn-reject-confirm" style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                    XÁC NHẬN TỪ CHỐI
+                                </button>
                             </div>
                         </form>
                     </div>
