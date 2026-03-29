@@ -79,7 +79,6 @@ const DuyetYeuCauMua = () => {
                 <div>
                     <h2 style={{ display: 'flex', alignItems: 'center' }}>
                         👑 Duyệt Yêu Cầu Mua Hàng (Sếp)
-                        {/* 🎯 ĐÂY LÀ CHỖ HIỂN THỊ SỐ LƯỢNG ĐƠN CẦN DUYỆT NÈ SẾP */}
                         {filterStatus === 'Chờ Duyệt' && yeuCaus.length > 0 && (
                             <span style={{
                                 backgroundColor: '#ef4444',

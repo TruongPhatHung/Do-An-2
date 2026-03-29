@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import './QuanLyTaiKhoan.css';
 import { toast } from 'react-toastify';
+import adminAvatar from "../components/avarta/Screenshot 2026-03-21 185323 copy.png";
+import khoAvatar from "../components/avarta/Screenshot 2026-03-21 185359.png";
 
 const QuanLyTaiKhoan = () => {
     // 1. TÊN STATE LÀ 'users'
@@ -101,8 +103,8 @@ const QuanLyTaiKhoan = () => {
     const getRoleAvatar = (avatarDb, vaiTro) => {
         if (avatarDb) return avatarDb;
         const role = vaiTro?.toUpperCase();
-        if (role === 'ADMIN') return 'src/components/avarta/Screenshot 2026-03-21 185323 copy.png';
-        if (role === 'KHO' || role === 'QUANLYKHO') return 'src/components/avarta/Screenshot 2026-03-21 185359.png';
+        if (role === 'ADMIN') return adminAvatar;
+        if (role === 'KHO' || role === 'QUANLYKHO') return khoAvatar;
         if (role === 'MUAHANG') return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
         return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
     };
