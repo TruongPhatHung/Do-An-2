@@ -50,27 +50,31 @@
     background-color: #27ae60;
 }
 
-/* --- THANH TÌM KIẾM VÀ BỘ LỌC --- */
+/* --- THANH TÌM KIẾM VÀ BỘ LỌC (ĐÃ ĐƯỢC NÂNG CẤP) --- */
 .search-filter-section {
     display: flex;
-    gap: 20px;
+    flex-wrap: wrap; /* Rất quan trọng: cho phép rớt dòng nếu màn hình nhỏ */
+    gap: 15px;
     margin-bottom: 25px;
     background: #f8f9fa;
     padding: 15px 20px;
     border-radius: 8px;
     align-items: center;
     border: 1px solid #e9ecef;
+    justify-content: space-between;
 }
 
 .search-box {
-    flex: 2;
+    flex: 1 1 250px; /* Co giãn linh hoạt, min width 250px */
+    max-width: 400px; /* Không để thanh search dài quá mức cần thiết */
     display: flex;
     align-items: center;
     background: white;
     border: 1px solid #ced4da;
     border-radius: 6px;
     padding: 0 15px;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 44.5px;
 }
 
 .search-box:focus-within {
@@ -85,32 +89,57 @@
 
 .search-box input {
     width: 100%;
-    padding: 12px 0;
+    height: 100%;
     border: none;
     outline: none;
     background: transparent;
     font-size: 0.95rem;
 }
 
-.filter-box {
-    flex: 1;
+/* Nhóm các bộ lọc */
+.filter-group {
+    display: flex;
+    flex: 2 1 auto;
+    flex-wrap: wrap; 
+    gap: 15px;
+    justify-content: flex-end; /* Đẩy các bộ lọc sang góc phải cho đẹp */
 }
 
-.filter-box select {
+.filter-box {
+    flex: 0 0 auto; /* Không tự động giãn bừa bãi */
+    min-width: 180px; /* Đảm bảo đủ rộng để hiển thị hết text */
+    animation: fadeIn 0.3s ease-in-out; /* Thêm hiệu ứng hiện mượt mà khi ô Date xuất hiện */
+}
+
+/* Gộp chung style cho thẻ select và date picker để cao bằng nhau */
+.filter-box select,
+.custom-date-picker {
     width: 100%;
-    padding: 12px 15px;
+    height: 44.5px; /* Cố định chiều cao tuyệt đối cho tất cả filter */
+    padding: 0 15px;
     border: 1px solid #ced4da;
     border-radius: 6px;
     background-color: white;
     font-size: 0.95rem;
     cursor: pointer;
     outline: none;
+    color: #34495e;
+    font-weight: 500;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.filter-box select:focus {
+.filter-box select:focus,
+.custom-date-picker:focus {
     border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
+/* Animation mượt mà khi ô lọc ngày xuất hiện */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
 /* --- BẢNG DANH SÁCH --- */
 .table-responsive {
     overflow-x: auto;

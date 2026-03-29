@@ -5,6 +5,8 @@ import {
     PieChart, Pie, Cell, LineChart, Line, ComposedChart 
 } from 'recharts';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -21,6 +23,9 @@ const Dashboard = () => {
     
     // State lưu chi tiết danh sách xuất kho
     const [exportDetails, setExportDetails] = useState([]);
+
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [exportType, setExportType] = useState('tonghop'); // 'tonghop', 'tonkho', 'xuatkho'
 
     const COLORS = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#6f42c1', '#fd7e14'];
     const PIE_COLORS = ['#f6c23e', '#e74a3b', '#6f42c1', '#36b9cc', '#1cc88a'];
@@ -170,66 +175,151 @@ const Dashboard = () => {
         fetchDashboardData();
     }, []);
 
+    // THÊM MỚI: Hàm loại bỏ dấu tiếng Việt để xuất PDF không bị lỗi font
+    const removeVietnameseTones = (str) => {
+        if (!str) return "";
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ/g, "d");
+        str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+        str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+        str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+        str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+        str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+        str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+        str = str.replace(/Đ/g, "D");
+        return str;
+    }
+
+// ĐÃ SỬA LẠI: Hàm xuất Excel theo Tùy chọn
     const handleExportExcel = () => {
-        // ==========================================
-        // SHEET 1: DỮ LIỆU TỒN KHO
-        // ==========================================
-        const excelDataTonKho = items.map((item, index) => ({
-            "STT": index + 1,
-            "Mã Hàng": item.maHang,
-            "Tên Mặt Hàng": item.tenHang,
-            "Số Lượng Tồn": item.soLuongTon,
-            "Giá Nhập (VNĐ)": item.giaNhap,
-            "Thành Tiền (VNĐ)": item.thanhTien
-        }));
-
-        excelDataTonKho.push({
-            "STT": "", "Mã Hàng": "", "Tên Mặt Hàng": "TỔNG CỘNG:",
-            "Số Lượng Tồn": stats.tongSoLuong, "Giá Nhập (VNĐ)": "",
-            "Thành Tiền (VNĐ)": stats.tongTienNhap
-        });
-
-        const wsTonKho = XLSX.utils.json_to_sheet(excelDataTonKho);
-        wsTonKho['!cols'] = [{ wch: 5 }, { wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 20 }, { wch: 20 }];
-
-
-        // ==========================================
-        // SHEET 2: DỮ LIỆU XUẤT KHO (ĐÃ CẬP NHẬT)
-        // ==========================================
-        const excelDataXuatKho = exportDetails.map((item, index) => ({
-            "STT": index + 1,
-            "Mã Phiếu": item.maPhieu,
-            "Ngày Xuất": item.ngayXuat,
-            "Lý Do": item.lyDo,
-            "Mã Hàng": item.maHang,
-            "Tên Mặt Hàng": item.tenHang,
-            "Số Lượng Xuất": item.soLuongXuat,
-            "Tổng Giá Trị (VNĐ)": item.tongGiaTri // <-- THÊM MỚI
-        }));
-
-        // Thêm dòng tổng cộng cho Xuất Kho
-        excelDataXuatKho.push({
-            "STT": "", "Mã Phiếu": "", "Ngày Xuất": "", "Lý Do": "", "Mã Hàng": "", 
-            "Tên Mặt Hàng": "TỔNG CỘNG:",
-            "Số Lượng Xuất": exportStats.tongSoLuongXuat,
-            "Tổng Giá Trị (VNĐ)": exportStats.tongGiaTriXuat // <-- THÊM MỚI
-        });
-
-        const wsXuatKho = XLSX.utils.json_to_sheet(excelDataXuatKho);
-        // ĐÃ SỬA: Căn chỉnh lại độ rộng cột, thêm cột Tổng Giá Trị
-        wsXuatKho['!cols'] = [{ wch: 5 }, { wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 20 }];
-
-
-        // ==========================================
-        // TẠO WORKBOOK VÀ XUẤT FILE
-        // ==========================================
         const workbook = XLSX.utils.book_new();
-        
-        XLSX.utils.book_append_sheet(workbook, wsTonKho, "TonKho");
-        XLSX.utils.book_append_sheet(workbook, wsXuatKho, "XuatKho");
-
         const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-        XLSX.writeFile(workbook, `BaoCao_TongHopKho_${dateStr}.xlsx`);
+
+        // Chuẩn bị Sheet Tồn Kho
+        if (exportType === 'tonghop' || exportType === 'tonkho') {
+            const excelDataTonKho = items.map((item, index) => ({
+                "STT": index + 1,
+                "Mã Hàng": item.maHang,
+                "Tên Mặt Hàng": item.tenHang,
+                "Số Lượng Tồn": item.soLuongTon,
+                "Giá Nhập (VNĐ)": item.giaNhap,
+                "Thành Tiền (VNĐ)": item.thanhTien
+            }));
+            excelDataTonKho.push({
+                "STT": "", "Mã Hàng": "", "Tên Mặt Hàng": "TỔNG CỘNG:",
+                "Số Lượng Tồn": stats.tongSoLuong, "Giá Nhập (VNĐ)": "",
+                "Thành Tiền (VNĐ)": stats.tongTienNhap
+            });
+            const wsTonKho = XLSX.utils.json_to_sheet(excelDataTonKho);
+            wsTonKho['!cols'] = [{ wch: 5 }, { wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 20 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(workbook, wsTonKho, "TonKho");
+        }
+
+        // Chuẩn bị Sheet Xuất Kho
+        if (exportType === 'tonghop' || exportType === 'xuatkho') {
+            const excelDataXuatKho = exportDetails.map((item, index) => ({
+                "STT": index + 1,
+                "Mã Phiếu": item.maPhieu,
+                "Ngày Xuất": item.ngayXuat,
+                "Lý Do": item.lyDo,
+                "Mã Hàng": item.maHang,
+                "Tên Mặt Hàng": item.tenHang,
+                "Số Lượng Xuất": item.soLuongXuat,
+                "Tổng Giá Trị (VNĐ)": item.tongGiaTri 
+            }));
+            excelDataXuatKho.push({
+                "STT": "", "Mã Phiếu": "", "Ngày Xuất": "", "Lý Do": "", "Mã Hàng": "", 
+                "Tên Mặt Hàng": "TỔNG CỘNG:",
+                "Số Lượng Xuất": exportStats.tongSoLuongXuat,
+                "Tổng Giá Trị (VNĐ)": exportStats.tongGiaTriXuat 
+            });
+            const wsXuatKho = XLSX.utils.json_to_sheet(excelDataXuatKho);
+            wsXuatKho['!cols'] = [{ wch: 5 }, { wch: 15 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 40 }, { wch: 15 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(workbook, wsXuatKho, "XuatKho");
+        }
+
+        let fileName = `BaoCao_${exportType}_${dateStr}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+        setShowExportModal(false); // Đóng modal sau khi xuất
+    };
+
+    // THÊM MỚI: Hàm xuất PDF
+    const handleExportPDF = () => {
+        const doc = new jsPDF('landscape'); // Khổ ngang cho dễ nhìn bảng
+        const dateStr = new Date().toLocaleDateString('vi-VN');
+        
+        doc.setFontSize(18);
+        doc.text(removeVietnameseTones(`BAO CAO ${exportType.toUpperCase()} - NGAY ${dateStr}`), 14, 20);
+
+        let startYPos = 30;
+
+        // Bảng Tồn Kho
+        if (exportType === 'tonghop' || exportType === 'tonkho') {
+            doc.setFontSize(14);
+            doc.text("DANH SACH TON KHO", 14, startYPos);
+            
+            const tableDataTonKho = items.map((item, index) => [
+                index + 1,
+                item.maHang,
+                removeVietnameseTones(item.tenHang),
+                item.soLuongTon,
+                item.giaNhap.toLocaleString() + " VND",
+                item.thanhTien.toLocaleString() + " VND"
+            ]);
+
+            tableDataTonKho.push(["", "", "TONG CONG:", stats.tongSoLuong, "", stats.tongTienNhap.toLocaleString() + " VND"]);
+
+          // THAY BẰNG CÁCH MỚI:
+            autoTable(doc, {
+                startY: startYPos + 5,
+                head: [['STT', 'Ma Hang', 'Ten Mat Hang', 'So Luong Ton', 'Gia Nhap', 'Thanh Tien']],
+                body: tableDataTonKho,
+                theme: 'grid',
+                headStyles: { fillColor: [78, 115, 223] }
+            });
+            startYPos = doc.lastAutoTable.finalY + 15;
+        }
+
+        // Bảng Xuất Kho
+        if (exportType === 'tonghop' || exportType === 'xuatkho') {
+            if (exportType === 'tonghop' && startYPos > 150) {
+                doc.addPage();
+                startYPos = 20;
+            }
+            
+            doc.setFontSize(14);
+            doc.text("DANH SACH XUAT KHO", 14, startYPos);
+
+            const tableDataXuatKho = exportDetails.map((item, index) => [
+                index + 1,
+                item.maPhieu,
+                item.ngayXuat,
+                removeVietnameseTones(item.lyDo),
+                item.maHang,
+                removeVietnameseTones(item.tenHang),
+                item.soLuongXuat,
+                item.tongGiaTri.toLocaleString() + " VND"
+            ]);
+
+            tableDataXuatKho.push(["", "", "", "", "", "TONG CONG:", exportStats.tongSoLuongXuat, exportStats.tongGiaTriXuat.toLocaleString() + " VND"]);
+
+           // THAY BẰNG CÁCH MỚI:
+            autoTable(doc, {
+                startY: startYPos + 5,
+                head: [['STT', 'Ma Phieu', 'Ngay Xuat', 'Ly Do', 'Ma Hang', 'Ten Mat Hang', 'SL Xuat', 'Tong Gia Tri']],
+                body: tableDataXuatKho,
+                theme: 'grid',
+                headStyles: { fillColor: [231, 74, 59] }
+            });
+        }
+
+        doc.save(`BaoCao_${exportType}_${new Date().toISOString().slice(0, 10)}.pdf`);
+        setShowExportModal(false); // Đóng modal sau khi xuất
     };
 
     const topValueItems = items.slice(0, 5);
@@ -244,10 +334,45 @@ const Dashboard = () => {
                     <h2>📊 Phân Tích Kho Hàng Tổng Hợp</h2>
                     <p>Cập nhật lần cuối: {new Date().toLocaleTimeString()}</p>
                 </div>
-                <button onClick={handleExportExcel} className="btn-export-excel" title="Tải xuống báo cáo chi tiết">
-                    <span style={{ marginRight: '8px' }}>📊</span> Xuất Báo Cáo
+               {/* SỬA LẠI NÚT BẤM ĐỂ MỞ MODAL */}
+                <button onClick={() => setShowExportModal(true)} className="btn-export-excel" title="Mở tùy chọn xuất báo cáo">
+                    <span style={{ marginRight: '8px' }}>📊</span> Tùy Chọn Xuất
                 </button>
             </header>
+            {/* THÊM MỚI: MODAL CHỌN XUẤT FILE */}
+            {showExportModal && (
+                <div className="custom-modal-overlay">
+                    <div className="custom-modal-content">
+                        <h4>⚙️ Chọn Tùy Chọn Xuất Báo Cáo</h4>
+                        
+                        <div className="modal-form-group">
+                            <label>Dữ liệu muốn xuất:</label>
+                            <select 
+                                value={exportType} 
+                                onChange={(e) => setExportType(e.target.value)}
+                                className="modal-select"
+                            >
+                                <option value="tonghop">Tất cả (Tổng Hợp)</option>
+                                <option value="tonkho">Chỉ danh sách Tồn Kho</option>
+                                <option value="xuatkho">Chỉ danh sách Xuất Kho</option>
+                            </select>
+                        </div>
+
+                        <div className="modal-buttons-grid">
+                            <button onClick={handleExportExcel} className="btn-export type-excel">
+                                📗 Xuất ra EXCEL
+                            </button>
+                            <button onClick={handleExportPDF} className="btn-export type-pdf">
+                                📕 Xuất ra PDF
+                            </button>
+                        </div>
+                        
+                        <button onClick={() => setShowExportModal(false)} className="btn-close-modal">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            )}
             
             {/* THỐNG KÊ TỔNG QUAN */}
             <div className="db-stats-grid">

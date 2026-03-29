@@ -167,3 +167,115 @@
     color: #2c3e50 !important; /* Dùng màu xám đen/đen để dễ nhìn */
     font-weight: 700 !important;
 }
+/* ==========================================
+   CSS CHO MODAL XUẤT BÁO CÁO
+========================================== */
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.custom-modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-modal-content h4 {
+    margin-top: 0;
+    color: #4e73df;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modal-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.modal-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d3e2;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.modal-select:focus {
+    border-color: #4e73df;
+}
+
+.modal-buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.btn-export {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-export.type-excel {
+    background-color: #217346; /* Xanh lá Excel */
+}
+.btn-export.type-excel:hover {
+    background-color: #1a5a37;
+}
+
+.btn-export.type-pdf {
+    background-color: #e74a3b; /* Đỏ PDF */
+}
+.btn-export.type-pdf:hover {
+    background-color: #be2617;
+}
+
+.btn-close-modal {
+    width: 100%;
+    padding: 10px;
+    background-color: #eaecf4;
+    color: #5a5c69;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-close-modal:hover {
+    background-color: #d1d3e2;
+}

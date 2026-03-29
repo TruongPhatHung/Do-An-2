@@ -8,38 +8,49 @@
 }
 
 .hanghoa-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 20px;
 }
 
 .hanghoa-header h2 {
     color: #2c3e50;
     margin: 0;
-    font-size: 22px;
+    font-size: 24px;
+    font-weight: bold;
 }
 
-/* Thanh tìm kiếm hiện đại */
+/* === THANH CÔNG CỤ (TÌM KIẾM & LỌC) === */
+.toolbar-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: center;
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
 .search-box {
     position: relative;
     display: flex;
     align-items: center;
+    flex: 1;
+    min-width: 300px;
 }
 
 .search-icon {
     position: absolute;
-    left: 12px;
+    left: 14px;
     color: #858796;
     font-size: 18px;
 }
 
 .search-bar {
-    width: 350px;
-    /* Thêm !important để chống bị các CSS khác ghi đè */
-    padding: 10px 10px 10px 25px !important; 
+    width: 100%;
+    padding: 10px 10px 10px 38px !important; 
     border: 1px solid #d1d3e2;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 14px;
     transition: all 0.3s ease;
     outline: none;
@@ -51,12 +62,56 @@
     box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
 }
 
-/* Bảng dữ liệu */
+.filter-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 220px;
+}
+
+.filter-icon {
+    position: absolute;
+    left: 14px;
+    color: #4e73df;
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 10px 10px 10px 38px !important;
+    border: 1px solid #d1d3e2;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #495057;
+    background-color: #fff;
+    cursor: pointer;
+    appearance: none; /* Ẩn mũi tên mặc định trên một số trình duyệt */
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+/* Thêm mũi tên dropdown custom */
+.filter-box::after {
+    content: '▼';
+    font-size: 10px;
+    color: #858796;
+    position: absolute;
+    right: 14px;
+    pointer-events: none;
+}
+
+/* === BẢNG DỮ LIỆU === */
 .table-responsive {
     background: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .hanghoa-table {
@@ -65,12 +120,12 @@
 }
 
 .hanghoa-table th {
-    background-color: #f1f4f8;
+    background-color: #f8f9fc;
     color: #4a5568;
     font-weight: 600;
     padding: 16px 12px;
     text-align: left;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #e3e6f0;
     white-space: nowrap;
 }
 
@@ -102,6 +157,7 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+    display: inline-block;
 }
 
 .price-text {

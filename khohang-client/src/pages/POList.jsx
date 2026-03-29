@@ -7,6 +7,11 @@ const POList = () => {
     const [orders, setOrders] = useState([]);
     const [filterStatus, setFilterStatus] = useState('ALL');
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // States cho bộ lọc thời gian
+    const [timeFilter, setTimeFilter] = useState('ALL'); 
+    const [specificDate, setSpecificDate] = useState(''); // State lưu ngày cụ thể người dùng chọn
+
     const navigate = useNavigate();
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -25,9 +30,7 @@ const POList = () => {
     }, []);
 
     const getStatusLabel = (status) => {
-        // Cập nhật lại key cho khớp với dữ liệu thực tế ("HOÀN THÀNH", "HOÀN TẤT", "MỚI TẠO"...)
         const normalizedStatus = status ? status.toUpperCase() : '';
-        
         switch (normalizedStatus) {
             case 'MỚI TẠO':
                 return <span className="status-badge status-new">Mới Tạo</span>;
@@ -45,19 +48,69 @@ const POList = () => {
         return (chiTiets || []).reduce((sum, item) => sum + (item.soLuongDat * item.donGia), 0);
     };
 
+    // --- LOGIC XỬ LÝ THỜI GIAN ---
+    const checkTimeFilter = (dateString, filterType, selectedDateStr) => {
+        if (filterType === 'ALL') return true;
+        
+        const date = new Date(dateString);
+        const now = new Date();
+        
+        const isSameDay = (d1, d2) => 
+            d1.getDate() === d2.getDate() && 
+            d1.getMonth() === d2.getMonth() && 
+            d1.getFullYear() === d2.getFullYear();
+
+        switch (filterType) {
+            case 'SPECIFIC_DATE':
+                if (!selectedDateStr) return true; // Nếu chưa chọn ngày thì bỏ qua lọc
+                const selectedDate = new Date(selectedDateStr);
+                return isSameDay(date, selectedDate);
+                
+            case 'THIS_WEEK':
+                const currentDay = now.getDay() || 7; 
+                const firstDayOfWeek = new Date(now);
+                firstDayOfWeek.setDate(now.getDate() - currentDay + 1);
+                firstDayOfWeek.setHours(0, 0, 0, 0);
+                
+                const lastDayOfWeek = new Date(firstDayOfWeek);
+                lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+                lastDayOfWeek.setHours(23, 59, 59, 999);
+                
+                return date >= firstDayOfWeek && date <= lastDayOfWeek;
+                
+            case 'THIS_MONTH':
+                return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                
+            case 'THIS_QUARTER':
+                const getQuarter = (d) => Math.floor(d.getMonth() / 3);
+                return getQuarter(date) === getQuarter(now) && date.getFullYear() === now.getFullYear();
+                
+            default:
+                return true;
+        }
+    };
+
     const filteredOrders = orders.filter(o => {
         const matchesSearch = (o.maDon?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
             (o.nhaCungCap?.tenNCC?.toLowerCase() || "").includes(searchTerm.toLowerCase());
         
-        // So sánh không phân biệt hoa thường
         const matchesStatus = filterStatus === 'ALL' || (o.trangThai && o.trangThai.toUpperCase() === filterStatus.toUpperCase());
-        return matchesSearch && matchesStatus;
+        
+        // Truyền thêm specificDate vào hàm kiểm tra
+        const matchesTime = checkTimeFilter(o.ngayTao, timeFilter, specificDate);
+
+        return matchesSearch && matchesStatus && matchesTime;
     });
 
     const totalPages = Math.ceil(filteredOrders.length / itemsPerPage) || 1;
+    
+    // Reset về trang 1 nếu đổi bất kỳ bộ lọc nào
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterStatus, timeFilter, specificDate]);
+
     const currentItems = filteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    // Hàm chuyển trang
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
@@ -76,7 +129,7 @@ const POList = () => {
 
             <div className="search-filter-section">
                 <div className="search-box">
-                    <span className="search-icon">🔍</span>
+                    
                     <input
                         type="text"
                         placeholder="Tìm theo Mã đơn hoặc Tên công ty..."
@@ -84,13 +137,46 @@ const POList = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="filter-box">
-                    <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                        <option value="ALL">Tất cả trạng thái</option>
-                        <option value="MỚI TẠO">Mới tạo</option>
-                        <option value="GIAO THIẾU">Giao thiếu</option>
-                        <option value="HOÀN TẤT">Hoàn tất</option>
-                    </select>
+                
+                <div className="filter-group">
+                    <div className="filter-box">
+                        <select 
+                            value={timeFilter} 
+                            onChange={(e) => {
+                                setTimeFilter(e.target.value);
+                                if (e.target.value !== 'SPECIFIC_DATE') {
+                                    setSpecificDate(''); // Xoá ngày đã chọn nếu chuyển sang lọc Tuần/Tháng/Quý
+                                }
+                            }}
+                        >
+                            <option value="ALL">🗓️ Toàn thời gian</option>
+                            <option value="SPECIFIC_DATE">📅 Chọn ngày cụ thể</option>
+                            <option value="THIS_WEEK">📊 Tuần này</option>
+                            <option value="THIS_MONTH">📆 Tháng này</option>
+                            <option value="THIS_QUARTER">📈 Quý này</option>
+                        </select>
+                    </div>
+
+                    {/* Ô CHỌN NGÀY CHỈ HIỆN RA KHI CHỌN "Chọn ngày cụ thể" */}
+                    {timeFilter === 'SPECIFIC_DATE' && (
+                        <div className="filter-box">
+                            <input 
+                                type="date" 
+                                className="custom-date-picker"
+                                value={specificDate}
+                                onChange={(e) => setSpecificDate(e.target.value)}
+                            />
+                        </div>
+                    )}
+
+                    <div className="filter-box">
+                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                            <option value="ALL">🏷️ Tất cả trạng thái</option>
+                            <option value="MỚI TẠO">Mới tạo</option>
+                            <option value="GIAO THIẾU">Giao thiếu</option>
+                            <option value="HOÀN TẤT">Hoàn tất</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -126,8 +212,9 @@ const POList = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#7f8c8d' }}>
-                                    Không tìm thấy đơn hàng nào.
+                                <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#7f8c8d' }}>
+                                    <div style={{ fontSize: '2rem', marginBottom: '10px' }}>📭</div>
+                                    Không tìm thấy đơn hàng nào phù hợp với bộ lọc.
                                 </td>
                             </tr>
                         )}
@@ -135,7 +222,6 @@ const POList = () => {
                 </table>
             </div>
 
-            {/* KHU VỰC PHÂN TRANG */}
             {totalPages > 1 && (
                 <div className="pagination">
                     <button 
