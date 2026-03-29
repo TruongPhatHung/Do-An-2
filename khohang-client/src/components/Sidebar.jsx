@@ -69,6 +69,13 @@ const Sidebar = () => {
                         <NavLink to ="/lich-su-xuat-kho" className={navClass}>
                             <span className="menu-icon">📥</span> Lịch Sử Xuất Kho
                         </NavLink>
+                        <NavLink to ="/lich-su-yeu-cau-mua" className={navClass}>
+                            <span className="menu-icon">📥</span> Lịch Sử Yêu Cầu Mua
+                        </NavLink>
+                        <NavLink to="/lich-su-yeu-cau-xuat" className={navClass}>
+                            <span className="menu-icon">📥</span> Lịch Sử Yêu Cầu Xuất
+                        </NavLink>
+
                         {/* Thêm menu Lập lệnh xuất kho */}
                         
                     </li>
@@ -114,6 +121,10 @@ const Sidebar = () => {
                         <NavLink to="/duyet-yeu-cau-mua" className={navClass}>
                             <span className="menu-icon">👥</span> Duyết Yêu Cầu Mua
                         </NavLink>
+                        <NavLink to="/duyet-yeu-cau-xuat" className={navClass}>
+                            <span className="menu-icon">👥</span> Duyết Yêu Cầu Xuat
+                        </NavLink>
+                        
                     </li>
                 )}
 

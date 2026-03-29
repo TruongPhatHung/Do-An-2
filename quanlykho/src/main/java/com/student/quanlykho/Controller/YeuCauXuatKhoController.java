@@ -8,10 +8,12 @@ import com.student.quanlykho.Repository.YeuCauXuatKhoRepository;
 import com.student.quanlykho.Service.AuditLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,11 +39,9 @@ public class YeuCauXuatKhoController {
     // 2. 🎯 ĐÃ SỬA: Lấy các yêu cầu ĐANG CHỜ XUẤT + GIAO THIẾU
     @GetMapping("/pending")
     public List<YeuCauXuatKho> getPendingRequests() {
-        // Chúng ta chỉ lấy:
-        // 1. Chờ Xuất: Đơn mới tinh chưa nhặt món nào.
-        // 2. Giao Thiếu: Đơn đã nhặt một ít, còn nợ lại.
+        // Nhân viên kho chỉ thấy đơn "Đã Duyệt" (để đi nhặt hàng) và "Giao Thiếu" (để giao bù)
         return yeuCauXuatKhoRepository.findByTrangThaiInOrderByNgayCanXuatAsc(
-                List.of("Chờ Xuất", "Giao Thiếu")
+                List.of("Đã Duyệt", "Giao Thiếu")
         );
     }
 
@@ -55,7 +55,7 @@ public class YeuCauXuatKhoController {
         ycx.setNgayCanXuat(request.getNgayCanXuat());
         ycx.setNguoiTao(request.getNguoiTao());
         ycx.setGhiChu(request.getGhiChu());
-        ycx.setTrangThai("Chờ Xuất");
+        ycx.setTrangThai("Chờ Duyệt");
 
         List<ChiTietYeuCauXuat> chiTiets = request.getChiTiets().stream().map(item -> {
             // Lấy mặt hàng từ kho lên kiểm tra
@@ -86,6 +86,23 @@ public class YeuCauXuatKhoController {
 
         return saved;
     }
+    @PutMapping("/{maYeuCau}/duyet")
+    @Transactional
+    public ResponseEntity<?> duyetLenhXuat(@PathVariable String maYeuCau, @RequestBody Map<String, String> body) {
+        YeuCauXuatKho ycx = yeuCauXuatKhoRepository.findById(maYeuCau)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lệnh xuất!"));
+
+        String trangThaiMoi = body.get("trangThai"); // "Đã Duyệt" hoặc "Từ Chối"
+        String lyDo = body.get("lyDoTuChoi");
+
+        ycx.setTrangThai(trangThaiMoi);
+        if ("Từ Chối".equals(trangThaiMoi)) {
+            ycx.setLyDoTuChoi(lyDo);
+        }
+
+        yeuCauXuatKhoRepository.save(ycx);
+        return ResponseEntity.ok("Cập nhật trạng thái lệnh xuất thành công!");
+    }
 
     // --- DTO (Data Transfer Objects) để hứng dữ liệu từ React ---
     public static class YeuCauXuatRequest {
@@ -95,6 +112,7 @@ public class YeuCauXuatKhoController {
         private String nguoiTao;
         private String ghiChu;
         private List<ChiTietYeuCauRequest> chiTiets;
+
 
         // Getters, Setters
         public String getMaYeuCau() { return maYeuCau; }

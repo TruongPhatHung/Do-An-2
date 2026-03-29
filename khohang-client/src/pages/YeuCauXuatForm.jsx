@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiTrash2, FiSave, FiArrowLeft, FiAlertTriangle } from 'react-icons/fi'; // Đổi icon sang AlertTriangle
+import { FiPlus, FiTrash2, FiArrowLeft, FiAlertTriangle, FiSend } from 'react-icons/fi';
 import './YeuCauXuatForm.css';
 
 const YeuCauXuatForm = () => {
@@ -43,25 +43,24 @@ const YeuCauXuatForm = () => {
         if (items.length > 1) setItems(items.filter((_, i) => i !== index));
     };
 
-    // 🎯 ĐÃ SỬA: Chỉ chặn submit nếu số lượng <= 0. KHÔNG CHẶN nếu số lượng > tồn kho nữa.
+    // Chặn submit nếu số lượng <= 0
     const isInvalidQuantity = items.some(item => item.soLuongYeuCau <= 0);
 
-    // 🎯 THÊM MỚI: Biến này dùng để hiện cảnh báo màu vàng cho Sếp biết kho đang thiếu hàng
+    // Cảnh báo màu vàng cho Kinh doanh biết kho đang thiếu hàng, Sếp sẽ thấy
     const isWarningQuantity = items.some(item => item.soLuongYeuCau > item.tonKho);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Chỉ chặn nếu nhập số âm hoặc số 0
         if (isInvalidQuantity) {
             toast.error("Vui lòng kiểm tra lại! Số lượng yêu cầu phải lớn hơn 0.");
             return;
         }
 
-        const nguoiTao = localStorage.getItem('username') || "ADMIN";
+        const nguoiTao = localStorage.getItem('username') || "Kinh Doanh";
 
         const payload = {
-            maYeuCau: "YCX-" + Date.now().toString().slice(-6), // Làm gọn mã YCX cho đẹp
+            maYeuCau: "YCX-" + Date.now().toString().slice(-6),
             noiNhan,
             ngayCanXuat,
             nguoiTao,
@@ -75,14 +74,14 @@ const YeuCauXuatForm = () => {
         try {
             await api.post('/yeu-cau-xuat', payload);
 
-            // 🎯 ĐÃ SỬA: Báo Toast khác nhau tùy việc có đặt lố hàng hay không
+            // 🎯 ĐÃ SỬA: Thông báo rõ ràng là đang chờ duyệt
             if (isWarningQuantity) {
-                toast.warning("Lệnh đã được phát! Lưu ý: Có mặt hàng đang vượt quá tồn kho (Sẽ giao thiếu).");
+                toast.warning("Đã gửi lệnh cho Sếp! Lưu ý: Kho đang thiếu hàng, lệnh có thể bị Sếp từ chối.");
             } else {
-                toast.success("✅ Đã phát lệnh xuất kho thành công!");
+                toast.success("✅ Đã trình lệnh xuất kho. Vui lòng chờ Sếp phê duyệt!");
             }
 
-            navigate('/dashboard');
+            navigate('/dashboard'); // Hoặc điều hướng về trang Lịch sử của họ
         } catch (error) {
             toast.error(error.response?.data?.message || "❌ Lỗi: Không thể tạo Lệnh xuất kho!");
             console.error(error);
@@ -95,11 +94,14 @@ const YeuCauXuatForm = () => {
                 <button type="button" className="btn-back" onClick={() => navigate(-1)}>
                     <FiArrowLeft /> Quay lại
                 </button>
-                <h2>📤 Lập Lệnh Yêu Cầu Xuất Kho</h2>
+                <div style={{ marginLeft: '15px' }}>
+                    <h2 style={{ margin: 0, color: '#1e293b' }}>📤 Lập Lệnh Yêu Cầu Xuất Kho</h2>
+                    <p style={{ margin: '5px 0 0 0', color: '#64748b' }}>Lập danh sách hàng hóa cần xuất để trình Giám đốc phê duyệt</p>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit} className="ycx-card">
-                {/* PHẦN 1: THÔNG TIN LỆNH XUẤT (Giữ nguyên) */}
+                {/* PHẦN 1: THÔNG TIN LỆNH XUẤT */}
                 <div className="ycx-section">
                     <h4 className="section-title">1. Thông tin lệnh xuất</h4>
                     <div className="form-grid">
@@ -118,9 +120,9 @@ const YeuCauXuatForm = () => {
                             />
                         </div>
                         <div className="input-group full-width">
-                            <label>Ghi chú lệnh xuất</label>
+                            <label>Ghi chú lệnh xuất (Gửi Sếp)</label>
                             <input
-                                type="text" placeholder="Giao gấp, bọc kỹ..."
+                                type="text" placeholder="VD: Khách Vip giao gấp, đang nợ 2 cái chờ hàng về..."
                                 value={ghiChu} onChange={e => setGhiChu(e.target.value)}
                             />
                         </div>
@@ -142,7 +144,6 @@ const YeuCauXuatForm = () => {
                             </thead>
                             <tbody>
                                 {items.map((item, index) => {
-                                    // 🎯 ĐÃ SỬA: Đổi cảnh báo từ Lỗi (Đỏ) sang Cảnh báo (Vàng)
                                     const isShortage = item.soLuongYeuCau > item.tonKho;
 
                                     return (
@@ -155,7 +156,6 @@ const YeuCauXuatForm = () => {
                                                 >
                                                     <option value="">-- Chọn mặt hàng --</option>
                                                     {products.map(p => (
-                                                        // 🎯 ĐÃ SỬA: Không disable mặt hàng hết tồn kho nữa, cứ cho Sếp chọn để nợ!
                                                         <option key={p.maHang} value={p.maHang}>
                                                             {p.tenHang} {p.soLuongTon <= 0 ? '(Kho đang hết)' : ''}
                                                         </option>
@@ -176,10 +176,9 @@ const YeuCauXuatForm = () => {
                                                     disabled={!item.maHang}
                                                     style={isShortage ? { borderColor: '#f59e0b', outlineColor: '#f59e0b' } : {}}
                                                 />
-                                                {/* 🎯 ĐÃ SỬA: Chữ màu vàng báo hiệu thiếu hàng */}
                                                 {isShortage && (
                                                     <div style={{ color: '#d97706', fontSize: '12px', marginTop: '4px', fontWeight: 'bold' }}>
-                                                        <FiAlertTriangle /> Kho không đủ (Sẽ giao thiếu)
+                                                        <FiAlertTriangle /> Kho không đủ (Sẽ nợ / Sếp có thể từ chối)
                                                     </div>
                                                 )}
                                             </td>
@@ -200,10 +199,10 @@ const YeuCauXuatForm = () => {
                 </div>
 
                 {/* PHẦN 3: XÁC NHẬN */}
-                <div className="ycx-footer">
-                    {/* 🎯 ĐÃ SỬA: Bỏ isInvalidQuantity ở đây đi, nút luôn sáng nếu đã chọn mã hàng */}
-                    <button type="submit" className="btn-submit-ycx" disabled={isInvalidQuantity || items[0].maHang === ''}>
-                        <FiSave style={{ marginRight: '8px' }} /> PHÁT LỆNH XUẤT KHO
+                <div className="ycx-footer" style={{ justifyContent: 'flex-end', display: 'flex', marginTop: '20px' }}>
+                    {/* 🎯 ĐÃ SỬA: Tên nút rõ ràng mục đích */}
+                    <button type="submit" className="btn-submit-ycx" disabled={isInvalidQuantity || items[0].maHang === ''} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#3b82f6', color: 'white', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
+                        <FiSend /> TRÌNH SẾP DUYỆT LỆNH
                     </button>
                 </div>
             </form>

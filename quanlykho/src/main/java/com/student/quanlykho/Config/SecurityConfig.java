@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
                         .requestMatchers(HttpMethod.POST, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "QUANLYKHO")
 
+                        .requestMatchers(HttpMethod.PUT, "/api/yeu-cau-xuat/*/duyet").hasAuthority("ADMIN")
                         // =========================================================
                         // 🎯 10. MỚI: QUẢN LÝ YÊU CẦU MUA HÀNG (Quy trình PR -> PO)
                         // =========================================================

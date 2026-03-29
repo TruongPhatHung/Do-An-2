@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import './PhieuXuatKho.css';
 import { toast } from 'react-toastify';
-import { FiCheckCircle, FiAlertTriangle, FiArrowLeft, FiUser, FiTag } from 'react-icons/fi';
+import { FiCheckCircle, FiAlertTriangle, FiArrowLeft, FiUser, FiTag, FiFileText } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const PhieuXuatKho = () => {
@@ -11,27 +11,27 @@ const PhieuXuatKho = () => {
     const [inventory, setInventory] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [selectedRequest, setSelectedRequest] = useState('');
+    const [selectedReqData, setSelectedReqData] = useState(null); // Lưu thông tin chi tiết của lệnh đang chọn
     const [items, setItems] = useState([]);
 
-    // 🎯 THÊM STATE ĐỂ ĐỒNG BỘ VỚI BACKEND
     const [tenNguoiNhan, setTenNguoiNhan] = useState('');
-    const [mucDich, setMucDich] = useState('Xuất bán khách hàng'); // Có chứa chữ "bán" để BE bốc Giá Bán
+    const [mucDich, setMucDich] = useState('Xuất bán khách hàng');
 
     const refreshData = async () => {
         try {
             const resStock = await api.get('/products');
             setInventory(resStock.data);
 
+            // Backend trả về list đã lọc "Đã Duyệt" & "Giao Thiếu"
             const resReq = await api.get('/yeu-cau-xuat/pending');
-            // Backend trả về list đã lọc "Chờ Xuất" & "Giao Thiếu"
             setPendingRequests(resReq.data);
             return { stock: resStock.data, reqs: resReq.data };
         } catch (error) {
             console.error("Lỗi tải lại dữ liệu:", error);
+            toast.error("Không thể tải dữ liệu lệnh xuất!");
         }
     };
 
-    // Tải danh sách Hàng trong kho và Danh sách Lệnh yêu cầu xuất
     useEffect(() => {
         const init = async () => {
             const data = await refreshData();
@@ -39,7 +39,6 @@ const PhieuXuatKho = () => {
             // Xử lý khi bay từ trang Giao Thiếu sang
             const maYeuCauTuDong = location.state?.maYeuCauTuDong;
             if (maYeuCauTuDong && data) {
-                // Đợi 1 chút để select kịp render danh sách mới
                 setTimeout(() => {
                     handleSelectRequest(maYeuCauTuDong, data.reqs, data.stock);
                 }, 200);
@@ -48,17 +47,18 @@ const PhieuXuatKho = () => {
         init();
     }, [location.state]);
 
-    // Khi chọn 1 Lệnh Xuất -> Tự động đổ hàng và thông tin ra form
     const handleSelectRequest = (maYeuCau, currentRequests = pendingRequests, currentInventory = inventory) => {
         setSelectedRequest(maYeuCau);
         if (!maYeuCau) {
             setItems([]);
             setTenNguoiNhan('');
+            setSelectedReqData(null);
             return;
         }
 
         const request = currentRequests.find(req => req.maYeuCau === maYeuCau);
         if (request) {
+            setSelectedReqData(request); // Lưu lại để hiển thị ghi chú
             setTenNguoiNhan(request.noiNhan || '');
             if (request.chiTiets) {
                 const mappedItems = request.chiTiets.map(ct => {
@@ -72,7 +72,6 @@ const PhieuXuatKho = () => {
                         soLuongYeuCau: ct.soLuongYeuCau,
                         soLuongDaXuat: daXuat,
                         soLuongTon: stockItem ? stockItem.soLuongTon : 0,
-                        // Nếu món này đã giao đủ rồi thì mặc định là 0, không thì điền số nợ
                         soLuongThucXuat: canXuat > 0 ? canXuat : 0
                     };
                 });
@@ -89,7 +88,7 @@ const PhieuXuatKho = () => {
         setItems(newItems);
     };
 
-    // Kiểm tra điều kiện để mở khóa nút Submit (Không cho lố tồn kho và lố yêu cầu)
+    // Kiểm tra điều kiện để mở khóa nút Submit
     const isValidToSubmit = items.length > 0 && !items.some(i => {
         const conNo = i.soLuongYeuCau - i.soLuongDaXuat;
         return i.soLuongThucXuat > i.soLuongTon || i.soLuongThucXuat < 0 || i.soLuongThucXuat > conNo;
@@ -99,24 +98,26 @@ const PhieuXuatKho = () => {
         e.preventDefault();
 
         const chiTietMap = {};
+        let totalExport = 0;
+
         items.forEach(item => {
             if (item.soLuongThucXuat > 0) {
                 chiTietMap[item.maHang] = item.soLuongThucXuat;
+                totalExport += item.soLuongThucXuat;
             }
         });
 
-        if (Object.keys(chiTietMap).length === 0) {
+        if (totalExport === 0) {
             toast.warn("Bạn chưa điền số lượng thực xuất nào cả!");
             return;
         }
 
         const randomMaPhieu = "PX-" + Date.now().toString().slice(-6);
 
-        // ĐỒNG BỘ PAYLOAD VỚI DTO CỦA BACKEND
         const payload = {
             maPhieuXuat: randomMaPhieu,
-            lyDo: `${mucDich} (Lệnh: ${selectedRequest})`, // Gửi đúng từ khóa "bán", "trả", "hủy" để BE tính tiền
-            tenNguoiNhan: tenNguoiNhan, // Gửi tên người nhận
+            lyDo: `${mucDich} (Lệnh: ${selectedRequest})`,
+            tenNguoiNhan: tenNguoiNhan,
             chiTietXuat: chiTietMap
         };
 
@@ -126,15 +127,10 @@ const PhieuXuatKho = () => {
 
             // Reset form
             setSelectedRequest('');
+            setSelectedReqData(null);
             setItems([]);
             setTenNguoiNhan('');
-            
-            // Tải lại dữ liệu
-            const resStock = await api.get('/products');
-            setInventory(resStock.data);
 
-            const resReq = await api.get('/yeu-cau-xuat/pending');
-            setPendingRequests(resReq.data);
             await refreshData();
         } catch (error) {
             toast.error(error.response?.data?.message || "❌ Lỗi xuất kho! Có thể do hệ thống bị gián đoạn.");
@@ -149,7 +145,7 @@ const PhieuXuatKho = () => {
                 </button>
                 <div className="header-title-group">
                     <h2>📤 Tạo Phiếu Xuất Kho (Thực Thi Lệnh)</h2>
-                    <p>Chọn lệnh yêu cầu từ sếp để tiến hành xuất kho</p>
+                    <p>Chọn lệnh yêu cầu <strong style={{ color: '#10b981' }}>đã được Sếp duyệt</strong> để tiến hành xuất kho</p>
                 </div>
             </div>
 
@@ -162,20 +158,26 @@ const PhieuXuatKho = () => {
                         className="custom-select select-request"
                     >
                         <option value="">-- Click để chọn Lệnh xuất kho --</option>
-                        {pendingRequests
-                            .filter(req => req.trangThai !== "Hoàn Thành")
-                            .map(req => (
-                                <option key={req.maYeuCau} value={req.maYeuCau}>
-                                    [{req.trangThai}] {req.maYeuCau} | Giao đến: {req.noiNhan}
-                                </option>
-                            ))}
+                        {pendingRequests.map(req => (
+                            <option key={req.maYeuCau} value={req.maYeuCau}>
+                                {req.trangThai === 'Giao Thiếu' ? '⚠️' : '🟢'} [{req.trangThai}] Lệnh: {req.maYeuCau} | Giao đến: {req.noiNhan}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
                 {selectedRequest ? (
                     <form onSubmit={handleSubmit} className="xuatkho-form">
 
-                        {/* THÊM KHUNG THÔNG TIN XUẤT KHO */}
+                        {/* HIỂN THỊ GHI CHÚ CỦA LỆNH */}
+                        {selectedReqData?.ghiChu && (
+                            <div style={{ backgroundColor: '#eff6ff', padding: '12px 15px', borderRadius: '8px', marginBottom: '20px', borderLeft: '4px solid #3b82f6', color: '#1e3a8a', fontSize: '0.95rem' }}>
+                                <FiFileText style={{ marginRight: '8px' }} />
+                                <strong>Ghi chú lệnh: </strong> {selectedReqData.ghiChu}
+                            </div>
+                        )}
+
+                        {/* KHUNG THÔNG TIN XUẤT KHO */}
                         <div className="info-export-box" style={{ display: 'flex', gap: '20px', marginBottom: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                             <div style={{ flex: 1 }}>
                                 <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>
@@ -212,8 +214,8 @@ const PhieuXuatKho = () => {
                                     <tr>
                                         <th>Mã Hàng</th>
                                         <th>Tên Hàng</th>
-                                        <th className="text-center">Sếp Đòi</th>
-                                        <th className="text-center">Đã Giao</th>
+                                        <th className="text-center">Yêu Cầu (Đã Duyệt)</th>
+                                        <th className="text-center">Đã Giao Trước Đó</th>
                                         <th className="text-center">Tồn Kho</th>
                                         <th width="20%" className="text-center">SL Nhặt Lần Này</th>
                                     </tr>
@@ -221,14 +223,13 @@ const PhieuXuatKho = () => {
                                 <tbody>
                                     {items.map((item, index) => {
                                         const conNo = item.soLuongYeuCau - item.soLuongDaXuat;
-                                        // Nếu món này đã giao đủ (conNo <= 0), ẩn dòng này đi
                                         if (conNo <= 0) return null;
 
                                         return (
                                             <tr key={item.maHang} className={conNo > 0 ? 'row-pending' : ''}>
-                                                <td className="fw-bold">{item.maHang}</td>
+                                                <td className="fw-bold text-primary">{item.maHang}</td>
                                                 <td>{item.tenHang}</td>
-                                                <td className="text-center">{item.soLuongYeuCau}</td>
+                                                <td className="text-center" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{item.soLuongYeuCau}</td>
                                                 <td className="text-center text-success">{item.soLuongDaXuat}</td>
                                                 <td className="text-center">{item.soLuongTon}</td>
                                                 <td>
@@ -240,20 +241,17 @@ const PhieuXuatKho = () => {
                                                             className={`input-qty ${item.soLuongThucXuat > item.soLuongTon || item.soLuongThucXuat > conNo ? 'input-qty-error' : item.soLuongThucXuat > 0 && item.soLuongThucXuat < conNo ? 'input-qty-warn' : ''}`}
                                                             max={conNo}
                                                         />
-                                                        
-                                                        {/* Lỗi vượt Tồn Kho */}
+
                                                         {item.soLuongThucXuat > item.soLuongTon && (
-                                                            <span className="error-msg" style={{color: 'red', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '500'}}>❌ Vượt tồn kho!</span>
-                                                        )}
-                                                        
-                                                        {/* Lỗi vượt số nợ */}
-                                                        {item.soLuongThucXuat > conNo && item.soLuongThucXuat <= item.soLuongTon && (
-                                                            <span className="error-msg" style={{color: 'red', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '500'}}>❌ Vượt SL yêu cầu!</span>
+                                                            <span className="error-msg" style={{ color: '#ef4444', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '500' }}>❌ Vượt tồn kho!</span>
                                                         )}
 
-                                                        {/* 🎯 CẢNH BÁO GIAO THIẾU (Số lượng > 0 và < số nợ) */}
+                                                        {item.soLuongThucXuat > conNo && item.soLuongThucXuat <= item.soLuongTon && (
+                                                            <span className="error-msg" style={{ color: '#ef4444', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '500' }}>❌ Vượt SL yêu cầu!</span>
+                                                        )}
+
                                                         {item.soLuongThucXuat > 0 && item.soLuongThucXuat < conNo && item.soLuongThucXuat <= item.soLuongTon && (
-                                                            <span className="warn-msg" style={{color: '#d97706', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '600'}}>⚠️ Giao thiếu</span>
+                                                            <span className="warn-msg" style={{ color: '#d97706', fontSize: '13px', display: 'block', marginTop: '4px', fontWeight: '600' }}><FiAlertTriangle /> Giao thiếu (Sẽ nợ)</span>
                                                         )}
                                                     </div>
                                                 </td>
@@ -266,14 +264,14 @@ const PhieuXuatKho = () => {
 
                         <div className="form-actions xuatkho-footer">
                             <button type="submit" className="btn-submit-main" disabled={!isValidToSubmit}>
-                                🚚 XÁC NHẬN GIAO HÀNG
+                                🚚 XÁC NHẬN GIAO HÀNG & TRỪ TỒN KHO
                             </button>
                         </div>
                     </form>
                 ) : (
                     <div className="empty-state">
-                        <img src="https://cdn-icons-png.flaticon.com/512/1157/1157056.png" alt="Empty" />
-                        <p>Vui lòng chọn một lệnh yêu cầu xuất ở trên để bắt đầu lấy hàng!</p>
+                        <img src="https://cdn-icons-png.flaticon.com/512/1157/1157056.png" alt="Empty" style={{ width: '80px', opacity: 0.5, marginBottom: '15px' }} />
+                        <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Vui lòng chọn một lệnh yêu cầu xuất ở trên để bắt đầu lấy hàng!</p>
                     </div>
                 )}
             </div>

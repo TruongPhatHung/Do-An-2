@@ -1,0 +1,22 @@
+.ls-container { padding: 20px; background: #f8fafc; min-height: 100vh; }
+.ls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.ls-search { position: relative; display: flex; align-items: center; background: #fff; padding: 10px 15px; border-radius: 8px; border: 1px solid #e2e8f0; width: 350px; }
+.ls-search input { border: none; outline: none; margin-left: 10px; width: 100%; }
+
+.ls-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+.ls-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; transition: transform 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.ls-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+
+.ls-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.ls-ma { font-weight: 800; color: #1e293b; font-size: 1.1rem; }
+.ls-status { display: flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+
+.ls-card-body h4 { margin: 0 0 10px 0; color: #334155; }
+.ls-date, .ls-note { font-size: 0.9rem; color: #64748b; margin: 5px 0; }
+.ls-items-preview { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0; }
+.ls-items-preview ul { margin: 8px 0; padding-left: 20px; color: #475569; font-size: 0.9rem; }
+
+/* Box phản hồi của Sếp */
+.ls-feedback-box { margin-top: 15px; background: #fff1f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px; color: #991b1b; }
+.ls-feedback-box p { margin: 5px 0 0 0; font-size: 0.9rem; font-style: italic; }
+.ls-feedback-success { margin-top: 15px; color: #059669; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 5px; }

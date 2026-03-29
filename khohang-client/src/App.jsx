@@ -37,6 +37,9 @@ import DonGiaoThieu from './pages/DonGiaoThieu';
 import DuyetYeuCauMua from './pages/DuyetYeuCauMua';
 import LapYeuCauMuaForm from './pages/LapYeuCauMuaForm';
 import ChiTietPhieuXuat from './pages/ChiTietPhieuXuat';
+import LichSuYeuCauMua from './pages/LichSuYeuCauMua'; // Kiểm tra đường dẫn này!
+import DuyetYeuCauXuat from './pages/DuyetYeuCauXuat';
+import LichSuYeuCauXuat from './pages/LichSuYeuCauXuat';
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -99,10 +102,14 @@ function App() {
                 <Route path="/xuat-kho" element={<ProtectedRoute><PhieuXuatKho /></ProtectedRoute>} />
                 <Route path="/lich-su-xuat-kho" element={<ProtectedRoute><LichSuXuatKho /></ProtectedRoute>} />
                 <Route path="//chi-tiet-phieu-xuat/:id" element={<ProtectedRoute><ChiTietPhieuXuat /></ProtectedRoute>} />
+                <Route path="/lich-su-yeu-cau-mua" element={<ProtectedRoute><LichSuYeuCauMua /></ProtectedRoute>} />
+                <Route path="/lich-su-yeu-cau-xuat" element={<ProtectedRoute><LichSuYeuCauXuat></LichSuYeuCauXuat></ProtectedRoute>}/>
 
                 {/* YeuCauXuat */}
                 <Route path="/lap-lenh-xuat" element={<ProtectedRoute><YeuCauXuatForm /></ProtectedRoute>} />
                 <Route path="/lap-lenh-yeu-cau-mua" element={<ProtectedRoute><LapYeuCauMuaForm /></ProtectedRoute>} />
+                <Route path="/duyet-yeu-cau-xuat" element={<ProtectedRoute><DuyetYeuCauXuat /></ProtectedRoute>} />
+
 
                 {/* Hệ thống */}
                 <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />

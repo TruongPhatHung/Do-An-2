@@ -40,13 +40,18 @@ public class YeuCauXuatKho {
     @Column(name = "ngay_hen_giao_bu")
     private java.time.LocalDate ngayHenGiaoBu;
 
+    @Column(name = "ly_do_tu_choi", columnDefinition = "TEXT")
+    private String lyDoTuChoi;
+
     @PrePersist
     protected void onCreate() {
         this.ngayTao = LocalDateTime.now();
         if (this.trangThai == null) {
-            this.trangThai = "Chờ Xuất"; // Mặc định khi mới tạo
+            // 🎯 ĐỔI TỪ "Chờ Xuất" SANG "Chờ Duyệt"
+            this.trangThai = "Chờ Duyệt";
         }
     }
+
     public int getTongSoLuongYeuCau() {
         if (this.chiTiets == null) return 0;
         return this.chiTiets.stream()
