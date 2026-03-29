@@ -9,4 +9,5 @@ import java.util.List;
 public interface TraoDoiDonHangRepository extends JpaRepository<TraoDoiDonHang, Long> {
     // Lấy toàn bộ lịch sử chat của 1 đơn, sắp xếp từ cũ đến mới
     List<TraoDoiDonHang> findByMaYeuCauOrderByThoiGianAsc(String maYeuCau);
+    void deleteByMaYeuCau(String maYeuCau);
 }

@@ -56,7 +56,9 @@ const Sidebar = () => {
                         <NavLink to="/don-hang" className={navClass}>
                             <span className="menu-icon">📝</span> Lên Đơn (PO)
                         </NavLink>
+                        
                     </li>
+                    
                 )}
 
                 {(role === 'ADMIN' || role === 'KHO') && (
@@ -76,6 +78,10 @@ const Sidebar = () => {
                     <li>
                         <NavLink to="/lap-lenh-xuat" className={navClass}>
                             <span className="menu-icon">📥</span> Lập Lệnh Xuất
+                        </NavLink>
+
+                        <NavLink to="/lap-lenh-yeu-cau-mua" className={navClass}>
+                            <span className="menu-icon">📥</span> Lập Lệnh Yêu Cầu Mua
                         </NavLink>
                     </li>
                 )}
@@ -104,6 +110,9 @@ const Sidebar = () => {
                     <li>
                         <NavLink to="/tai-khoan" className={navClass}>
                             <span className="menu-icon">👥</span> Quản Lý Tài Khoản
+                        </NavLink>
+                        <NavLink to="/duyet-yeu-cau-mua" className={navClass}>
+                            <span className="menu-icon">👥</span> Duyết Yêu Cầu Mua
                         </NavLink>
                     </li>
                 )}

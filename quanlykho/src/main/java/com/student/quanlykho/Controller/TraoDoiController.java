@@ -2,6 +2,7 @@ package com.student.quanlykho.Controller;
 
 import com.student.quanlykho.Entity.TraoDoiDonHang;
 import com.student.quanlykho.Repository.TraoDoiDonHangRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -24,5 +25,10 @@ public class TraoDoiController {
     @PostMapping
     public TraoDoiDonHang sendChat(@RequestBody TraoDoiDonHang message) {
         return traoDoiRepository.save(message);
+    }
+    @DeleteMapping("/{maYeuCau}")
+    @Transactional
+    public void xoaLichSuChat(@PathVariable String maYeuCau) {
+        traoDoiRepository.deleteByMaYeuCau(maYeuCau);
     }
 }

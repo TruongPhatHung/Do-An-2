@@ -36,9 +36,9 @@ public class PhieuXuatController {
     @Transactional
     public PhieuXuat xuatKho(@RequestBody XuatKhoRequest request) {
 
-        // ==========================================
+        
         // 🎯 BƯỚC 1: KHỞI TẠO PHIẾU XUẤT
-        // ==========================================
+
         PhieuXuat phieuXuat = new PhieuXuat();
         phieuXuat.setMaPhieuXuat(request.getMaPhieuXuat());
         phieuXuat.setLyDoXuat(request.getLyDo());
@@ -51,9 +51,9 @@ public class PhieuXuatController {
         List<ChiTietPhieuXuat> dsChiTiet = new ArrayList<>();
         double tongTienPhieu = 0.0;
 
-        // ==========================================
+
         // 🎯 BƯỚC 2: XỬ LÝ TRỪ KHO VÀ TÍNH TIỀN
-        // ==========================================
+
         for (Map.Entry<String, Integer> entry : request.getChiTietXuat().entrySet()) {
             String maHang = entry.getKey();
             Integer soLuongXuat = entry.getValue();
@@ -95,16 +95,16 @@ public class PhieuXuatController {
             auditLogService.ghiLog("XUẤT KHO", "HÀNG HÓA", maHang, "Tồn cũ: " + (hangHoa.getSoLuongTon() + soLuongXuat), "Xuất: " + soLuongXuat);
         }
 
-        // ==========================================
+
         // 🎯 BƯỚC 3: LƯU PHIẾU XUẤT
-        // ==========================================
+
         phieuXuat.setChiTiets(dsChiTiet);
         phieuXuat.setTongTien(tongTienPhieu);
         PhieuXuat savedPhieu = phieuXuatRepository.save(phieuXuat);
 
-        // ==========================================
+
         // 🎯 BƯỚC 4: CẬP NHẬT LẠI LỆNH YÊU CẦU (YCX)
-        // ==========================================
+
         String lyDoXuat = request.getLyDo();
         if (lyDoXuat != null && lyDoXuat.contains("YCX-")) {
             try {

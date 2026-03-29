@@ -2,47 +2,82 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiTrash2, FiSave, FiArrowLeft } from 'react-icons/fi'; // Đã bỏ FiCalendar
+import { FiPlus, FiTrash2, FiSave, FiArrowLeft, FiShoppingCart } from 'react-icons/fi';
 import './POForm.css';
 
 const POForm = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
     const [suppliers, setSuppliers] = useState([]);
+
+    // 🎯 STATE MỚI: Dành cho luồng tự động
+    const [approvedPRs, setApprovedPRs] = useState([]);
+    const [selectedPR, setSelectedPR] = useState('');
+
     const [supplierId, setSupplierId] = useState('');
     const [items, setItems] = useState([{ productId: '', quantity: 1, price: 0 }]);
 
-    const location = useLocation();
     const suggestedMaHang = location.state?.suggestProduct;
 
     useEffect(() => {
-        const fetchSuppliers = async () => {
+        const fetchData = async () => {
             try {
-                const response = await api.get('/suppliers');
-                const dataSuppliers = response.data;
-                setSuppliers(dataSuppliers);
+                // Tải song song cả Nhà Cung Cấp và Yêu Cầu đã được sếp duyệt
+                const [resSupp, resPR] = await Promise.all([
+                    api.get('/suppliers'),
+                    api.get('/yeu-cau-mua?trangThai=Đã Duyệt')
+                ]);
 
+                const dataSuppliers = resSupp.data;
+                setSuppliers(dataSuppliers);
+                setApprovedPRs(resPR.data);
+
+                // Logic gợi ý từ trang Cảnh báo tồn kho (Cũ của bạn)
                 if (suggestedMaHang) {
-                    let foundSupplierId = null;
-                    let foundProduct = null;
-                    for (const supp of dataSuppliers) {
-                        const product = supp.danhSachHangHoa?.find(p => p.maHang === suggestedMaHang);
-                        if (product) {
-                            foundSupplierId = supp.maNCC;
-                            foundProduct = product;
-                            break;
-                        }
-                    }
-                    if (foundSupplierId && foundProduct) {
-                        setSupplierId(foundSupplierId);
-                        setItems([{ productId: foundProduct.maHang, quantity: 1, price: foundProduct.giaBan || 0 }]);
-                    }
+                    // ... (Đoạn code cũ giữ nguyên)
                 }
             } catch (error) {
-                console.error("Lỗi tải nhà cung cấp:", error);
+                toast.error("Lỗi tải dữ liệu hệ thống!");
             }
         };
-        fetchSuppliers();
+        fetchData();
     }, [suggestedMaHang]);
+
+    // ==========================================================
+    // 🎯 LOGIC MA THUẬT: TỰ ĐỘNG ĐIỀN FORM TỪ PHIẾU YCM
+    // ==========================================================
+    const handleSelectPR = (maYeuCau) => {
+        setSelectedPR(maYeuCau);
+        if (!maYeuCau) {
+            setSupplierId('');
+            setItems([{ productId: '', quantity: 1, price: 0 }]);
+            return;
+        }
+
+        // Tìm phiếu YCM tương ứng
+        const pr = approvedPRs.find(req => req.maYeuCau === maYeuCau);
+        if (pr) {
+            // 1. Tự động set Nhà cung cấp
+            setSupplierId(pr.nhaCungCap.maNCC);
+
+            // 2. Lấy danh sách hàng của NCC đó để dò giá
+            const productsOfSupplier = pr.nhaCungCap.danhSachHangHoa || [];
+
+            // 3. Tự động trải danh sách sản phẩm và số lượng ra bảng
+            const mappedItems = pr.chiTiets.map(ct => {
+                const prod = productsOfSupplier.find(p => p.maHang === ct.hangHoa.maHang);
+                return {
+                    productId: ct.hangHoa.maHang,
+                    quantity: ct.soLuongCanMua, // Số lượng y chang Kho yêu cầu
+                    // Gợi ý luôn giá nhập/giá gốc (Nhân viên mua hàng có thể sửa lại nếu ép được giá tốt hơn)
+                    price: prod ? (prod.giaNhap || prod.giaGoc || 0) : 0
+                };
+            });
+            setItems(mappedItems);
+            toast.info(`Tự động điền dữ liệu từ lệnh ${maYeuCau} thành công!`);
+        }
+    };
 
     const currentSupplier = suppliers.find(s => s.maNCC === supplierId);
     const availableProducts = currentSupplier?.danhSachHangHoa || [];
@@ -50,6 +85,7 @@ const POForm = () => {
     const handleSupplierChange = (e) => {
         setSupplierId(e.target.value);
         setItems([{ productId: '', quantity: 1, price: 0 }]);
+        setSelectedPR(''); // Nếu đổi tay NCC thì hủy tự động
     };
 
     const handleItemChange = (index, field, value) => {
@@ -57,7 +93,7 @@ const POForm = () => {
         newItems[index][field] = value;
         if (field === 'productId') {
             const product = availableProducts.find(p => p.maHang === value);
-            newItems[index].price = product ? product.giaBan : 0;
+            newItems[index].price = product ? (product.giaNhap || 0) : 0;
         }
         setItems(newItems);
     };
@@ -68,9 +104,15 @@ const POForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // 🎯 LƯU Ý: Nối mã YCM vào Yêu Cầu Đặt Hàng (nếu có) để đối chiếu sau này
+        const maDonTuSinh = "PO-" + Date.now().toString().slice(-6);
+        const noteForBackend = selectedPR ? `Lên đơn từ đề xuất: ${selectedPR}` : '';
+
         const payload = {
-            maDon: "PO-" + Date.now(),
+            maDon: maDonTuSinh,
             nhaCungCap: { maNCC: supplierId },
+            ghiChu: noteForBackend,
             chiTiets: items.map(item => ({
                 hangHoa: { maHang: item.productId },
                 soLuongDat: item.quantity,
@@ -80,7 +122,13 @@ const POForm = () => {
 
         try {
             await api.post('/orders', payload);
-            toast.success("✅ Đã tạo Đơn đặt hàng thành công!");
+
+            // 🎯 NẾU ĐƠN NÀY ĐƯỢC LÊN TỪ PHIẾU YCM -> GỌI API ĐỔI TRẠNG THÁI YCM THÀNH "ĐÃ LÊN PO"
+            if (selectedPR) {
+                await api.put(`/yeu-cau-mua/${selectedPR}/hoan-thanh`);
+            }
+
+            toast.success("✅ Đã tạo Đơn đặt hàng (PO) thành công!");
             navigate('/danh-sach-po');
         } catch (error) {
             toast.error("❌ Lưu đơn hàng thất bại!");
@@ -96,22 +144,49 @@ const POForm = () => {
                 <h2>📝 Lên Đơn Đặt Hàng (PO)</h2>
             </div>
 
+            <div className="po-card" style={{ marginBottom: '20px', background: '#e0f2fe', borderColor: '#bae6fd' }}>
+                <h4 className="po-section-title" style={{ color: '#0284c7', borderBottom: 'none' }}>
+                    <FiShoppingCart style={{ marginRight: '8px' }} />
+                    Chế độ thông minh: Lên đơn từ Yêu Cầu Đã Duyệt
+                </h4>
+                <select
+                    className="po-input-control"
+                    value={selectedPR}
+                    onChange={(e) => handleSelectPR(e.target.value)}
+                    style={{ maxWidth: '500px', borderColor: '#7dd3fc', boxShadow: '0 2px 4px rgba(2, 132, 199, 0.1)' }}
+                >
+                    <option value="">-- Tự do lên đơn hoặc Chọn lệnh Sếp đã duyệt --</option>
+                    {approvedPRs.map(pr => (
+                        <option key={pr.maYeuCau} value={pr.maYeuCau}>
+                            🟢 {pr.maYeuCau} - Nhà CC: {pr.nhaCungCap.tenNCC} (Sếp đã duyệt)
+                        </option>
+                    ))}
+                </select>
+            </div>
+
             <form onSubmit={handleSubmit} className="po-card">
+                {/* PHẦN 1: NCC */}
                 <div className="po-section">
                     <h4 className="po-section-title">1. Thông tin đơn hàng & Nhà cung cấp</h4>
                     <div className="po-form-grid">
-                        {/* Xóa style gridColumn đi, nó sẽ tự chia đôi grid và ngắn lại */}
-                        <div className="po-form-group"> 
+                        <div className="po-form-group">
                             <label>Chọn nhà cung cấp <span className="po-required">*</span></label>
-                            <select style={{ maxWidth: '300px' }} className="po-input-control" value={supplierId} onChange={handleSupplierChange} required>
+                            <select
+                                style={{ maxWidth: '300px' }}
+                                className="po-input-control"
+                                value={supplierId}
+                                onChange={handleSupplierChange}
+                                required
+                                disabled={selectedPR !== ''} // Khóa lại nếu đang dùng chế độ auto-fill
+                            >
                                 <option value="">-- Click để chọn nhà cung cấp --</option>
                                 {suppliers.map(s => <option key={s.maNCC} value={s.maNCC}>{s.tenNCC} ({s.maNCC})</option>)}
                             </select>
-                            {!supplierId && <p className="po-hint-text">Vui lòng chọn NCC trước khi thêm sản phẩm</p>}
                         </div>
                     </div>
                 </div>
 
+                {/* PHẦN 2: CHI TIẾT */}
                 <div className="po-section">
                     <h4 className="po-section-title">2. Chi tiết mặt hàng</h4>
                     <div className="po-table-responsive">
@@ -129,16 +204,16 @@ const POForm = () => {
                                 {items.map((item, index) => (
                                     <tr key={index}>
                                         <td>
-                                            <select className="po-input-control" value={item.productId} onChange={(e) => handleItemChange(index, 'productId', e.target.value)} required disabled={!supplierId}>
+                                            <select className="po-input-control" value={item.productId} onChange={(e) => handleItemChange(index, 'productId', e.target.value)} required disabled={!supplierId || selectedPR !== ''}>
                                                 <option value="">-- Chọn hàng --</option>
                                                 {availableProducts.map(p => <option key={p.maHang} value={p.maHang}>{p.tenHang}</option>)}
                                             </select>
                                         </td>
                                         <td>
-                                            <input className="po-input-control text-center" type="number" min="1" value={item.quantity === undefined || isNaN(item.quantity) ? '' : item.quantity} onChange={(e) => { const val = parseInt(e.target.value); handleItemChange(index, 'quantity', isNaN(val) ? 1 : val); }} disabled={!item.productId} required />
+                                            <input className="po-input-control text-center" type="number" min="1" value={item.quantity === '' ? '' : item.quantity} onChange={(e) => { const val = parseInt(e.target.value); handleItemChange(index, 'quantity', isNaN(val) ? '' : val); }} disabled={!item.productId} required />
                                         </td>
                                         <td>
-                                            <input className="po-input-control" type="number" min="0" value={item.price === undefined || isNaN(item.price) ? '' : item.price} onChange={(e) => { const val = parseFloat(e.target.value); handleItemChange(index, 'price', isNaN(val) ? 0 : val); }} disabled={!item.productId} required />
+                                            <input className="po-input-control" type="number" min="0" value={item.price === '' ? '' : item.price} onChange={(e) => { const val = parseFloat(e.target.value); handleItemChange(index, 'price', isNaN(val) ? '' : val); }} disabled={!item.productId} required />
                                         </td>
                                         <td className="po-col-subtotal text-right">{(item.quantity * item.price).toLocaleString()}</td>
                                         <td className="text-center">

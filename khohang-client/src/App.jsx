@@ -34,7 +34,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LichSuXuatKho from './pages/LichSuXuatKho';
 import DonGiaoThieu from './pages/DonGiaoThieu';
-
+import DuyetYeuCauMua from './pages/DuyetYeuCauMua';
+import LapYeuCauMuaForm from './pages/LapYeuCauMuaForm';
 import ChiTietPhieuXuat from './pages/ChiTietPhieuXuat';
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
                 <Route path="/product-detail/:id" element={<ProtectedRoute><ChiTietHangHoa /></ProtectedRoute>} />
                 <Route path="/edit-product/:id" element={<ProtectedRoute><SuaHangHoa /></ProtectedRoute>} />
 
+
                 {/* Nhà cung cấp */}
                 <Route path="/suppliers" element={<ProtectedRoute><NhaCungCapList /></ProtectedRoute>} />
                 <Route path="/add-supplier" element={<ProtectedRoute><NhaCungCapForm /></ProtectedRoute>} />
@@ -100,11 +102,14 @@ function App() {
 
                 {/* YeuCauXuat */}
                 <Route path="/lap-lenh-xuat" element={<ProtectedRoute><YeuCauXuatForm /></ProtectedRoute>} />
+                <Route path="/lap-lenh-yeu-cau-mua" element={<ProtectedRoute><LapYeuCauMuaForm /></ProtectedRoute>} />
 
                 {/* Hệ thống */}
                 <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />
                 <Route path="/admin/logs" element={<ProtectedRoute><AdminLogs /></ProtectedRoute>} />
                 <Route path="/thong-bao" element={<ProtectedRoute><NotificationBell /></ProtectedRoute>} />
+
+                <Route path="/duyet-yeu-cau-mua" element={<ProtectedRoute><DuyetYeuCauMua /></ProtectedRoute>} />
 
               </Routes>
             </main>

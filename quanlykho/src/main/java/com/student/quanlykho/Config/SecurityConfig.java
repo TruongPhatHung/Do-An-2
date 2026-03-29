@@ -1,6 +1,5 @@
 package com.student.quanlykho.Config;
 
-
 import com.student.quanlykho.Security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +12,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-
-
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,10 +22,12 @@ import java.util.List;
 public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http ) throws Exception {
         http.cors(cors -> {})
@@ -41,66 +40,66 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").hasAuthority("ADMIN")
 
                         // 3. QUẢN LÝ NHÀ CUNG CẤP (Suppliers)
-                        .requestMatchers(HttpMethod.GET, "/api/suppliers/**").authenticated() // Ai đăng nhập cũng được xem
+                        .requestMatchers(HttpMethod.GET, "/api/suppliers/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/suppliers/**").hasAnyAuthority("ADMIN", "MUAHANG")
                         .requestMatchers(HttpMethod.PUT, "/api/suppliers/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/suppliers/**").hasAuthority("ADMIN")
 
                         // 4. QUẢN LÝ LÊN ĐƠN HÀNG (Orders / PO)
-                        .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG", "KHO") // KHO cần xem để biết sắp có hàng về
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG", "KHO")
                         .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG")
                         .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG")
-                        .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasAuthority("ADMIN") // Chỉ Admin mới được xóa PO
+                        .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasAuthority("ADMIN")
 
                         // 5. QUẢN LÝ HÀNG HÓA TRONG KHO (Products)
-                        // Lưu ý: Mình để sẵn cả 2 URL đề phòng Controller của bạn dùng 1 trong 2
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/hang-hoa/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/products/**", "/api/hang-hoa/**").hasAnyAuthority("ADMIN", "KHO")
-                        .requestMatchers(HttpMethod.PUT, "/api/products/**", "/api/hang-hoa/**").hasAnyAuthority("ADMIN", "KHO")
+                        .requestMatchers(HttpMethod.POST, "/api/products/**", "/api/hang-hoa/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**", "/api/hang-hoa/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**", "/api/hang-hoa/**").hasAuthority("ADMIN")
 
                         // 6. QUẢN LÝ NHẬP KHO (Receipts)
-                        .requestMatchers(HttpMethod.GET, "/api/phieu-nhap/**").hasAnyAuthority("ADMIN", "KHO", "MUAHANG")
-                        .requestMatchers(HttpMethod.POST, "/api/phieu-nhap/**").hasAnyAuthority("ADMIN", "KHO") // Chỉ Kho và Admin mới được nhập hàng vào kho
+                        .requestMatchers(HttpMethod.GET, "/api/phieu-nhap/**").hasAnyAuthority("ADMIN", "KHO", "MUAHANG", "QUANLYKHO")
+                        .requestMatchers(HttpMethod.POST, "/api/phieu-nhap/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
 
                         // 7. QUẢN LÝ XUẤT KHO (Issues)
-                        .requestMatchers(HttpMethod.GET, "/api/phieu-xuat/**").hasAnyAuthority("ADMIN", "KHO")
-                        .requestMatchers(HttpMethod.POST, "/api/phieu-xuat/**").hasAnyAuthority("ADMIN", "KHO")
+                        .requestMatchers(HttpMethod.GET, "/api/phieu-xuat/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
+                        .requestMatchers(HttpMethod.POST, "/api/phieu-xuat/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
 
                         // 8. BÁO CÁO / THỐNG KÊ (Dashboard)
-                        .requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAuthority("ADMIN") // Thường chỉ sếp mới được xem tổng quan
+                        .requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAuthority("ADMIN")
 
-                        // --- CHỐT CHẶN CUỐI CÙNG ---
-                        // Tất cả các API khác (nếu lỡ quên chưa khai báo ở trên) đều bắt buộc phải có Token
-                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                         // 9. QUẢN LÝ YÊU CẦU XUẤT KHO (Lệnh xuất)
                         .requestMatchers(HttpMethod.GET, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
                         .requestMatchers(HttpMethod.POST, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "QUANLYKHO")
 
+                        // =========================================================
+                        // 🎯 10. MỚI: QUẢN LÝ YÊU CẦU MUA HÀNG (Quy trình PR -> PO)
+                        // =========================================================
+                        .requestMatchers(HttpMethod.GET, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").permitAll()
+                        .requestMatchers("/api/trao-doi", "/api/trao-doi/**").permitAll()
+                        // --- CHỐT CHẶN CUỐI CÙNG ---
+                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                         .anyRequest().authenticated()
-
                 )
                 // GẮN CÁI KHIÊN JWT VÀO ĐÂY!
                 .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration configuration = new CorsConfiguration();
-
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
-
 }
