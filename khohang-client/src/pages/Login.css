@@ -133,17 +133,18 @@
 /* Icon tĩnh (User) - Chuyển sang bên phải */
 .input-icon {
     position: absolute;
-    right: 14px; /* Fix sang phải */
-    color: #cbd5e1;
+    right: 14px; 
     display: flex;
     align-items: center;
     pointer-events: none;
+    z-index: 10; /* Đảm bảo nổi lên trên input */
 }
 
-/* Chỉnh lại màu các icon (User / Mắt) cho sáng sủa hơn */
+/* 🎯 ĐỔI MÀU ICON Ở ĐÂY: Dùng màu xám đậm để nổi trên nền input trắng */
 .input-icon, .toggle-password {
-    color: #f8fafc; 
+    color: #475569; /* Đổi từ trắng sang xám đậm */
     opacity: 0.8;
+    z-index: 10;
 }
 
 /* Icon mắt bên phải (Mật khẩu) */
@@ -158,7 +159,7 @@
 }
 
 .toggle-password:hover {
-    color: #ffffff;
+    color: #0f172a; /* Hover vào thì chuyển sang màu đen/xanh than đậm */
     opacity: 1;
 }
 
@@ -248,4 +249,16 @@
     -webkit-text-fill-color: #ffffff !important;
     transition: background-color 5000s ease-in-out 0s;
     border-radius: 10px;
+}
+/* =========================================
+   FIX LỖI ICON BỊ ẨN KHI TRÌNH DUYỆT AUTOFILL
+========================================= */
+/* Bắt sự kiện: Nếu ô input phía trước đang bị autofill thì đổi màu icon phía sau thành trắng */
+.input-wrapper input:-webkit-autofill ~ .input-icon,
+.input-wrapper input:-webkit-autofill ~ .toggle-password {
+    color: #ffffff !important;
+}
+
+.input-wrapper input:-webkit-autofill ~ .toggle-password:hover {
+    color: #94a3b8 !important; /* Màu xám sáng nhẹ khi di chuột vào icon lúc đang autofill */
 }
