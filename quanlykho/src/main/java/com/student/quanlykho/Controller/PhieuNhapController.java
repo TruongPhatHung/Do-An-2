@@ -1,16 +1,16 @@
 package com.student.quanlykho.Controller;
 
-import com.student.quanlykho.Entity.ChiTietDonDatHang;
-import com.student.quanlykho.Entity.DonDatHang;
-import com.student.quanlykho.Entity.HangHoa;
-import com.student.quanlykho.Repository.ChiTietDonDatHangRepository;
-import com.student.quanlykho.Repository.DonDatHangRepository;
-import com.student.quanlykho.Repository.HangHoaRepository;
+import com.student.quanlykho.Entity.*;
+import com.student.quanlykho.Repository.*;
 import com.student.quanlykho.Service.AuditLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,87 +20,87 @@ public class PhieuNhapController {
 
     @Autowired
     private DonDatHangRepository donDatHangRepository;
-
     @Autowired
     private ChiTietDonDatHangRepository chiTietDonDatHangRepository;
-
     @Autowired
     private HangHoaRepository hangHoaRepository;
-
     @Autowired
     private AuditLogService auditLogService;
 
+    // 🎯 CẦN THÊM CÁC REPOSITORY NÀY ĐỂ LƯU LỊCH SỬ
+    @Autowired
+    private PhieuNhapRepository phieuNhapRepository;
+
+    // 1. LẤY LỊCH SỬ NHẬP KHO (Cho trang React hiện danh sách)
+    @GetMapping
+    public List<PhieuNhap> getLichSu() {
+        return phieuNhapRepository.findAllByOrderByNgayNhapDesc();
+    }
+
+    // 2. XỬ LÝ NHẬP KHO VÀ LƯU PHIẾU
     @PostMapping
     @Transactional
     public String nhapKho(@RequestBody NhapKhoRequest request) {
-        // 1. Tìm đơn đặt hàng (PO)
+        // 1. Tìm đơn PO
         DonDatHang po = donDatHangRepository.findById(request.getMaDonHang())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy PO: " + request.getMaDonHang()));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy PO"));
 
-        // Lấy tên Nhà cung cấp để ghi log đối soát
-        String tenNCC = (po.getNhaCungCap() != null) ? po.getNhaCungCap().getTenNCC() : "N/A";
+        // 2. TẠO PHIẾU NHẬP MỚI
+        PhieuNhap phieu = new PhieuNhap();
+        phieu.setMaPhieuNhap("PNK-" + System.currentTimeMillis());
+        phieu.setNguoiNhap(request.getNguoiNhap());
+        phieu.setNhaCungCap(po.getNhaCungCap());
+        phieu.setDonDatHang(po);
 
-        boolean isGiaoDuTatCa = true;
+        double tongTienPhieu = 0;
+        List<ChiTietPhieuNhap> dsChiTiet = new ArrayList<>();
 
-        // 2. Duyệt qua từng món hàng trong yêu cầu nhập kho
+        // 3. Xử lý từng món hàng
         for (Map.Entry<String, Integer> entry : request.getChiTietNhap().entrySet()) {
             String maHang = entry.getKey();
-            Integer soLuongNhap = entry.getValue();
+            Integer slNhap = entry.getValue();
 
-            if (soLuongNhap == null || soLuongNhap <= 0) continue;
+            HangHoa hh = hangHoaRepository.findById(maHang).get();
+            ChiTietDonDatHang ctPO = chiTietDonDatHangRepository.findByDonDatHangAndMaHang(po, maHang).get();
 
-            // --- A. TÌM HÀNG HÓA TRONG KHO TỔNG ---
-            HangHoa hangHoa = hangHoaRepository.findById(maHang)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy mặt hàng: " + maHang));
+            // Cập nhật tồn kho như cũ...
+            hh.setSoLuongTon(hh.getSoLuongTon() + slNhap);
+            hangHoaRepository.save(hh);
 
-            // --- B. TÌM CHI TIẾT TRONG ĐƠN HÀNG ĐỂ LẤY THÔNG TIN LOẠI ---
-            ChiTietDonDatHang chiTietPO = chiTietDonDatHangRepository.findByDonDatHangAndMaHang(po, maHang)
-                    .orElseThrow(() -> new RuntimeException("Mặt hàng " + maHang + " không thuộc đơn hàng " + po.getMaDon()));
+            // TẠO CHI TIẾT PHIẾU NHẬP
+            ChiTietPhieuNhap ctPN = new ChiTietPhieuNhap();
+            ctPN.setPhieuNhap(phieu);
+            ctPN.setHangHoa(hh);
+            ctPN.setSoLuong(slNhap);
+            ctPN.setDonGia(ctPO.getDonGia());
+            dsChiTiet.add(ctPN);
 
-            // 🎯 TỰ ĐỘNG CẬP NHẬT LOẠI HÀNG (Kế thừa từ danh mục Nhà cung cấp trong PO)
-            // Nếu hàng hóa tổng đang "Chưa phân loại", lấy loại từ PO ốp sang
-            if (hangHoa.getLoaiHang() == null && chiTietPO.getLoaiHang() != null) {
-                hangHoa.setLoaiHang(chiTietPO.getLoaiHang());
-            }
-
-            // --- C. CẬP NHẬT TỒN KHO ---
-            int tonKhoCu = hangHoa.getSoLuongTon();
-            hangHoa.setSoLuongTon(tonKhoCu + soLuongNhap);
-            hangHoaRepository.save(hangHoa);
-
-            // --- D. CẬP NHẬT TIẾN ĐỘ GIAO HÀNG TRÊN PO ---
-            chiTietPO.setSoLuongDaNhap(chiTietPO.getSoLuongDaNhap() + soLuongNhap);
-            chiTietDonDatHangRepository.save(chiTietPO);
-
-            if (chiTietPO.getSoLuongDaNhap() < chiTietPO.getSoLuongDat()) {
-                isGiaoDuTatCa = false; // Vẫn còn nợ hàng
-            }
-
-            // 🎯 GHI LOG CHI TIẾT (Bổ sung tên NCC và Loại hàng để Admin dễ kiểm soát)
-            String tenLoai = (hangHoa.getLoaiHang() != null) ? hangHoa.getLoaiHang().getTenLoai() : "Chưa phân loại";
-            String logMoi = String.format("Nhập: +%d | Loại: %s | NCC: %s | Tồn mới: %d",
-                    soLuongNhap, tenLoai, tenNCC, hangHoa.getSoLuongTon());
-
-            auditLogService.ghiLog("NHẬP KHO", "HÀNG HÓA", maHang, "Tồn kho cũ: " + tonKhoCu, logMoi);
+            tongTienPhieu += (slNhap * ctPO.getDonGia());
         }
 
-        // 3. CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
-        if (isGiaoDuTatCa) {
-            po.setTrangThai("Hoàn Tất");
-        } else {
-            po.setTrangThai("Giao Thiếu");
-        }
-        donDatHangRepository.save(po);
+        phieu.setChiTiets(dsChiTiet);
+        phieu.setTongTien(tongTienPhieu);
+        phieuNhapRepository.save(phieu); // 👈 LƯU PHIẾU VÀO DATABASE
 
-        return "Đã xác nhận nhập kho đơn " + po.getMaDon() + " từ Nhà cung cấp: " + tenNCC;
+        return "Đã lưu phiếu nhập: " + phieu.getMaPhieuNhap();
+    }
+    @GetMapping("/{maPhieu}")
+    public ResponseEntity<PhieuNhap> getDetail(@PathVariable String maPhieu) {
+        return phieuNhapRepository.findById(maPhieu)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
+    // --- DTO ---
     public static class NhapKhoRequest {
         private String maDonHang;
+        private String nguoiNhap;
         private Map<String, Integer> chiTietNhap;
-
+        // Getters/Setters
         public String getMaDonHang() { return maDonHang; }
         public void setMaDonHang(String maDonHang) { this.maDonHang = maDonHang; }
+        public String getNguoiNhap() { return nguoiNhap; }
+        public void setNguoiNhap(String nguoiNhap) { this.nguoiNhap = nguoiNhap; }
         public Map<String, Integer> getChiTietNhap() { return chiTietNhap; }
         public void setChiTietNhap(Map<String, Integer> chiTietNhap) { this.chiTietNhap = chiTietNhap; }
     }

@@ -30,9 +30,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http ) throws Exception {
-        http.cors(cors -> {})
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+
 
                         .requestMatchers("/api/auth/**").permitAll()
 
@@ -76,13 +77,20 @@ public class SecurityConfig {
                         // =========================================================
                         // 🎯 10. MỚI: QUẢN LÝ YÊU CẦU MUA HÀNG (Quy trình PR -> PO)
                         // =========================================================
-                        .requestMatchers(HttpMethod.GET, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").authenticated()
+
+                        // CHỈ CÓ KHO HOẶC QUẢN LÝ KHO mới được lập phiếu đề xuất
+                         .requestMatchers(HttpMethod.POST, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").hasAnyAuthority("KHO", "QUANLYKHO", "ADMIN")
+
+                        // CHỈ CÓ SẾP (ADMIN) mới được quyền vào duyệt hoặc từ chối
+                        .requestMatchers(HttpMethod.PUT, "/api/yeu-cau-mua/*/duyet").hasAuthority("ADMIN")
                         .requestMatchers("/api/trao-doi", "/api/trao-doi/**").permitAll()
                         // --- CHỐT CHẶN CUỐI CÙNG ---
                         .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers("/api/thong-bao", "/api/thong-bao/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 // GẮN CÁI KHIÊN JWT VÀO ĐÂY!
@@ -96,12 +104,12 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        // 3. Cho phép tất cả Header (để nó nhận cái x-pinggy-no-screen từ bạn ông)
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }

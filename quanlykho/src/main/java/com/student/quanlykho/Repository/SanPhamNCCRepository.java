@@ -13,4 +13,5 @@ public interface SanPhamNCCRepository extends JpaRepository<SanPhamNCC, Long> {
     @Modifying
     @Query("DELETE FROM SanPhamNCC s WHERE s.nhaCungCap.id = :nccId")
     void xoaToanBoSanPhamCuaNcc(@Param("nccId") Long nccId);
+
 }

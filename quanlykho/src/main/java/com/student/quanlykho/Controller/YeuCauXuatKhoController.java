@@ -20,10 +20,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/yeu-cau-xuat")
-@CrossOrigin(origins = "*")
+// 🎯 ĐÃ XÓA: @CrossOrigin(origins = "*") ở đây để tránh đánh nhau với SecurityConfig
 public class YeuCauXuatKhoController {
+
     @Autowired
     private ThongBaoRepository thongBaoRepository;
+
     @Autowired
     private YeuCauXuatKhoRepository yeuCauXuatKhoRepository;
 
@@ -86,6 +88,8 @@ public class YeuCauXuatKhoController {
         String logMoi = String.format("Nơi nhận: %s | Số mặt hàng: %d | Hạn xuất: %s",
                 saved.getNoiNhan(), chiTiets.size(), saved.getNgayCanXuat());
         auditLogService.ghiLog("THÊM", "LỆNH XUẤT KHO", saved.getMaYeuCau(), "Chưa có", logMoi);
+
+        // Bắn thông báo cho ADMIN
         ThongBao tb = new ThongBao();
         tb.setTieuDe("Lệnh xuất kho mới!");
         tb.setNoiDung("Nhân viên " + request.getNguoiTao() + " vừa lập lệnh xuất " + saved.getMaYeuCau() + " đang chờ bạn duyệt.");
@@ -95,6 +99,7 @@ public class YeuCauXuatKhoController {
 
         return saved;
     }
+
     @PutMapping("/{maYeuCau}/duyet")
     @Transactional
     public ResponseEntity<?> duyetLenhXuat(@PathVariable String maYeuCau, @RequestBody Map<String, String> body) {
@@ -121,7 +126,6 @@ public class YeuCauXuatKhoController {
         private String nguoiTao;
         private String ghiChu;
         private List<ChiTietYeuCauRequest> chiTiets;
-
 
         // Getters, Setters
         public String getMaYeuCau() { return maYeuCau; }

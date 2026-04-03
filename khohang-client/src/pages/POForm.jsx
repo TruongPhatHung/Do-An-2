@@ -10,31 +10,27 @@ const POForm = () => {
     const location = useLocation();
 
     const [suppliers, setSuppliers] = useState([]);
-
-    // 🎯 STATE: Dành cho luồng tự động
     const [approvedPRs, setApprovedPRs] = useState([]);
+
     const [selectedPR, setSelectedPR] = useState('');
-    const [allProducts, setAllProducts] = useState([]);
     const [supplierId, setSupplierId] = useState('');
-    const [items, setItems] = useState([{ productId: '', quantity: 1, price: 0 }]);
+    // 🎯 Thêm productName vào state để lưu cứng tên SP lúc tự động điền
+    const [items, setItems] = useState([{ productId: '', productName: '', quantity: 1, price: 0 }]);
 
     const suggestedMaHang = location.state?.suggestProduct;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Tải song song cả 3: Nhà Cung Cấp, Yêu Cầu và Hàng Hóa
-                const [resSupp, resPR, resProd] = await Promise.all([
+                // Chỉ cần lấy NCC và Yêu Cầu Mua, không cần móc vào Kho Hàng Hóa nữa
+                const [resSupp, resPR] = await Promise.all([
                     api.get('/suppliers'),
-                    api.get('/yeu-cau-mua?trangThai=Đã Duyệt'),
-                    api.get('/products') // 👈 Cập nhật đường dẫn api lấy danh sách hàng hóa của bạn ở đây
+                    api.get('/yeu-cau-mua?trangThai=Đã Duyệt')
                 ]);
 
                 setSuppliers(resSupp.data);
                 setApprovedPRs(resPR.data);
-                setAllProducts(resProd.data); // 👈 Lưu vào state
 
-               
             } catch (error) {
                 toast.error("Lỗi tải dữ liệu hệ thống!");
             }
@@ -49,7 +45,7 @@ const POForm = () => {
         setSelectedPR(maYeuCau);
         if (!maYeuCau) {
             setSupplierId('');
-            setItems([{ productId: '', quantity: 1, price: 0 }]);
+            setItems([{ productId: '', productName: '', quantity: 1, price: 0 }]);
             return;
         }
 
@@ -59,47 +55,51 @@ const POForm = () => {
             // 1. Tự động set Nhà cung cấp
             setSupplierId(pr.nhaCungCap.maNCC);
 
-            // 2. Lấy danh sách hàng từ state `suppliers` tổng (vì PR thường không kèm chi tiết hàng)
+            // 2. Lấy danh mục hàng hóa của CHÍNH NHÀ CUNG CẤP ĐÓ (Bảng SanPhamNCC)
             const fullSupplier = suppliers.find(s => s.maNCC === pr.nhaCungCap.maNCC);
             const productsOfSupplier = fullSupplier ? fullSupplier.danhSachHangHoa : [];
 
-           // Thay thế đoạn tìm productsOfSupplier bằng việc tìm thẳng trong allProducts
             const mappedItems = pr.chiTiets.map(ct => {
-                // 🔍 Tra cứu thẳng từ kho Hàng Hóa tổng
-                const prod = allProducts.find(p => p.maHang === ct.hangHoa.maHang);
-                
+                // 🔍 Tìm mặt hàng này trong Bảng Báo Giá của NCC
+                const spNcc = productsOfSupplier.find(p => p.maHang === ct.hangHoa.maHang);
+
                 return {
                     productId: ct.hangHoa.maHang,
+                    productName: spNcc ? spNcc.tenHang : ct.hangHoa.tenHang, // Lưu luôn tên hàng
                     quantity: ct.soLuongCanMua,
-                    // Thử lấy trực tiếp từ ct.hangHoa.giaNhap nếu backend đã cung cấp
-                    price: ct.hangHoa.giaNhap || ct.hangHoa.donGia || 0
+                    // 🎯 BỐC CHÍNH XÁC GIÁ TỪ BẢNG NHÀ CUNG CẤP (SanPhamNCC)
+                    price: spNcc ? (spNcc.giaBan || 0) : 0
                 };
             });
             setItems(mappedItems);
-            toast.info(`Tự động điền dữ liệu từ lệnh ${maYeuCau} thành công!`);
+            toast.info(`Tự động điền dữ liệu và giá từ Nhà cung cấp thành công!`);
         }
     };
 
+    // Lấy danh sách hàng hóa của NHÀ CUNG CẤP đang chọn (khi Lên đơn tự do)
     const currentSupplier = suppliers.find(s => s.maNCC === supplierId);
     const availableProducts = currentSupplier?.danhSachHangHoa || [];
 
     const handleSupplierChange = (e) => {
         setSupplierId(e.target.value);
-        setItems([{ productId: '', quantity: 1, price: 0 }]);
-        setSelectedPR(''); // Nếu đổi tay NCC thì hủy tự động
+        setItems([{ productId: '', productName: '', quantity: 1, price: 0 }]);
+        setSelectedPR(''); // Nếu đổi tay NCC thì hủy chế độ tự động
     };
 
     const handleItemChange = (index, field, value) => {
         const newItems = [...items];
         newItems[index][field] = value;
+
+        // Nếu người dùng đổi Mặt Hàng -> Tự động điền Giá từ Báo giá NCC
         if (field === 'productId') {
             const product = availableProducts.find(p => p.maHang === value);
-            newItems[index].price = product ? (product.giaNhap || 0) : 0;
+            newItems[index].price = product ? (product.giaBan || 0) : 0;
+            newItems[index].productName = product ? product.tenHang : '';
         }
         setItems(newItems);
     };
 
-    const addRow = () => setItems([...items, { productId: '', quantity: 1, price: 0 }]);
+    const addRow = () => setItems([...items, { productId: '', productName: '', quantity: 1, price: 0 }]);
     const removeRow = (index) => { if (items.length > 1) setItems(items.filter((_, i) => i !== index)); };
     const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
@@ -134,7 +134,6 @@ const POForm = () => {
         }
     };
 
-    // Cờ kiểm tra xem đang ở chế độ khóa (dữ liệu cứng) hay không
     const isAutoFilled = selectedPR !== '';
 
     return (
@@ -157,29 +156,28 @@ const POForm = () => {
                     onChange={(e) => handleSelectPR(e.target.value)}
                     style={{ maxWidth: '500px', borderColor: '#7dd3fc', boxShadow: '0 2px 4px rgba(2, 132, 199, 0.1)' }}
                 >
-                    <option value="">-- Tự do lên đơn hoặc Chọn lệnh Sếp đã duyệt --</option>
+                    <option value="">-- Lên đơn tự do hoặc Chọn đề xuất Sếp đã duyệt --</option>
                     {approvedPRs.map(pr => (
                         <option key={pr.maYeuCau} value={pr.maYeuCau}>
-                            🟢 {pr.maYeuCau} - Nhà CC: {pr.nhaCungCap.tenNCC} (Sếp đã duyệt)
+                            🟢 {pr.maYeuCau} - Nhà CC: {pr.nhaCungCap?.tenNCC} (Sếp đã duyệt)
                         </option>
                     ))}
                 </select>
             </div>
 
             <form onSubmit={handleSubmit} className="po-card">
-                {/* PHẦN 1: NCC */}
                 <div className="po-section">
                     <h4 className="po-section-title">1. Thông tin đơn hàng & Nhà cung cấp</h4>
                     <div className="po-form-grid">
                         <div className="po-form-group">
                             <label>Chọn nhà cung cấp <span className="po-required">*</span></label>
                             <select
-                                style={{ maxWidth: '300px' }}
+                                style={{ maxWidth: '400px' }}
                                 className="po-input-control"
                                 value={supplierId}
                                 onChange={handleSupplierChange}
                                 required
-                                disabled={isAutoFilled} // Khóa khi dùng auto-fill
+                                disabled={isAutoFilled}
                             >
                                 <option value="">-- Click để chọn nhà cung cấp --</option>
                                 {suppliers.map(s => <option key={s.maNCC} value={s.maNCC}>{s.tenNCC} ({s.maNCC})</option>)}
@@ -188,7 +186,6 @@ const POForm = () => {
                     </div>
                 </div>
 
-                {/* PHẦN 2: CHI TIẾT */}
                 <div className="po-section">
                     <h4 className="po-section-title">2. Chi tiết mặt hàng</h4>
                     <div className="po-table-responsive">
@@ -197,72 +194,82 @@ const POForm = () => {
                                 <tr>
                                     <th width="40%">Sản phẩm</th>
                                     <th width="15%" className="text-center">Số lượng</th>
-                                    <th width="20%">Đơn giá (VNĐ)</th>
+                                    <th width="20%">Đơn giá nhập (VNĐ)</th>
                                     <th width="20%" className="text-right">Thành tiền</th>
                                     <th width="5%" className="text-center">Xóa</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map((item, index) => (
-                                    <tr key={index}>
-                                        <td>
-                                            <select 
-                                                className="po-input-control" 
-                                                value={item.productId} 
-                                                onChange={(e) => handleItemChange(index, 'productId', e.target.value)} 
-                                                required 
-                                                disabled={!supplierId || isAutoFilled} // Khóa khi auto-fill
-                                            >
-                                                <option value="">-- Chọn hàng --</option>
-                                                {availableProducts.map(p => <option key={p.maHang} value={p.maHang}>{p.tenHang}</option>)}
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input 
-                                                className="po-input-control text-center" 
-                                                type="number" 
-                                                min="1" 
-                                                value={item.quantity === '' ? '' : item.quantity} 
-                                                onChange={(e) => { const val = parseInt(e.target.value); handleItemChange(index, 'quantity', isNaN(val) ? '' : val); }} 
-                                                disabled={!item.productId || isAutoFilled} // 🔒 CHÍNH LÀ ĐÂY: KHÓA DỮ LIỆU CỨNG
-                                                required 
-                                            />
-                                        </td>
-                                        <td>
-                                            <input 
-                                                className="po-input-control" 
-                                                type="number" 
-                                                min="0" 
-                                                value={item.price === '' ? '' : item.price} 
-                                                onChange={(e) => { const val = parseFloat(e.target.value); handleItemChange(index, 'price', isNaN(val) ? '' : val); }} 
-                                                disabled={!item.productId || isAutoFilled} // 🔒 CHÍNH LÀ ĐÂY: KHÓA DỮ LIỆU CỨNG
-                                                required 
-                                            />
-                                        </td>
-                                        <td className="po-col-subtotal text-right">{(item.quantity * item.price).toLocaleString()}</td>
-                                        <td className="text-center">
-                                            <button 
-                                                type="button" 
-                                                className="po-btn-remove" 
-                                                onClick={() => removeRow(index)}
-                                                disabled={isAutoFilled} // 🔒 KHÔNG CHO XÓA NẾU LÀ ĐƠN SẾP DUYỆT
-                                            >
-                                                <FiTrash2 />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {items.map((item, index) => {
+                                    return (
+                                        <tr key={index}>
+                                            <td>
+                                                {isAutoFilled ? (
+                                                    <div style={{ padding: '8px 12px', background: '#f1f5f9', borderRadius: '6px', border: '1px solid #e2e8f0', color: '#475569', fontWeight: '500' }}>
+                                                        {item.productName || item.productId}
+                                                    </div>
+                                                ) : (
+                                                    <select
+                                                        className="po-input-control"
+                                                        value={item.productId}
+                                                        onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
+                                                        required
+                                                    >
+                                                        <option value="">-- Chọn hàng --</option>
+                                                        {availableProducts.map(p => <option key={p.maHang} value={p.maHang}>{p.tenHang}</option>)}
+                                                    </select>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <input
+                                                    className="po-input-control text-center"
+                                                    type="number"
+                                                    min="1"
+                                                    value={item.quantity === '' ? '' : item.quantity}
+                                                    onChange={(e) => { const val = parseInt(e.target.value); handleItemChange(index, 'quantity', isNaN(val) ? '' : val); }}
+                                                    disabled={!item.productId || isAutoFilled}
+                                                    required
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    className="po-input-control"
+                                                    type="number"
+                                                    min="0"
+                                                    value={item.price === '' ? '' : item.price}
+                                                    onChange={(e) => { const val = parseFloat(e.target.value); handleItemChange(index, 'price', isNaN(val) ? '' : val); }}
+                                                    disabled={!item.productId || isAutoFilled}
+                                                    required
+                                                />
+                                            </td>
+                                            <td className="po-col-subtotal text-right">{(item.quantity * item.price).toLocaleString()}</td>
+                                            <td className="text-center">
+                                                <button
+                                                    type="button"
+                                                    className="po-btn-remove"
+                                                    onClick={() => removeRow(index)}
+                                                    disabled={isAutoFilled}
+                                                >
+                                                    <FiTrash2 />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
-                    <button 
-                        type="button" 
-                        className="po-btn-add-row" 
-                        onClick={addRow} 
-                        disabled={!supplierId || isAutoFilled} // 🔒 KHÔNG CHO THÊM DÒNG MỚI
-                    >
-                        <FiPlus /> Thêm dòng sản phẩm
-                    </button>
+
+                    {!isAutoFilled && (
+                        <button
+                            type="button"
+                            className="po-btn-add-row"
+                            onClick={addRow}
+                            disabled={!supplierId}
+                        >
+                            <FiPlus /> Thêm dòng sản phẩm
+                        </button>
+                    )}
                 </div>
 
                 <div className="po-footer">

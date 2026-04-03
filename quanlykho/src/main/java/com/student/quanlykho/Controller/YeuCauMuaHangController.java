@@ -14,8 +14,10 @@ import java.util.List;
 @RequestMapping("/api/yeu-cau-mua")
 @CrossOrigin(origins = "*")
 public class YeuCauMuaHangController {
+
     @Autowired
     private ThongBaoRepository thongBaoRepository;
+
     @Autowired
     private YeuCauMuaHangRepository yeuCauMuaHangRepository;
 
@@ -24,6 +26,10 @@ public class YeuCauMuaHangController {
 
     @Autowired
     private HangHoaRepository hangHoaRepository;
+
+    // 🎯 THÊM CÁI NÀY ĐỂ TÌM SP CỦA NCC
+    @Autowired
+    private SanPhamNCCRepository sanPhamNCCRepository;
 
     // ========================================================
     // 📦 1. QUẢN LÝ KHO: TẠO PHIẾU YÊU CẦU MUA HÀNG (PR)
@@ -46,8 +52,31 @@ public class YeuCauMuaHangController {
         // Xử lý danh sách mặt hàng cần mua
         List<ChiTietYeuCauMua> dsChiTiet = new ArrayList<>();
         for (ChiTietYeuCauMuaRequest item : request.getChiTiets()) {
+
+            // 🎯 THUẬT TOÁN MỚI: TÌM TRONG KHO, KHÔNG CÓ THÌ TẠO MỚI TỪ BẢNG NHÀ CUNG CẤP
             HangHoa hangHoa = hangHoaRepository.findById(item.getMaHang())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy mã hàng: " + item.getMaHang()));
+                    .orElseGet(() -> {
+                        // Khúc này là khi kho CHƯA CÓ mặt hàng này
+                        // 1. Chạy sang hỏi bảng SanPhamNCC xem nó là cái gì
+                        SanPhamNCC spNcc = sanPhamNCCRepository.findByMaHangAndNhaCungCap_MaNCC(item.getMaHang(), ncc.getMaNCC())
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy mã hàng " + item.getMaHang() + " trong báo giá của Nhà Cung Cấp!"));
+
+                        // 2. Tự động "Khai sinh" mặt hàng mới vào trong Kho (Tồn = 0)
+                        HangHoa hhMoi = new HangHoa();
+                        hhMoi.setMaHang(spNcc.getMaHang()); // Lấy mã của NCC
+                        hhMoi.setTenHang(spNcc.getTenHang()); // Lấy tên của NCC
+
+// 🎯 BỔ SUNG CHỖ NÀY: Giá bán của NCC chính là Giá nhập của mình!
+                        hhMoi.setGiaNhap(spNcc.getGiaBan());
+
+// (Tùy chọn) Sếp có thể cho nó tự tính luôn giá bán ra thị trường (VD: Lời 20%)
+                        hhMoi.setGiaBan(spNcc.getGiaBan() != null ? spNcc.getGiaBan() * 1.2 : 0);
+
+                        hhMoi.setSoLuongTon(0); // Kho đang trống nên tồn = 0  // Gắn tạm loại hàng của NCC
+
+                        // Lưu vào kho
+                        return hangHoaRepository.save(hhMoi);
+                    });
 
             ChiTietYeuCauMua chiTiet = new ChiTietYeuCauMua();
             chiTiet.setYeuCauMuaHang(ycm);
@@ -128,6 +157,7 @@ public class YeuCauMuaHangController {
 
         return saved;
     }
+
     @PutMapping("/{maYeuCau}/hoan-thanh")
     @Transactional
     public void hoanThanhYeuCau(@PathVariable String maYeuCau) {

@@ -1,0 +1,104 @@
+.history-container {
+    padding: 20px;
+    background: #f8f9fc;
+    min-height: 100vh;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.search-box {
+    position: relative;
+    width: 350px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 10px 10px 35px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+.history-table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.history-table th {
+    background: #4e73df;
+    color: white;
+    padding: 15px;
+    text-align: left;
+}
+
+.history-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.font-bold { font-weight: bold; }
+.text-blue { color: #4e73df; }
+
+.price {
+    color: #e74a3b;
+    font-weight: bold;
+}
+
+.user-badge {
+    background: #eaecf4;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #4e73df;
+}
+
+.btn-view {
+    background: #36b9cc;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 auto;
+}
+
+.btn-view:hover { background: #2c9faf; }
+/* CSS DÀNH RIÊNG CHO IN ẤN */
+@media print {
+    .no-print { display: none !important; } /* Ẩn nút bấm khi in */
+    body { background: white; }
+    .printable-receipt { border: none; box-shadow: none; width: 100%; }
+    .receipt-table th { background-color: #eee !important; color: black; }
+}
+
+.detail-header-actions { display: flex; gap: 15px; margin-bottom: 20px; }
+.btn-print { background: #1cc88a; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.printable-receipt { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+.receipt-header { text-align: center; margin-bottom: 30px; }
+.receipt-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; border-bottom: 1px dashed #ccc; padding-bottom: 20px; }
+.receipt-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+.receipt-table th, .receipt-table td { border: 1px solid #ddd; padding: 12px; }
+.total-amount { font-size: 1.2rem; color: #e74a3b; font-weight: bold; }
+.receipt-footer { display: flex; justify-content: space-around; margin-top: 50px; text-align: center; }
