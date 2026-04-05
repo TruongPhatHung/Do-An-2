@@ -1,0 +1,306 @@
+/* PhieuNhapDetail.css - Thiết kế hiện đại, chuyên nghiệp */
+
+/* Reset cơ bản và font */
+.detail-container {
+    padding: 20px;
+    background-color: #f4f7f6; /* Nền xám nhạt cho Dashboard */
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Căn giữa phiếu */
+}
+
+/* Header điều hướng - Góc trên bên trái */
+.detail-header-actions {
+    display: flex;
+    gap: 15px;
+    position: absolute; /* Đẩy lên góc */
+    top: 20px;
+    left: 20px;
+}
+
+/* Kiểu nút Quay lại - Màu Xanh Dương */
+.btn-back {
+    background-color: #3498db; 
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-back:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* Kiểu nút In - Màu Vàng Mint */
+.btn-print {
+    background-color: #f1c40f; /* Màu vàng */
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-print:hover {
+    background-color: #f39c12;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Vùng nội dung phiếu - Khung trắng ở giữa */
+.printable-receipt {
+    background: white;
+    padding: 50px 70px; /* Padding rộng cho đẹp */
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* Bóng đổ mịn */
+    width: 80%; /* Chiếm 80% chiều rộng */
+    max-width: 900px;
+    margin-top: 80px; /* Cách xa các nút ở trên */
+    border: 1px dashed #ccc; /* Border nét đứt xung quanh theo phác thảo */
+}
+
+/* Tiêu đề phiếu */
+.receipt-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.receipt-header h2 {
+    color: #16a085; /* Màu Teal đậm cho tiêu đề */
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.receipt-code {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+/* Grid thông tin phiếu - Border nét đứt phân cách */
+.receipt-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 cột */
+    gap: 20px 40px;
+    margin-bottom: 40px;
+    padding: 20px 0;
+    border-top: 2px dashed #eaeaea;
+    border-bottom: 2px dashed #eaeaea;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.info-item strong {
+    color: #2c3e50;
+    min-width: 130px; /* Chiều rộng cố định cho nhãn */
+}
+
+.info-item svg {
+    color: #16a085; /* Màu Teal cho icon */
+    font-size: 1.3rem;
+}
+
+/* Bảng chi tiết mặt hàng */
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+}
+
+/* Style cho Header Bảng - Màu nền Teal, chữ trắng */
+.receipt-table thead th {
+    background-color: #16a085;
+    color: white;
+    padding: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    border-bottom: 3px solid #1abc9c;
+}
+
+/* Căn chỉnh các cột */
+.receipt-table th:first-child,
+.receipt-table td:first-child { text-align: center; width: 50px; } /* STT */
+.receipt-table th:nth-child(2),
+.receipt-table td:nth-child(2) { text-align: left; width: 100px; font-weight: bold; color: #2980b9; } /* Mã Hàng */
+.receipt-table th:nth-child(3),
+.receipt-table td:nth-child(3) { text-align: left; } /* Tên Hàng */
+.receipt-table th:nth-child(4),
+.receipt-table td:nth-child(4) { text-align: center; width: 100px; } /* Số Lượng */
+.receipt-table th:nth-child(5),
+.receipt-table td:nth-child(5) { text-align: right; width: 150px; } /* Đơn Giá */
+.receipt-table th:nth-child(6),
+.receipt-table td:nth-child(6) { text-align: right; width: 180px; } /* Thành Tiền */
+
+/* Dòng dữ liệu */
+.receipt-table tbody td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f1f1;
+    color: #555;
+    font-size: 1rem;
+}
+
+.receipt-table tbody tr:hover {
+    background-color: #fbfdfc; /* Hover màu Teal siêu nhẹ */
+}
+
+/* Dòng tổng cộng ở cuối bảng - Style màu Teal in đậm */
+.receipt-table tfoot td {
+    padding: 15px;
+    background-color: #fdfdfd;
+}
+
+.receipt-table tfoot .total-row-label {
+    text-align: right;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    border-top: 2px solid #16a085;
+}
+
+.receipt-table tfoot .total-amount {
+    text-align: right;
+    font-size: 1.5rem;
+    color: #c0392b; /* Màu đỏ cho số tiền tổng */
+    font-weight: 800;
+    border-top: 2px solid #16a085;
+    background-color: #fff6f6; /* Nền hồng nhẹ cho số tiền */
+}
+
+/* Khu vực chữ ký - Đẩy sang 2 bên */
+.receipt-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 60px;
+    text-align: center;
+}
+
+.signature-box {
+    width: 40%; /* Chiếm 40% chiều rộng mỗi bên */
+}
+
+.signature-box p strong {
+    color: #16a085; /* Màu Teal cho tiêu đề chữ ký */
+    font-size: 1.2rem;
+}
+
+.signature-box p:last-child {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* --- STYLE CHO IN ẤN --- */
+/* --- STYLE CHO IN ẤN (FIX LỖI TRÀN BẢNG) --- */
+/* --- STYLE CHO IN ẤN (CHUẨN FORM A4, DỌN SẠCH RÁC) --- */
+@media print {
+    /* 1. ẨN TẤT CẢ CÁC THANH MENU, HEADER, SIDEBAR */
+    .no-print, 
+    .sidebar, 
+    .top-bar, 
+    .header, 
+    .navbar, 
+    nav, 
+    header,
+    aside { 
+        display: none !important; 
+    } 
+
+    /* 2. CHUẨN HÓA KHỔ GIẤY A4 */
+    @page {
+        size: A4 portrait;
+        margin: 15mm; /* Lề in chuẩn */
+    }
+
+    /* 3. DIỆT THANH CUỘN BẬC TỔNG: Ép toàn bộ web nhả scrollbar ra */
+    html, body, #root, .main-content, .detail-container { 
+        background: white !important; 
+        padding: 0 !important; 
+        margin: 0 !important;
+        width: 100% !important;
+        height: auto !important; /* Xóa giới hạn chiều cao */
+        overflow: visible !important; /* Tuyệt đối không hiện thanh cuộn */
+        display: block !important; /* Phá vỡ flexbox nếu có để tránh lỗi cuộn */
+    }
+
+    /* 4. KÉO PHIẾU LÊN CHIẾM TRỌN MÀN HÌNH */
+    .printable-receipt { 
+        position: absolute !important; /* Giật nó ra khỏi layout của web */
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important; 
+        border: none !important; 
+        box-shadow: none !important; 
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+    }
+    
+    /* 5. TỐI ƯU BẢNG VÀ CHỮ CÁC LOẠI */
+    .receipt-table {
+        width: 100% !important;
+        table-layout: auto !important; 
+        margin-bottom: 20px !important;
+    }
+
+    .receipt-table th, 
+    .receipt-table td {
+        padding: 8px 5px !important; 
+        font-size: 12px !important; 
+        word-wrap: break-word !important; 
+        white-space: normal !important;
+    }
+
+    /* Cột tên hàng rộng ra */
+    .receipt-table th:nth-child(3),
+    .receipt-table td:nth-child(3) { width: 45% !important; }
+
+    /* Ép hiển thị màu nền */
+    .receipt-table thead th { 
+        background-color: #16a085 !important; 
+        color: white !important; 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
+    }
+    
+    /* Ép hiển thị màu đỏ chỗ thành tiền */
+    .receipt-table tfoot .total-amount { 
+        font-size: 14px !important; 
+        color: #c0392b !important; 
+        background-color: #fff6f6 !important;
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
+    }
+
+    /* Khóa chữ ký không bị rớt trang */
+    .receipt-footer {
+        margin-top: 40px !important;
+        page-break-inside: avoid !important; 
+    }
+}

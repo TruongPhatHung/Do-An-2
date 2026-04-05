@@ -287,3 +287,53 @@
     cursor: not-allowed;
     border-color: #edf2f7;
 }
+/* --- CSS CHO BANNER CẢNH BÁO --- */
+.alert-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff3cd; /* Nền vàng nhạt */
+    color: #856404; /* Chữ vàng nâu */
+    padding: 15px 25px;
+    border-radius: 8px;
+    border-left: 6px solid #ffc107;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.alert-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.05rem;
+}
+
+.alert-pulse {
+    color: #dc3545; /* Icon đỏ */
+    animation: pulse 1.5s infinite; /* Hiệu ứng đập đập */
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.btn-filter-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffc107;
+    color: #212529;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-filter-alert:hover {
+    background-color: #e0a800;
+    transform: translateY(-2px);
+}
