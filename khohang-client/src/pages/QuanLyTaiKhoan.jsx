@@ -2,58 +2,31 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import './QuanLyTaiKhoan.css';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import adminAvatar from "../components/avarta/Screenshot 2026-03-21 185323 copy.png";
 import khoAvatar from "../components/avarta/Screenshot 2026-03-21 185359.png";
+// 🎯 Đã import thêm FiEdit vào đây nhé
+import { FiUserPlus, FiX, FiKey, FiTrash2, FiEye, FiEdit } from 'react-icons/fi';
 
 const QuanLyTaiKhoan = () => {
-    // 1. TÊN STATE LÀ 'users'
     const [users, setUsers] = useState([]);
-    const [showAddForm, setShowAddForm] = useState(false);
-
-    const initialFormState = {
-        tenDangNhap: '',
-        hoTen: '',
-        matKhau: '',
-        vaiTro: 'KHO',
-        email: ''
-    };
     const [selectedImage, setSelectedImage] = useState(null);
-    const [newUser, setNewUser] = useState(initialFormState);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // 1. Gọi lần đầu khi vào trang
         fetchUsers();
-
-        // 2. Thiết lập "máy đếm nhịp" cứ 30 giây hỏi server 1 lần
         const interval = setInterval(() => {
             fetchUsers();
-            console.log("Đang cập nhật trạng thái online...");
-        }, 30000); // 30000ms = 30s
-
-        // 3. Quan trọng: Xóa bộ đếm khi rời khỏi trang để tránh tốn tài nguyên
+        }, 30000); 
         return () => clearInterval(interval);
     }, []);
 
     const fetchUsers = async () => {
         try {
             const res = await api.get('/users');
-            console.log("Dữ liệu từ Server trả về nè:", res.data);
             setUsers(res.data);
         } catch (error) {
             console.error("Lỗi tải danh sách:", error);
-        }
-    };
-
-    const handleAddUser = async (e) => {
-        e.preventDefault();
-        try {
-            await api.post('/users', newUser);
-            toast.success("✅ Tạo tài khoản nhân viên thành công!");
-            setNewUser(initialFormState);
-            setShowAddForm(false);
-            fetchUsers();
-        } catch (error) {
-            toast.error("❌ Lỗi: Tên đăng nhập đã tồn tại hoặc dữ liệu không hợp lệ!");
         }
     };
 
@@ -100,6 +73,15 @@ const QuanLyTaiKhoan = () => {
         }
     };
 
+    const handleViewDetails = (id) => {
+        navigate(`/chi-tiet-tai-khoan/${id}`);
+    };
+
+    // 🎯 THÊM HÀM XỬ LÝ NÚT SỬA
+    const handleEdit = (id) => {
+        navigate(`/sua-tai-khoan/${id}`);
+    };
+
     const getRoleAvatar = (avatarDb, vaiTro) => {
         if (avatarDb) return avatarDb;
         const role = vaiTro?.toUpperCase();
@@ -109,163 +91,138 @@ const QuanLyTaiKhoan = () => {
         return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
     };
 
-    const handleEdit = (user) => {
-        toast.info("Chức năng sửa thông tin đang được cập nhật!");
-    };
-
     return (
         <div className="tk-container">
-            <div className="tk-header">
-                <h2 className="tk-title">👥 Quản lý Thông tin Tài khoản</h2>
+            {/* Header Area */}
+            <div className="tk-header-card">
+                <div className="tk-title-area">
+                    <h2 className="tk-title">Quản Lý Tài Khoản</h2>
+                    <p className="tk-subtitle">Kiểm soát phân quyền và nhân sự hệ thống</p>
+                </div>
                 <button
-                    className={`tk-btn-add-toggle ${showAddForm ? 'close' : ''}`}
-                    onClick={() => setShowAddForm(!showAddForm)}
+                    className="tk-btn-toggle"
+                    onClick={() => navigate('/them-tai-khoan')}
                 >
-                    {showAddForm ? "✖ Đóng Form" : "➕ Thêm Nhân Viên Mới"}
+                    <FiUserPlus /> Thêm Nhân Viên Mới
                 </button>
             </div>
 
-            {showAddForm && (
-                <div className="tk-add-card">
-                    <h3>➕ Tạo Tài Khoản Mới</h3>
-                    <form onSubmit={handleAddUser} className="tk-form-grid">
-                        <div className="tk-input-group">
-                            <label>Tên đăng nhập:</label>
-                            <input
-                                placeholder="VD: staff01"
-                                value={newUser.tenDangNhap}
-                                onChange={(e) => setNewUser({ ...newUser, tenDangNhap: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="tk-input-group">
-                            <label>Họ Tên:</label>
-                            <input
-                                placeholder="VD: Nguyễn Văn A"
-                                value={newUser.hoTen}
-                                onChange={(e) => setNewUser({ ...newUser, hoTen: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="tk-input-group">
-                            <label>Mật khẩu:</label>
-                            <input
-                                type="password"
-                                placeholder="******"
-                                value={newUser.matKhau}
-                                onChange={(e) => setNewUser({ ...newUser, matKhau: e.target.value })}
-                                required
-                            />
-                        </div>
+            {/* Table Card */}
+            <div className="tk-table-wrapper">
+                <table className="tk-table">
+                    <thead>
+                        <tr>
+                            <th>Mã ND</th>
+                            <th>Tài khoản</th>
+                            <th>Họ Tên</th>
+                            <th>Liên hệ</th>
+                            <th>Cấp quyền</th>
+                            <th className="align-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map((acc) => {
+                            const isUserOnline = acc.isOnline !== undefined ? acc.isOnline : (acc.vaiTro === 'ADMIN');
 
-                        <div className="tk-input-group">
-                            <label>Gmail:</label>
-                            <input
-                                type="email"
-                                placeholder="abc@gmail.com"
-                                value={newUser.email}
-                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                                required
-                            />
-                        </div>
-
-                        <div className="tk-input-group">
-                            <label>Vai trò:</label>
-                            <select
-                                value={newUser.vaiTro}
-                                onChange={(e) => setNewUser({ ...newUser, vaiTro: e.target.value })}
-                            >
-                                <option value="KHO">Nhân viên Kho</option>
-                                <option value="QUANLYKHO">Quản lý Kho</option>
-                                <option value="MUAHANG">Nhân viên Mua hàng</option>
-                                <option value="ADMIN">Quản trị viên (Admin)</option>
-                            </select>
-                        </div>
-
-                        <div className="tk-input-group">
-                            <label>&nbsp;</label>
-                            <button type="submit" className="tk-btn-save">💾 Lưu tài khoản</button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            <table className="tk-table">
-                <thead>
-                    <tr>
-                        <th>Mã ND</th>
-                        <th>Tên đăng nhập & Trạng thái</th>
-                        <th>Họ Tên</th>
-                        <th>Gmail</th>
-                        <th>Vai trò (Cấp quyền)</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map((acc) => {
-                        // 🎯 MẸO TEST: Tạm thời cho Admin luôn Online để xem hiệu ứng
-                        const isUserOnline = acc.isOnline !== undefined ? acc.isOnline : (acc.vaiTro === 'ADMIN');
-
-                        return (
-                            <tr key={acc.id || acc.maND}>
-                                <td style={{ fontWeight: 'bold', color: '#7f8c8d' }}>
-                                    {acc.id || acc.maND}
-                                </td>
-                                <td style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                    <img
-                                        src={getRoleAvatar(acc.avatar, acc.vaiTro)}
-                                        alt="avatar"
-                                        className="avatar-circle"
-                                        style={{ cursor: 'zoom-in' }}
-                                        onClick={() => setSelectedImage(getRoleAvatar(acc.avatar, acc.vaiTro))}
-                                    />
-                                    {/* 🎯 GẮN ĐÈN LED Ở ĐÂY NÈ! */}
-                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <span style={{ fontWeight: 'bold', color: '#2980b9', fontSize: '15px' }}>
-                                            {acc.tenDangNhap}
-                                        </span>
-                                        <div className="status-indicator">
-                                            <span className={`status-dot ${isUserOnline ? 'online' : 'offline'}`}></span>
-                                            <span style={{ color: isUserOnline ? '#27ae60' : '#95a5a6', fontSize: '12px' }}>
-                                                {isUserOnline ? 'Đang hoạt động' : 'Ngoại tuyến'}
-                                            </span>
+                            return (
+                                <tr key={acc.id || acc.maND}>
+                                    <td className="tk-id-col">#{acc.id || acc.maND}</td>
+                                    
+                                    <td>
+                                        <div className="tk-profile-cell">
+                                            <div className="tk-avatar-wrapper">
+                                                <img
+                                                    src={getRoleAvatar(acc.avatar, acc.vaiTro)}
+                                                    alt="avatar"
+                                                    className="tk-avatar"
+                                                    onClick={() => setSelectedImage(getRoleAvatar(acc.avatar, acc.vaiTro))}
+                                                />
+                                                <span className={`tk-status-dot ${isUserOnline ? 'online' : 'offline'}`}></span>
+                                            </div>
+                                            <div className="tk-profile-info">
+                                                <span className="tk-username">{acc.tenDangNhap}</span>
+                                                <span className="tk-status-text">{isUserOnline ? 'Online' : 'Offline'}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td>{acc.hoTen || 'N/A'}</td>
-                                <td>{acc.email || '---'}</td>
-                                <td>
-                                    <select
-                                        value={acc.vaiTro}
-                                        onChange={(e) => handleUpdateRole(acc.maND || acc.id, e.target.value)}
-                                        className={`role-select role-${acc.vaiTro?.toLowerCase()}`}
-                                    >
-                                        <option value="KHO">Nhân viên Kho</option>
-                                        <option value="QUANLYKHO">Quản lý Kho</option>
-                                        <option value="MUAHANG">Nhân viên Mua hàng</option>
-                                        <option value="ADMIN">Quản trị viên (Admin)</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <button className="btn-edit" onClick={() => handleUpdatePassword(acc.maND || acc.id)}>Đổi MK</button>
-                                    <button className="btn-delete" onClick={() => handleDelete(acc.maND || acc.id)}>Xóa</button>
+                                    </td>
+
+                                    <td className="tk-name-col">{acc.hoTen || 'N/A'}</td>
+                                    
+                                    <td className="tk-email-col">{acc.email || '---'}</td>
+                                    
+                                    <td>
+                                        <select
+                                            value={acc.vaiTro}
+                                            onChange={(e) => handleUpdateRole(acc.maND || acc.id, e.target.value)}
+                                            className={`tk-role-badge role-${acc.vaiTro?.toLowerCase()}`}
+                                        >
+                                            <option value="KHO">NV Kho</option>
+                                            <option value="QUANLYKHO">Quản lý Kho</option>
+                                            <option value="MUAHANG">NV Mua Hàng</option>
+                                            <option value="ADMIN">Admin</option>
+                                        </select>
+                                    </td>
+                                    
+                                    <td className="tk-actions-col">
+                                        <div className="tk-action-buttons">
+                                            {/* Nút Xem chi tiết */}
+                                            <button 
+                                                className="tk-btn-icon btn-eye" 
+                                                title="Xem chi tiết"
+                                                onClick={() => handleViewDetails(acc.maND || acc.id)}
+                                            >
+                                                <FiEye />
+                                            </button>
+                                            
+                                            {/* 🎯 NÚT SỬA MỚI THÊM VÀO ĐÂY */}
+                                            <button 
+                                                className="tk-btn-icon btn-edit" 
+                                                title="Sửa thông tin"
+                                                onClick={() => handleEdit(acc.maND || acc.id)}
+                                            >
+                                                <FiEdit />
+                                            </button>
+
+                                            {/* Nút Đổi mật khẩu */}
+                                            <button 
+                                                className="tk-btn-icon btn-key" 
+                                                title="Đổi mật khẩu"
+                                                onClick={() => handleUpdatePassword(acc.maND || acc.id)}
+                                            >
+                                                <FiKey />
+                                            </button>
+                                            
+                                            {/* Nút Xóa */}
+                                            <button 
+                                                className="tk-btn-icon btn-trash" 
+                                                title="Xóa tài khoản"
+                                                onClick={() => handleDelete(acc.maND || acc.id)}
+                                            >
+                                                <FiTrash2 />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                        {users.length === 0 && (
+                            <tr>
+                                <td colSpan="6" className="tk-empty-state">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="No data" width="60"/>
+                                    <p>Chưa có dữ liệu tài khoản nào!</p>
                                 </td>
                             </tr>
-                        );
-                    })}
-                    {users.length === 0 && (
-                        <tr>
-                            <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>Không có tài khoản nào!</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
+            {/* Modal Image Zoom */}
             {selectedImage && (
-                <div className="image-modal-overlay" onClick={() => setSelectedImage(null)}>
-                    <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
-                        <span className="close-modal-btn" onClick={() => setSelectedImage(null)}>✖</span>
-                        <img src={selectedImage} alt="Enlarged Avatar" className="enlarged-avatar" />
+                <div className="tk-modal-overlay" onClick={() => setSelectedImage(null)}>
+                    <div className="tk-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <span className="tk-modal-close" onClick={() => setSelectedImage(null)}><FiX /></span>
+                        <img src={selectedImage} alt="Enlarged" className="tk-enlarged-img" />
                     </div>
                 </div>
             )}

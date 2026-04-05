@@ -42,6 +42,9 @@ import DuyetYeuCauXuat from './pages/DuyetYeuCauXuat';
 import LichSuYeuCauXuat from './pages/LichSuYeuCauXuat';
 import LichSuNhapKho from './pages/LichSuNhapKho';
 import PhieuNhapDetail from './pages/PhieuNhapDetail';
+import ThemTaiKhoan from './pages/ThemTaiKhoan'; // Trang thêm tài khoản mới
+import ChiTietTaiKhoan from './pages/ChiTietTaiKhoan'; // Trang chi tiết tài khoản
+import SuaTaiKhoan from './pages/SuaTaiKhoan'; // Trang sửa tài khoản
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -118,7 +121,10 @@ function App() {
 
                 {/* Hệ thống */}
                 <Route path="/tai-khoan" element={<ProtectedRoute><QuanLyTaiKhoan /></ProtectedRoute>} />
+                <Route path="/them-tai-khoan" element={<ProtectedRoute><ThemTaiKhoan /></ProtectedRoute>} />
+                <Route path="/chi-tiet-tai-khoan/:id" element={<ProtectedRoute><ChiTietTaiKhoan /></ProtectedRoute>} />
                 <Route path="/admin/logs" element={<ProtectedRoute><AdminLogs /></ProtectedRoute>} />
+                <Route path="/sua-tai-khoan/:id" element={<ProtectedRoute><SuaTaiKhoan /></ProtectedRoute>} />
                 <Route path="/thong-bao" element={<ProtectedRoute><NotificationBell /></ProtectedRoute>} />
 
                 <Route path="/duyet-yeu-cau-mua" element={<ProtectedRoute><DuyetYeuCauMua /></ProtectedRoute>} />
