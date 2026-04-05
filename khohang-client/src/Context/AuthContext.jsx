@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
             console.log("Sending login request...");
 
 
-            const response = await fetch('http://localhost:8080/api/auth/login', {
+            const response = await fetch('http://10.10.80.70:8080/api/auth/login', {
 
                 method: 'POST',
                 headers: {
