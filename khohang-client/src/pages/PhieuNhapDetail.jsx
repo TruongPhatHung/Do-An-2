@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import { FiArrowLeft, FiPrinter, FiPackage, FiUser, FiCalendar, FiFileText } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-// 🎯 ĐÃ ĐỔI: Import file CSS mới
+// 🎯 Dùng chung file CSS "bọc thép" đã fix lỗi in ấn
 import './PhieuNhapDetail.css';
 
 const PhieuNhapDetail = () => {
@@ -15,7 +15,6 @@ const PhieuNhapDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                // Đảm bảo sếp dùng đúng ID khóa chính, ví dụ 'PNK-123...'
                 const res = await api.get(`/phieu-nhap/${id}`);
                 setPhieu(res.data);
             } catch (error) {
@@ -28,16 +27,20 @@ const PhieuNhapDetail = () => {
     }, [id]);
 
     const handlePrint = () => {
-        window.print(); // Lệnh in nhanh của trình duyệt
+        window.print();
     };
 
-    if (loading) return <div className="loading">⏳ Đang lấy dữ liệu...</div>;
-    if (!phieu) return <div className="error">❌ Phiếu không tồn tại!</div>;
+    if (loading) return <div className="loading">⏳ Đang lấy dữ liệu phiếu {id}...</div>;
+    if (!phieu) return <div className="error">❌ Phiếu nhập không tồn tại!</div>;
+
+    // Tính tổng tiền an toàn
+    const displayTotal = phieu.tongTien || phieu.chiTiets?.reduce((sum, ct) => {
+        return sum + ((ct.soLuong || 0) * (ct.donGia || 0));
+    }, 0) || 0;
 
     return (
         <div className="detail-container">
-            {/* Header điều hướng - Sẽ ẩn khi in */}
-            {/* 🎯 ĐÃ ĐỔI: Gom nút lên trên cùng */}
+            {/* Nút điều hướng - Sẽ ẩn khi in */}
             <div className="no-print detail-header-actions">
                 <button onClick={() => navigate(-1)} className="btn-back">
                     <FiArrowLeft /> Quay lại
@@ -47,63 +50,75 @@ const PhieuNhapDetail = () => {
                 </button>
             </div>
 
-            {/* Vùng nội dung phiếu - Sẽ được in */}
+            {/* Vùng nội dung phiếu - Chuẩn Form A4 */}
             <div className="printable-receipt">
                 <div className="receipt-header">
                     <h2>PHIẾU NHẬP KHO VẬT TƯ</h2>
-                    {/* Sửa lại để lấy đúng mã khóa chính 'PNK-...' */}
-                    <p className="receipt-code">Mã phiếu: {phieu.maPhieuNhap}</p>
+                    <p className="receipt-code">Mã phiếu: {phieu.maPhieuNhap || id}</p>
                 </div>
 
+                {/* Grid thông tin chia 2 cột chuyên nghiệp */}
                 <div className="receipt-info-grid">
-                    <div className="info-item">
-                        <FiUser /> <strong>Người nhập:</strong> {phieu.nguoiNhap || '---'}
+                    <div className="info-group">
+                        <div className="info-item">
+                            <FiUser className="icon-green" />
+                            <strong>Người nhập:</strong> {phieu.nguoiNhap || '---'}
+                        </div>
+                        <div className="info-item">
+                            <FiPackage className="icon-green" />
+                            <strong>Nhà cung cấp:</strong> {phieu.nhaCungCap?.tenNCC || 'N/A'}
+                        </div>
                     </div>
-                    <div className="info-item">
-                        <FiCalendar /> <strong>Ngày nhập:</strong> {phieu.ngayNhap ? new Date(phieu.ngayNhap).toLocaleString('vi-VN') : '---'}
-                    </div>
-                    <div className="info-item">
-                        <FiPackage /> <strong>Nhà cung cấp:</strong> {phieu.nhaCungCap?.tenNCC || 'N/A'}
-                    </div>
-                    <div className="info-item">
-                        <FiFileText /> <strong>Đơn hàng gốc:</strong> {phieu.donDatHang?.maDon || 'N/A'}
+                    <div className="info-group">
+                        <div className="info-item">
+                            <FiCalendar className="icon-green" />
+                            <strong>Ngày nhập:</strong> {phieu.ngayNhap ? new Date(phieu.ngayNhap).toLocaleString('vi-VN') : '---'}
+                        </div>
+                        <div className="info-item">
+                            <FiFileText className="icon-green" />
+                            <strong>Đơn hàng gốc:</strong> {phieu.donDatHang?.maDon || 'N/A'}
+                        </div>
                     </div>
                 </div>
 
+                {/* Bảng chi tiết chuẩn mẫu */}
                 <table className="receipt-table">
                     <thead>
                         <tr>
-                            <th>STT</th>
-                            <th>Mã Hàng</th>
-                            <th>Tên Mặt Hàng</th>
-                            <th>Số Lượng</th>
-                            <th>Đơn Giá</th>
-                            <th>Thành Tiền</th>
+                            <th style={{ width: '50px' }}>STT</th>
+                            <th>MÃ HÀNG</th>
+                            <th>TÊN MẶT HÀNG</th>
+                            <th className="text-center">SỐ LƯỢNG</th>
+                            <th className="text-right">ĐƠN GIÁ</th>
+                            <th className="text-right">THÀNH TIỀN</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {phieu.chiTiets?.map((ct, index) => (
-                            <tr key={index}>
-                                <td>{index + 1}</td>
-                                {/* 🎯 ĐÃ SỬA LỖI: Lấy đúng object hangHoa theo Entity mới */}
-                                <td>{ct.hangHoa?.maHang}</td>
-                                <td>{ct.hangHoa?.tenHang}</td>
-                                <td>{ct.soLuong}</td>
-                                <td>{(ct.donGia || 0).toLocaleString()} đ</td>
-                                <td>{(ct.soLuong * (ct.donGia || 0)).toLocaleString()} đ</td>
-                            </tr>
-                        ))}
+                        {phieu.chiTiets?.map((ct, index) => {
+                            const thanhTien = (ct.soLuong || 0) * (ct.donGia || 0);
+                            return (
+                                <tr key={index}>
+                                    <td className="text-center">{index + 1}</td>
+                                    <td className="text-bold-blue">{ct.hangHoa?.maHang || '---'}</td>
+                                    <td>{ct.hangHoa?.tenHang || 'Sản phẩm lỗi'}</td>
+                                    <td className="text-center">{ct.soLuong}</td>
+                                    <td className="text-right">{(ct.donGia || 0).toLocaleString()} đ</td>
+                                    <td className="text-right">{thanhTien.toLocaleString()} đ</td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                     <tfoot>
-                        <tr>
-                            <td colSpan="5" className="total-row-label">TỔNG CỘNG CỦA PHIẾU:</td>
-                            {/* 🎯 ĐÃ ĐỔI: Style màu đỏ in đậm */}
-                            <td className="total-amount">{(phieu.tongTien || 0).toLocaleString()} VNĐ</td>
+                        <tr className="total-row">
+                            <td colSpan="5" className="total-row-label">TỔNG GIÁ TRỊ NHẬP KHO:</td>
+                            <td className="total-amount">
+                                {displayTotal.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>VNĐ</span>
+                            </td>
                         </tr>
                     </tfoot>
                 </table>
 
-                {/* Khu vực chữ ký - Gom lại 2 bên */}
+                {/* Khu vực chữ ký 2 bên cân đối */}
                 <div className="receipt-footer">
                     <div className="signature-box">
                         <p><strong>Người lập phiếu</strong></p>

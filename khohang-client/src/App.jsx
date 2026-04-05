@@ -42,9 +42,13 @@ import DuyetYeuCauXuat from './pages/DuyetYeuCauXuat';
 import LichSuYeuCauXuat from './pages/LichSuYeuCauXuat';
 import LichSuNhapKho from './pages/LichSuNhapKho';
 import PhieuNhapDetail from './pages/PhieuNhapDetail';
+
 import ThemTaiKhoan from './pages/ThemTaiKhoan'; // Trang thêm tài khoản mới
 import ChiTietTaiKhoan from './pages/ChiTietTaiKhoan'; // Trang chi tiết tài khoản
 import SuaTaiKhoan from './pages/SuaTaiKhoan'; // Trang sửa tài khoản
+
+import PhieuXuatDetail from './pages/PhieuXuatDetail';
+
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -111,6 +115,7 @@ function App() {
                 <Route path="/lich-su-yeu-cau-xuat" element={<ProtectedRoute><LichSuYeuCauXuat></LichSuYeuCauXuat></ProtectedRoute>} />
                 <Route path="/chi-tiet-phieu-nhap/:id" element={<ProtectedRoute><PhieuNhapDetail /></ProtectedRoute>} />
                 <Route path="/lich-su-nhap-kho" element={<ProtectedRoute><LichSuNhapKho /></ProtectedRoute>} />
+                <Route path="/phieu-xuat-detail/:id" element={<ProtectedRoute><PhieuXuatDetail /></ProtectedRoute>} />
                 
 
                 {/* YeuCauXuat */}
