@@ -4,6 +4,7 @@ import { AuthContext } from '../Context/AuthContext';
 import './HangHoaList.css';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiEye, FiEdit, FiAlertCircle, FiFilter, FiShoppingCart } from 'react-icons/fi';
+import { FaBoxes } from 'react-icons/fa'; // 🎯 Thêm dòng này để lấy icon FontAwesome
 import { toast } from 'react-toastify'; // 🎯 Thêm Toast để bật popup
 
 const HangHoaList = () => {
@@ -80,7 +81,10 @@ const HangHoaList = () => {
     return (
         <div className="hanghoa-container">
             <div className="hanghoa-header">
-                <h2>📦 Quản Lý Danh Mục Hàng Hóa</h2>
+                {/* 🎯 Thay thế emoji bằng icon FontAwesome và thêm class canh chỉnh */}
+                <h2 className="page-title">
+                    <FaBoxes className="title-icon" /> Quản Lý Danh Mục Hàng Hóa
+                </h2>
             </div>
 
             {/* 🎯 4. BANNER CẢNH BÁO KHẨN CẤP TRÊN CÙNG */}
@@ -136,49 +140,54 @@ const HangHoaList = () => {
                 <table className="hanghoa-table">
                     <thead>
                         <tr>
-                            <th>Mã Hàng</th>
-                            <th>Tên Hàng</th>
-                            <th>Loại Hàng</th>
-                            <th>Đơn Vị Tính</th>
-                            <th>Số Lượng Tồn</th>
-                            <th>Định Mức</th>
+                            <th className="col-id">Mã Hàng</th>
+                            <th className="col-name">Tên Hàng</th>
+                            <th className="col-category">Loại Hàng</th>
+                            <th className="col-unit">Đơn Vị Tính</th>
+                            <th className="col-stock text-right">Số Lượng Tồn</th>
+                            <th className="col-min-stock text-right">Định Mức</th>
                             {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
-                                <th>Giá Nhập</th>
+                                <th className="col-price text-right">Giá Nhập</th>
                             )}
-                            <th style={{ textAlign: 'center' }}>Thao Tác</th>
+                            <th className="col-actions">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {currentItems.map((item) => {
-                            const isLowStock = (item.soLuongTon || 0) < (item.soLuongToiThieu || 0);
+                            const isLowStock = (item.soHolgTon || 0) < (item.soLuongToiThieu || 0);
 
                             return (
                                 <tr key={item.maHang || Math.random()}>
-                                    <td className="font-medium">{item.maHang || 'N/A'}</td>
-                                    <td>{item.tenHang || 'Không tên'}</td>
-                                    <td>
+                                    <td className="font-medium col-id">{item.maHang || 'N/A'}</td>
+                                    {/* 🎯 Thêm title để khi di chuột vào sẽ hiện tên đầy đủ */}
+                                    <td className="col-name">
+                                        <span className="truncate-text" title={item.tenHang}>
+                                            {item.tenHang || 'Không tên'}
+                                        </span>
+                                    </td>
+                                    <td className="col-category">
                                         <span className="badge-category">
                                             {item.loaiHang ? item.loaiHang.tenLoai : 'Chưa phân loại'}
                                         </span>
                                     </td>
-                                    <td>{item.donViTinh || 'Cái'}</td>
+                                    <td className="col-unit text-center">{item.donViTinh || 'Cái'}</td>
 
-                                    <td>
-                                        <div className={isLowStock ? "stock-warning" : "stock-normal"}>
+                                    <td className="col-stock text-right">
+                                        <div className={isLowStock ? "stock-warning" : "stock-normal"} style={{justifyContent: 'flex-end'}}>
                                             {item.soLuongTon ?? 0}
                                             {isLowStock && <FiAlertCircle className="warning-icon" title="Sắp hết hàng!" />}
                                         </div>
                                     </td>
 
-                                    <td className="text-muted">{item.soLuongToiThieu ?? 0}</td>
+                                    <td className="col-min-stock text-muted text-right">{item.soLuongToiThieu ?? 0}</td>
 
                                     {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
-                                        <td className="price-text">
+                                        <td className="col-price price-text text-right">
                                             {item.giaNhap ? item.giaNhap.toLocaleString() : '0'} VNĐ
                                         </td>
                                     )}
 
-                                    <td className="action-buttons">
+                                    <td className="col-actions action-buttons">
                                         <button
                                             className="btn-action btn-view"
                                             onClick={() => navigate(`/product-detail/${item.maHang}`)}

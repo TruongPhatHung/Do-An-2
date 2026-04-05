@@ -81,3 +81,7 @@
     color: #7f8c8d;
     font-style: italic;
 }
+/* Thêm khoảng cách giữa icon và chữ */
+.btn i, .logs-header h2 i {
+    margin-right: 5px;
+}

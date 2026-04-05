@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
-import './AdminLogs.css'; // Vẫn giữ để xài chung style cái Bảng (Table)
-import './CategoryManager.css'; // Import file CSS mới tạo
+import './AdminLogs.css'; 
+import './CategoryManager.css'; 
 import { toast } from 'react-toastify';
+
 const CategoryManager = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -74,12 +75,12 @@ const CategoryManager = () => {
         }
     };
 
-    if (loading) return <div className="loader">⏳ Đang tải...</div>;
+    if (loading) return <div className="loader"><i className="fas fa-spinner fa-spin"></i> Đang tải...</div>;
 
     return (
         <div className="logs-container">
             <div className="logs-header">
-                <h2>🏷️ Quản Lý Ngành Hàng / Danh Mục</h2>
+                <h2><i className="fas fa-tags"></i> Quản Lý Ngành Hàng / Danh Mục</h2>
                 <p>Phân loại Hàng hóa và Nhà cung cấp theo từng lĩnh vực</p>
             </div>
 
@@ -115,12 +116,16 @@ const CategoryManager = () => {
                     />
 
                     <button type="submit" className={`btn ${isEditing ? 'btn-update' : 'btn-add'}`}>
-                        {isEditing ? '💾 Cập Nhật' : '➕ Thêm Mới'}
+                        {isEditing ? (
+                            <><i className="fas fa-save"></i> Cập Nhật</>
+                        ) : (
+                            <><i className="fas fa-plus"></i> Thêm Mới</>
+                        )}
                     </button>
 
                     {isEditing && (
                         <button type="button" onClick={() => { setIsEditing(false); setFormData({ id: null, maLoai: '', tenLoai: '', moTa: '' }); }} className="btn btn-cancel">
-                            Hủy
+                            <i className="fas fa-times"></i> Hủy
                         </button>
                     )}
                 </form>
@@ -144,8 +149,12 @@ const CategoryManager = () => {
                                 <td className="text-highlight">{cat.tenLoai}</td>
                                 <td>{cat.moTa}</td>
                                 <td>
-                                    <button onClick={() => handleEdit(cat)} className="btn btn-sm btn-edit">✏️ Sửa</button>
-                                    <button onClick={() => handleDelete(cat.id, cat.tenLoai)} className="btn btn-sm btn-delete">🗑️ Xóa</button>
+                                    <button onClick={() => handleEdit(cat)} className="btn btn-sm btn-edit">
+                                        <i className="fas fa-edit"></i> Sửa
+                                    </button>
+                                    <button onClick={() => handleDelete(cat.id, cat.tenLoai)} className="btn btn-sm btn-delete">
+                                        <i className="fas fa-trash-alt"></i> Xóa
+                                    </button>
                                 </td>
                             </tr>
                         ))}
