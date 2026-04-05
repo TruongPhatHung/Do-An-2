@@ -11,5 +11,5 @@ import java.util.Optional;
 @Repository
 public interface ChiTietDonDatHangRepository  extends JpaRepository<ChiTietDonDatHang, Long > {
     // HÀM ĐÃ SỬA CHUẨN
-    Optional<ChiTietDonDatHang> findByDonDatHangAndMaHang(DonDatHang donDatHang, String maHang);
+    Optional<ChiTietDonDatHang> findByDonDatHangAndHangHoa_MaHang(DonDatHang donDatHang, String maHang);
 }
