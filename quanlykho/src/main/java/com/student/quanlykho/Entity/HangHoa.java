@@ -15,7 +15,7 @@ public class HangHoa {
     private String tenHang;
 
    @Column(name = "so_luong_ton")
-    private int  soLuongTon;
+    private Integer  soLuongTon;
    @Column(name = "don_vi_tinh")
     private String donViTinh;
 
@@ -25,7 +25,7 @@ public class HangHoa {
     private Double giaBan;
 
    @Column(name = "so_luong_toi_thieu")
-    private int soLuongToiThieu;
+    private Integer soLuongToiThieu;
     @ManyToOne
     @JoinColumn(name = "ma_ncc")
     private NhaCungCap nhaCungCap;

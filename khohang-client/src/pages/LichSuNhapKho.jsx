@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiEye, FiDownload, FiCalendar } from 'react-icons/fi';
+import { FiSearch, FiEye, FiCalendar } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import './LichSuNhapKho.css';
 
@@ -15,9 +15,11 @@ const LichSuNhapKho = () => {
         const fetchHistory = async () => {
             try {
                 const res = await api.get('/phieu-nhap');
-                setHistory(res.data);
+                // Đảm bảo dữ liệu là mảng
+                setHistory(Array.isArray(res.data) ? res.data : []);
             } catch (error) {
                 toast.error("Không thể tải lịch sử nhập kho!");
+                setHistory([]);
             } finally {
                 setLoading(false);
             }
@@ -25,10 +27,11 @@ const LichSuNhapKho = () => {
         fetchHistory();
     }, []);
 
+    // 🎯 ĐÃ SỬA: Lọc theo maPhieuNhap (tên cột đúng trong Entity)
     const filteredHistory = history.filter(item =>
-        item.maPhieu?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.nguoiNhap?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.nhaCungCap?.tenNCC?.toLowerCase().includes(searchTerm.toLowerCase())
+        (item.maPhieuNhap || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.nguoiNhap || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.nhaCungCap?.tenNCC || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     if (loading) return <div className="loading">⏳ Đang tải lịch sử...</div>;
@@ -63,15 +66,16 @@ const LichSuNhapKho = () => {
                     </thead>
                     <tbody>
                         {filteredHistory.map((item) => (
-                            <tr key={item.id}>
-                                <td className="font-bold text-blue">{item.maPhieu}</td>
+                            // 🎯 FIX LỖI 1: Dùng maPhieuNhap làm key duy nhất
+                            <tr key={item.maPhieuNhap || Math.random()}>
+                                <td className="font-bold text-blue">{item.maPhieuNhap}</td>
                                 <td>
                                     <div className="date-cell">
-                                        <FiCalendar /> {new Date(item.ngayNhap).toLocaleDateString('vi-VN')}
+                                        <FiCalendar /> {item.ngayNhap ? new Date(item.ngayNhap).toLocaleDateString('vi-VN') : '---'}
                                     </div>
                                 </td>
-                                <td>{item.nhaCungCap?.tenNCC}</td>
-                                <td><span className="user-badge">{item.nguoiNhap}</span></td>
+                                <td>{item.nhaCungCap?.tenNCC || 'N/A'}</td>
+                                <td><span className="user-badge">{item.nguoiNhap || 'Hệ thống'}</span></td>
                                 <td className="text-right price">
                                     {(item.tongTien || 0).toLocaleString()} đ
                                 </td>
@@ -79,7 +83,8 @@ const LichSuNhapKho = () => {
                                 <td className="text-center">
                                     <button
                                         className="btn-view"
-                                        onClick={() => navigate(`/phieu-nhap-detail/${item.id}`)}
+                                        // 🎯 FIX LỖI 2: Truyền maPhieuNhap vào URL để không bị undefined
+                                        onClick={() => navigate(`/chi-tiet-phieu-nhap/${item.maPhieuNhap}`)}
                                     >
                                         <FiEye /> Chi tiết
                                     </button>
@@ -88,6 +93,12 @@ const LichSuNhapKho = () => {
                         ))}
                     </tbody>
                 </table>
+
+                {filteredHistory.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '30px', color: '#888' }}>
+                        Không tìm thấy dữ liệu phiếu nhập nào.
+                    </div>
+                )}
             </div>
         </div>
     );

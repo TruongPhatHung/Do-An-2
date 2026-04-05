@@ -2,11 +2,11 @@ package com.student.quanlykho.Controller;
 
 import com.student.quanlykho.Entity.ChiTietDonDatHang;
 import com.student.quanlykho.Entity.DonDatHang;
-import com.student.quanlykho.Entity.HangHoa; // 🎯 Thêm import này
+import com.student.quanlykho.Entity.HangHoa;
 import com.student.quanlykho.Entity.NhaCungCap;
 import com.student.quanlykho.Entity.SanPhamNCC;
 import com.student.quanlykho.Repository.DonDatHangRepository;
-import com.student.quanlykho.Repository.HangHoaRepository; // 🎯 Thêm import này
+import com.student.quanlykho.Repository.HangHoaRepository;
 import com.student.quanlykho.Repository.NhaCungCapRepository;
 import com.student.quanlykho.Repository.SanPhamNCCRepository;
 import com.student.quanlykho.Service.AuditLogService;
@@ -31,7 +31,6 @@ public class DonDatHangController {
     @Autowired
     private SanPhamNCCRepository sanPhamNCCRepository;
 
-    // 🎯 1. Bổ sung HangHoaRepository để kiểm tra kho tổng
     @Autowired
     private HangHoaRepository hangHoaRepository;
 
@@ -64,14 +63,14 @@ public class DonDatHangController {
             ChiTietDonDatHang chiTiet = new ChiTietDonDatHang();
             chiTiet.setDonDatHang(donDatHang);
 
-            // Tìm sản phẩm trong danh mục của Nhà cung cấp này
+            // 1. Tìm sản phẩm trong danh mục của Nhà cung cấp này
             SanPhamNCC sanPham = sanPhamNCCRepository.findByMaHangAndNhaCungCap_MaNCC(item.getHangHoa().getMaHang(), nhaCungCap.getMaNCC())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy hàng hóa: " + item.getHangHoa().getMaHang()));
 
             // ====================================================================
-            // 🎯 2. ĐOẠN CODE "THẦN THÁNH" XỬ LÝ LỖI KHÓA NGOẠI:
-            // Nếu mã hàng này chưa từng tồn tại trong kho tổng -> Tự động thêm vào
+            // 2. TÌM HOẶC TẠO MỚI HÀNG HÓA TRONG KHO TỔNG
             // ====================================================================
+            HangHoa actualHangHoa;
             if (!hangHoaRepository.existsById(sanPham.getMaHang())) {
                 HangHoa newProduct = new HangHoa();
                 newProduct.setMaHang(sanPham.getMaHang());
@@ -81,24 +80,22 @@ public class DonDatHangController {
                 newProduct.setSoLuongToiThieu(10); // Mức cảnh báo tối thiểu (Mặc định)
                 newProduct.setGiaNhap(item.getDonGia());
                 newProduct.setGiaBan(item.getDonGia() * 1.2);
-
-
-                // Lấy giá từ đơn đặt
                 newProduct.setDonViTinh("Cái"); // Mặc định đơn vị tính
 
-
-                hangHoaRepository.save(newProduct); // Lưu vào bảng hang_hoa trước để không bị lỗi Foreign Key!
+                actualHangHoa = hangHoaRepository.save(newProduct); // Lưu ngay để có Object thật
+            } else {
+                // Nếu đã có trong kho thì lôi ra
+                actualHangHoa = hangHoaRepository.findById(sanPham.getMaHang()).get();
             }
-            // ====================================================================
 
-            chiTiet.setMaHang(sanPham.getMaHang());
-            chiTiet.setTenHang(sanPham.getTenHang());
+            // ====================================================================
+            // 🎯 3. ĐÃ SỬA: Set trực tiếp Object HangHoa vào Chi Tiết
+            // (Không còn dùng setMaHang hay setTenHang nữa)
+            // ====================================================================
+            chiTiet.setHangHoa(actualHangHoa);
             chiTiet.setSoLuongDat(item.getSoLuongDat());
             chiTiet.setDonGia(item.getDonGia());
             chiTiet.setSoLuongDaNhap(0);
-
-            // Việc này giúp thằng Nhập kho sau này "nhìn" thấy loại để tự động cập nhật
-            chiTiet.setLoaiHang(sanPham.getLoaiHang());
 
             return chiTiet;
         }).collect(Collectors.toList());

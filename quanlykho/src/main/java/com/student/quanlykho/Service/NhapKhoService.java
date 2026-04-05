@@ -1,18 +1,14 @@
 package com.student.quanlykho.Service;
 
-import com.student.quanlykho.Entity.ChiTietDonDatHang;
-import com.student.quanlykho.Entity.DonDatHang;
-import com.student.quanlykho.Entity.HangHoa;
-import com.student.quanlykho.Entity.PhieuNhap;
-import com.student.quanlykho.Repository.ChiTietDonDatHangRepository;
-import com.student.quanlykho.Repository.DonDatHangRepository;
-import com.student.quanlykho.Repository.HangHoaRepository;
-import com.student.quanlykho.Repository.PhieuNhapRepository;
+import com.student.quanlykho.Entity.*;
+import com.student.quanlykho.Repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -20,90 +16,87 @@ public class NhapKhoService {
 
     @Autowired
     private DonDatHangRepository donDatHangRepository;
-
     @Autowired
     private ChiTietDonDatHangRepository chiTietDonDatHangRepository;
-
     @Autowired
     private HangHoaRepository hangHoaRepository;
-
     @Autowired
     private PhieuNhapRepository phieuNhapRepository;
+    @Autowired
+    private AuditLogService auditLogService;
 
     @Transactional
-    public PhieuNhap taoPhieuNhap(String maDonHang, Map<String, Integer> hangNhap){
-        DonDatHang donDatHang = donDatHangRepository.findById(maDonHang)
-                .orElseThrow(()-> new RuntimeException("Không tìm thấy đơn hàng " + maDonHang));
+    public String taoPhieuNhap(String maDonHang, String nguoiNhap, Map<String, Integer> hangNhap) {
+        DonDatHang po = donDatHangRepository.findById(maDonHang)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng " + maDonHang));
 
-        // 1. Tạo phiếu nhập mới
-        PhieuNhap phieuNhap = new PhieuNhap();
-        phieuNhap.setMaPhieuNhap("PN-" + System.currentTimeMillis());
-        phieuNhap.setNgayNhap(LocalDateTime.now());
-        phieuNhap.setDonDatHang(donDatHang);
+        // 1. Tạo vỏ Phiếu Nhập
+        PhieuNhap phieu = new PhieuNhap();
+        phieu.setMaPhieuNhap("PNK-" + System.currentTimeMillis());
+        phieu.setNgayNhap(LocalDateTime.now());
+        phieu.setNguoiNhap(nguoiNhap);
+        phieu.setNhaCungCap(po.getNhaCungCap());
+        phieu.setDonDatHang(po);
 
-        // Lưu phiếu nhập trước (nếu cần thiết với thiết kế DB của bạn)
-        // phieuNhapRepository.save(phieuNhap);
+        double tongTienPhieu = 0;
+        List<ChiTietPhieuNhap> dsChiTietPhieu = new ArrayList<>();
+        boolean isGiaoDuTatCa = true;
 
-        // 2. Duyệt qua từng món hàng được nhân viên kho nhập vào
-        for (Map.Entry<String, Integer> entry : hangNhap.entrySet()){
-            String maHang = entry.getKey();
-            Integer soLuongThucNhap = entry.getValue();
+        // 2. Duyệt qua danh sách chi tiết của PO để lấy dữ liệu chuẩn
+        for (ChiTietDonDatHang ctPO : po.getChiTiets()) {
+            String maHang = (ctPO.getHangHoa() != null) ? ctPO.getHangHoa().getMaHang() : null;
+            if (maHang == null) continue;
 
-            // Lấy chi tiết đơn hàng (SỬA LỖI Ở ĐÂY: Truyền chuỗi maHang thay vì Object hangHoa)
-            ChiTietDonDatHang chiTiet = chiTietDonDatHangRepository.findByDonDatHangAndMaHang(donDatHang, maHang)
-                    .orElseThrow(() -> new RuntimeException("Lỗi: Mã hàng " + maHang + " không có trong Đơn đặt hàng này!"));
+            Integer slNhap = hangNhap.get(maHang);
 
-            // Kiểm tra số lượng nhập có vượt mức đặt không
-            int conLai = chiTiet.getSoLuongDat() - chiTiet.getSoLuongDaNhap();
-            if (soLuongThucNhap > conLai){
-                throw new RuntimeException("Lỗi: Không thể nhập quá số lượng đặt! Còn lại: " + conLai + ", Nhập: " + soLuongThucNhap);
+            if (slNhap != null && slNhap > 0) {
+                // 💡 LOGIC CỦA SẾP: Bắt lỗi nếu nhân viên kho gõ nhầm số quá tay
+                int conLai = ctPO.getSoLuongDat() - ctPO.getSoLuongDaNhap();
+                if (slNhap > conLai) {
+                    throw new RuntimeException("Lỗi: Mặt hàng " + maHang + " không thể nhập quá số lượng đặt! Cần: " + conLai + ", Đang nhập: " + slNhap);
+                }
+
+                // Cập nhật số lượng đã nhận vào Đơn Hàng
+                int daNhapCu = ctPO.getSoLuongDaNhap();
+                ctPO.setSoLuongDaNhap(daNhapCu + slNhap);
+
+                // Cập nhật Tồn Kho
+                HangHoa hh = hangHoaRepository.findById(maHang).orElseThrow(() -> new RuntimeException("Lỗi dữ liệu kho!"));
+                int tonKhoCu = (hh.getSoLuongTon() == null) ? 0 : hh.getSoLuongTon();
+                hh.setSoLuongTon(tonKhoCu + slNhap);
+                hangHoaRepository.save(hh);
+
+                // Ghi Log
+                auditLogService.ghiLog("NHẬP KHO", "HÀNG HÓA", maHang, "Cũ: " + tonKhoCu, "Mới: " + hh.getSoLuongTon());
+
+                // Tạo Chi Tiết Phiếu Nhập để lưu Lịch Sử
+                ChiTietPhieuNhap ctPN = new ChiTietPhieuNhap();
+                ctPN.setPhieuNhap(phieu);
+                ctPN.setHangHoa(hh);
+                ctPN.setSoLuong(slNhap);
+                ctPN.setDonGia(ctPO.getDonGia());
+                dsChiTietPhieu.add(ctPN);
+
+                tongTienPhieu += (slNhap * ctPO.getDonGia());
             }
 
-            // Cập nhật số lượng đã nhận vào Chi tiết đơn
-            chiTiet.setSoLuongDaNhap(chiTiet.getSoLuongDaNhap() + soLuongThucNhap);
-            chiTietDonDatHangRepository.save(chiTiet);
-
-            // --- LOGIC NHẬP KHO THÔNG MINH ---
-            // Tìm hàng trong kho. Dùng .orElse(null) để không ném lỗi nếu là hàng mới
-            HangHoa hangHoa = hangHoaRepository.findById(maHang).orElse(null);
-
-            if (hangHoa == null) {
-                // TÌNH HUỐNG 1: KHO CHƯA TỪNG CÓ MẶT HÀNG NÀY -> TẠO MỚI TỰ ĐỘNG
-                hangHoa = new HangHoa();
-                hangHoa.setMaHang(maHang);
-                hangHoa.setTenHang(chiTiet.getTenHang()); // Lấy tên từ đơn hàng
-                hangHoa.setGiaNhap(chiTiet.getDonGia());  // Lấy giá nhập từ đơn hàng
-                hangHoa.setSoLuongTon(soLuongThucNhap);   // Tồn kho bằng đúng số lượng vừa nhập
-                hangHoa.setDonViTinh("Cái");              // Set mặc định (Có thể cho nhân viên sửa sau)
-                hangHoa.setSoLuongToiThieu(10);           // Set mặc định
-                hangHoa.setNhaCungCap(donDatHang.getNhaCungCap()); // Gắn luôn nhà cung cấp
-            } else {
-                // TÌNH HUỐNG 2: KHO ĐÃ CÓ HÀNG NÀY -> CỘNG DỒN SỐ LƯỢNG
-                hangHoa.setSoLuongTon(hangHoa.getSoLuongTon() + soLuongThucNhap);
-            }
-
-            // Lưu thay đổi vào kho
-            hangHoaRepository.save(hangHoa);
-        }
-
-        capNhatTrangThaiDonHang(donDatHang);
-        return phieuNhap; // Nếu DB yêu cầu, bạn gọi phieuNhapRepository.save(phieuNhap) trước khi return nhé
-    }
-
-    private void capNhatTrangThaiDonHang(DonDatHang donDatHang){
-        boolean daDuHang = true;
-        for (ChiTietDonDatHang ct : donDatHang.getChiTiets()){
-            if (ct.getSoLuongDaNhap() < ct.getSoLuongDat()){
-                daDuHang = false;
-                break;
+            // Kiểm tra trạng thái giao hàng
+            int daNhapHienTai = ctPO.getSoLuongDaNhap();
+            int canGiao = ctPO.getSoLuongDat();
+            if (daNhapHienTai < canGiao) {
+                isGiaoDuTatCa = false;
             }
         }
-        if (daDuHang){
-            donDatHang.setTrangThai("Hoàn Thành");
-        }
-        else {
-            donDatHang.setTrangThai("Giao Thiếu");
-        }
-        donDatHangRepository.save(donDatHang);
+
+        // 3. Lưu Phiếu Nhập
+        phieu.setChiTiets(dsChiTietPhieu);
+        phieu.setTongTien(tongTienPhieu);
+        phieuNhapRepository.save(phieu);
+
+        // 4. Cập nhật trạng thái PO
+        po.setTrangThai(isGiaoDuTatCa ? "Hoàn Tất" : "Giao Thiếu");
+        donDatHangRepository.save(po);
+
+        return "Nhập kho thành công phiếu " + phieu.getMaPhieuNhap();
     }
 }

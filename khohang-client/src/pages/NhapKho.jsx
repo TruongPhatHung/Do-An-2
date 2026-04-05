@@ -1,26 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../services/axiosConfig';
 import './NhapKho.css';
 import { toast } from 'react-toastify';
 import { FiCheckCircle, FiAlertTriangle, FiCalendar, FiSave } from 'react-icons/fi';
+// 🎯 BỔ SUNG: Import Context để lấy tên người đang đăng nhập
+import { AuthContext } from '../Context/AuthContext';
 
 const NhapKho = () => {
+    // 🎯 Lấy thông tin user hiện tại
+    const { user } = useContext(AuthContext);
+
     const [pendingPOs, setPendingPOs] = useState([]);
     const [selectedPO, setSelectedPO] = useState(null);
     const [thucNhap, setThucNhap] = useState({});
     const [ngayNhapThucTe, setNgayNhapThucTe] = useState(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
-        const fetchPendingPOs = async () => {
-            try {
-                const response = await api.get('/orders/importable');
-                setPendingPOs(response.data);
-            } catch (error) {
-                console.error("Lỗi tải PO chờ nhập:", error);
-            }
-        };
         fetchPendingPOs();
     }, []);
+
+    const fetchPendingPOs = async () => {
+        try {
+            const response = await api.get('/orders/importable');
+            setPendingPOs(response.data);
+        } catch (error) {
+            console.error("Lỗi tải PO chờ nhập:", error);
+        }
+    };
 
     const handleSelectPO = (e) => {
         const po = pendingPOs.find(p => p.maDon === e.target.value);
@@ -45,19 +51,19 @@ const NhapKho = () => {
 
         const payload = {
             maDonHang: selectedPO.maDon,
-            ngayNhap: ngayNhapThucTe,
+            // 🎯 QUAN TRỌNG: Gửi kèm tên người nhập để Backend lưu vào Lịch sử
+            nguoiNhap: user?.displayName || 'Thủ kho',
             chiTietNhap: thucNhap
         };
 
         try {
             await api.post('/phieu-nhap', payload);
             toast.success("✅ Xác nhận nhập kho thành công!");
-            setSelectedPO(null);
-
-            const response = await api.get('/orders/importable');
-            setPendingPOs(response.data);
+            setSelectedPO(null); // Reset lại form
+            fetchPendingPOs(); // Tải lại danh sách PO mới nhất
         } catch (error) {
-            toast.error("❌ Lỗi khi lưu phiếu nhập!");
+            toast.error("❌ Lỗi khi lưu phiếu nhập! (Vui lòng kiểm tra lại)");
+            console.error(error);
         }
     };
 
@@ -127,13 +133,17 @@ const NhapKho = () => {
                                 </thead>
                                 <tbody>
                                     {selectedPO.chiTiets?.map((item) => {
+                                        // 🎯 SỬA LỖI Ở ĐÂY: Trích xuất chính xác mã hàng và tên hàng
+                                        const actualMaHang = item.hangHoa?.maHang || item.maHang;
+                                        const actualTenHang = item.hangHoa?.tenHang || item.tenHang;
+
                                         const conLai = item.soLuongDat - (item.soLuongDaNhap || 0);
                                         if (conLai <= 0) return null;
 
                                         return (
-                                            <tr key={item.maHang}>
-                                                <td className="fw-bold">{item.maHang}</td>
-                                                <td>{item.tenHang}</td>
+                                            <tr key={actualMaHang}>
+                                                <td className="fw-bold">{actualMaHang}</td>
+                                                <td>{actualTenHang}</td>
                                                 <td className="text-center fw-bold">{item.soLuongDat}</td>
                                                 <td className="text-center text-muted">{item.soLuongDaNhap || 0}</td>
                                                 <td className="text-center text-warning fw-bold">{conLai}</td>
@@ -141,8 +151,8 @@ const NhapKho = () => {
                                                     <input
                                                         type="number"
                                                         className="nhapkho-input-number"
-                                                        value={thucNhap[item.maHang] === 0 ? '' : (thucNhap[item.maHang] || '')}
-                                                        onChange={(e) => handleInputChange(item.maHang, e.target.value, conLai)}
+                                                        value={thucNhap[actualMaHang] === 0 ? '' : (thucNhap[actualMaHang] || '')}
+                                                        onChange={(e) => handleInputChange(actualMaHang, e.target.value, conLai)}
                                                         placeholder={`Tối đa ${conLai}`}
                                                     />
                                                 </td>
