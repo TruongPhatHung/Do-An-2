@@ -1,43 +1,35 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/axiosConfig';
 import './AdminLogs.css';
+import { FiSearch, FiFilter, FiX, FiClock, FiUser, FiDatabase, FiEye, FiChevronLeft, FiChevronRight, FiActivity, FiArrowRight } from 'react-icons/fi';
 
 const AdminLogs = () => {
-    const [logs, setLogs] = useState([]); // Sẽ chứa mảng lấy từ data.content
+    const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedLog, setSelectedLog] = useState(null);
 
-    // --- STATE CHO BỘ LỌC ---
     const [searchTerm, setSearchTerm] = useState('');
     const [filterAction, setFilterAction] = useState('ALL');
 
-    // --- STATE CHO PHÂN TRANG (Backend dùng 0-indexed, Frontend dùng 1-indexed) ---
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const itemsPerPage = 20;
 
-    // Tách hàm fetch ra để gọi lại khi đổi trang
     const fetchLogs = useCallback(async () => {
         setLoading(true);
         try {
-            // Spring Boot nhận page từ số 0, nên lấy currentPage - 1
             const response = await api.get(`/logs?page=${currentPage - 1}&size=${itemsPerPage}`);
-
-            // 🎯 FIX LỖI: Lấy content từ đối tượng Page của Spring
             const pageData = response.data;
             setLogs(pageData.content || []);
             setTotalPages(pageData.totalPages || 1);
-
-            setLoading(false);
         } catch (error) {
             console.error("Lỗi tải nhật ký:", error);
+        } finally {
             setLoading(false);
         }
     }, [currentPage]);
 
-    useEffect(() => {
-        fetchLogs();
-    }, [fetchLogs]);
+    useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
     const formatDateTime = (dateStr) => {
         if (!dateStr) return '---';
@@ -49,37 +41,49 @@ const AdminLogs = () => {
     };
 
     const getActionClass = (action) => {
-        switch (action) {
-            case 'THÊM': return 'badge-add';
-            case 'SỬA': return 'badge-edit';
-            case 'XÓA': return 'badge-delete';
-            case 'NHẬP KHO': return 'badge-add';
-            case 'XUẤT KHO': return 'badge-delete';
-            default: return 'badge-default';
-        }
+        if (!action) return 'badge-default';
+        if (action.includes('THÊM') || action.includes('NHẬP')) return 'badge-success';
+        if (action.includes('XÓA') || action.includes('XUẤT')) return 'badge-danger';
+        if (action.includes('SỬA') || action.includes('ĐỔI')) return 'badge-info';
+        return 'badge-warning';
     };
 
     const renderLogDetail = (log) => {
         if (!log.duLieuCu && !log.duLieuMoi) {
-            return <div style={{ color: '#7f8c8d', fontStyle: 'italic', padding: '10px' }}>Không có chi tiết dữ liệu thay đổi.</div>;
+            return <div className="diff-empty">Không có dữ liệu chi tiết cho thao tác này.</div>;
         }
         if (log.hanhDong === 'THÊM' || log.hanhDong === 'NHẬP KHO') {
-            return <div className="diff-added"><strong>Dữ liệu mới:</strong><br />{log.duLieuMoi}</div>;
+            return (
+                <div className="diff-card diff-new">
+                    <div className="diff-header-new">✨ Dữ liệu vừa được tạo/nhập:</div>
+                    <pre className="diff-pre">{log.duLieuMoi}</pre>
+                </div>
+            );
         }
         if (log.hanhDong === 'XÓA' || log.hanhDong === 'XUẤT KHO') {
-            return <div className="diff-removed"><strong>Dữ liệu đã xóa/xuất:</strong><br />{log.duLieuCu}</div>;
+            return (
+                <div className="diff-card diff-old">
+                    <div className="diff-header-old">🗑️ Dữ liệu đã bị xóa/xuất:</div>
+                    <pre className="diff-pre">{log.duLieuCu}</pre>
+                </div>
+            );
         }
         return (
-            <div className="diff-changed">
-                <div className="old"><strong>Dữ liệu cũ:</strong><br />{log.duLieuCu || 'Trống'}</div>
-                <div className="arrow">⬇️ ĐƯỢC THAY ĐỔI THÀNH ⬇️</div>
-                <div className="new"><strong>Dữ liệu mới:</strong><br />{log.duLieuMoi || 'Trống'}</div>
+            <div className="diff-split-container">
+                <div className="diff-card diff-old">
+                    <div className="diff-header-old">🔴 Dữ liệu CŨ (Trước khi sửa)</div>
+                    <pre className="diff-pre">{log.duLieuCu || '[Trống]'}</pre>
+                </div>
+                <div className="diff-center-icon"><FiArrowRight /></div>
+                <div className="diff-card diff-new">
+                    <div className="diff-header-new">🟢 Dữ liệu MỚI (Sau khi sửa)</div>
+                    <pre className="diff-pre">{log.duLieuMoi || '[Trống]'}</pre>
+                </div>
             </div>
         );
     };
 
-    // --- LỌC DỮ LIỆU TRÊN TRANG HIỆN TẠI ---
-    const filteredLogs = (Array.isArray(logs) ? logs : []).filter(log => {
+    const filteredLogs = logs.filter(log => {
         const matchesSearch = (log.nguoiThaoTac?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (log.bangDuLieu?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (log.idBanGhi?.toLowerCase() || '').includes(searchTerm.toLowerCase());
@@ -92,135 +96,121 @@ const AdminLogs = () => {
         setFilterAction('ALL');
     };
 
-    if (loading && currentPage === 1) return <div style={{ padding: '40px', textAlign: 'center' }}>⏳ Đang tải lịch sử hệ thống...</div>;
-
     return (
-        <div className="logs-container">
-            <div className="logs-header">
-                <h2>📜 Nhật Ký Hoạt Động Hệ Thống</h2>
-                <p>Theo dõi mọi thay đổi dữ liệu từ nhân viên (Trang {currentPage} / {totalPages})</p>
+        <div className="admin-logs-wrapper">
+            {/* HEADER */}
+            <div className="al-header">
+                <div>
+                    <h2 className="al-title"><FiActivity className="al-title-icon" /> Nhật Ký Hệ Thống</h2>
+                    <p className="al-subtitle">Giám sát và truy vết mọi thao tác thay đổi dữ liệu của nhân sự.</p>
+                </div>
             </div>
 
-            {/* THANH CÔNG CỤ TÌM KIẾM VÀ LỌC */}
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center' }}>
-                <input
-                    type="text"
-                    placeholder="🔍 Tìm trong trang này..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ padding: '10px 15px', width: '300px', borderRadius: '6px', border: '1px solid #dcdde1', outline: 'none' }}
-                />
-
-                <select
-                    value={filterAction}
-                    onChange={(e) => setFilterAction(e.target.value)}
-                    style={{ padding: '10px 15px', borderRadius: '6px', border: '1px solid #dcdde1', outline: 'none', backgroundColor: 'white' }}
-                >
-                    <option value="ALL">Tất cả hành động</option>
-                    <option value="THÊM">THÊM mới</option>
-                    <option value="SỬA">SỬA đổi</option>
-                    <option value="XÓA">XÓA</option>
-                    <option value="NHẬP KHO">NHẬP KHO</option>
-                    <option value="XUẤT KHO">XUẤT KHO</option>
-                </select>
-
+            {/* TOOLBAR */}
+            <div className="al-toolbar">
+                <div className="al-search-box">
+                    <FiSearch className="al-icon" />
+                    <input
+                        type="text"
+                        placeholder="Tìm nhân viên, module, ID..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="al-filter-box">
+                    <FiFilter className="al-icon" />
+                    <select value={filterAction} onChange={(e) => setFilterAction(e.target.value)}>
+                        <option value="ALL">Tất cả thao tác</option>
+                        <option value="THÊM">Tạo mới</option>
+                        <option value="SỬA">Sửa đổi</option>
+                        <option value="XÓA">Xóa / Hủy</option>
+                        <option value="NHẬP KHO">Nhập kho</option>
+                        <option value="XUẤT KHO">Xuất kho</option>
+                    </select>
+                </div>
                 {(searchTerm || filterAction !== 'ALL') && (
-                    <button onClick={handleClearFilter} style={{ padding: '10px 15px', cursor: 'pointer', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold' }}>
-                        ✖ Xóa Lọc
-                    </button>
+                    <button className="al-btn-clear" onClick={handleClearFilter}>✖ Bỏ lọc</button>
                 )}
             </div>
 
-            {/* BẢNG RÚT GỌN BÊN NGOÀI */}
-            <div className="logs-table-wrapper">
-                <table className="logs-table">
+            {/* TABLE */}
+            <div className="al-table-card">
+                <table className="al-table">
                     <thead>
                         <tr>
-                            <th width="20%">Thời Gian</th>
-                            <th width="20%">Nhân Viên</th>
+                            <th width="20%"><FiClock /> Thời Gian</th>
+                            <th width="20%"><FiUser /> Nhân Viên</th>
                             <th width="15%">Hành Động</th>
-                            <th width="30%">Đối Tượng (ID)</th>
-                            <th width="15%" style={{ textAlign: 'center' }}>Chi Tiết</th>
+                            <th width="30%"><FiDatabase /> Đối Tượng Tác Động</th>
+                            <th width="15%" className="text-center">Chi Tiết</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {loading ? (
-                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>Đang cập nhật dữ liệu...</td></tr>
-                        ) : filteredLogs.length > 0 ? filteredLogs.map((log) => (
-                            <tr key={log.id}>
-                                <td style={{ color: '#7f8c8d', fontSize: '14px' }}>{formatDateTime(log.thoiGian)}</td>
-                                <td><span style={{ fontWeight: 'bold', color: '#2c3e50' }}>👤 {log.nguoiThaoTac}</span></td>
-                                <td><span className={`action-badge ${getActionClass(log.hanhDong)}`}>{log.hanhDong}</span></td>
-                                <td>
-                                    <strong>{log.bangDuLieu}</strong>
-                                    <span style={{ fontSize: '12px', color: '#95a5a6', marginLeft: '8px', backgroundColor: '#f1f2f6', padding: '2px 6px', borderRadius: '4px' }}>
-                                        #{log.idBanGhi}
-                                    </span>
-                                </td>
-                                <td style={{ textAlign: 'center' }}>
-                                    <button className="btn-view-detail" onClick={() => setSelectedLog(log)} style={{ margin: '0 auto' }}>👁️ Xem</button>
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#7f8c8d' }}>Không có dữ liệu thao tác nào phù hợp.</td></tr>
+                        {loading && currentPage === 1 ? (
+                            <tr><td colSpan="5" className="al-loading">⏳ Đang tải dữ liệu hệ thống...</td></tr>
+                        ) : filteredLogs.length > 0 ? (
+                            filteredLogs.map((log) => (
+                                <tr key={log.id}>
+                                    <td className="al-time">{formatDateTime(log.thoiGian)}</td>
+                                    <td>
+                                        <div className="al-user-cell">
+                                            <span className="al-avatar-placeholder">{log.nguoiThaoTac?.charAt(0).toUpperCase()}</span>
+                                            <span className="al-username">@{log.nguoiThaoTac}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span className={`al-badge ${getActionClass(log.hanhDong)}`}>{log.hanhDong}</span>
+                                    </td>
+                                    <td>
+                                        <div className="al-module-cell">
+                                            <span className="al-module-name">{log.bangDuLieu}</span>
+                                            <span className="al-record-id">#{log.idBanGhi}</span>
+                                        </div>
+                                    </td>
+                                    <td className="text-center">
+                                        <button className="al-btn-view" onClick={() => setSelectedLog(log)}>
+                                            <FiEye /> Xem
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr><td colSpan="5" className="al-empty">Không có thao tác nào phù hợp với bộ lọc.</td></tr>
                         )}
                     </tbody>
                 </table>
             </div>
 
-            {/* THANH ĐIỀU HƯỚNG PHÂN TRANG (MỚI) */}
-            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(1)}
-                    style={{ padding: '8px 15px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', border: '1px solid #dcdde1', backgroundColor: 'white', borderRadius: '4px' }}
-                >
-                    ⏮ Trang Đầu
-                </button>
-                <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => prev - 1)}
-                    style={{ padding: '8px 15px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', border: '1px solid #dcdde1', backgroundColor: 'white', borderRadius: '4px' }}
-                >
-                    ◀ Trước
-                </button>
-                <span style={{ padding: '8px 15px', fontWeight: 'bold', backgroundColor: '#e8f4f8', color: '#2980b9', borderRadius: '4px', border: '1px solid #3498db' }}>
-                    Trang {currentPage} / {totalPages}
-                </span>
-                <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => prev + 1)}
-                    style={{ padding: '8px 15px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', border: '1px solid #dcdde1', backgroundColor: 'white', borderRadius: '4px' }}
-                >
-                    Sau ▶
-                </button>
-                <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(totalPages)}
-                    style={{ padding: '8px 15px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', border: '1px solid #dcdde1', backgroundColor: 'white', borderRadius: '4px' }}
-                >
-                    Trang Cuối ⏭
-                </button>
+            {/* PAGINATION */}
+            <div className="al-pagination">
+                <span className="al-page-info">Đang xem trang <strong>{currentPage}</strong> trên <strong>{totalPages}</strong></span>
+                <div className="al-page-controls">
+                    <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="al-btn-page">
+                        <FiChevronLeft />
+                    </button>
+                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)} className="al-btn-page">
+                        <FiChevronRight />
+                    </button>
+                </div>
             </div>
 
-            {/* POPUP MODAL */}
+            {/* MODAL CHI TIẾT */}
             {selectedLog && (
-                <div className="modal-overlay" onClick={() => setSelectedLog(null)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3 style={{ margin: 0 }}>🔍 Chi Tiết Thao Tác</h3>
-                            <button className="modal-close" onClick={() => setSelectedLog(null)}>✖</button>
+                <div className="al-modal-overlay" onClick={() => setSelectedLog(null)}>
+                    <div className="al-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="al-modal-header">
+                            <h3>🔍 Phân Tích Dữ Liệu Thay Đổi</h3>
+                            <button className="al-modal-close" onClick={() => setSelectedLog(null)}><FiX /></button>
                         </div>
-                        <div className="modal-body">
-                            <div className="info-grid">
-                                <div className="info-item"><span className="info-label">Nhân viên</span><span className="info-value">👤 {selectedLog.nguoiThaoTac}</span></div>
-                                <div className="info-item"><span className="info-label">Thời gian</span><span className="info-value">{formatDateTime(selectedLog.thoiGian)}</span></div>
-                                <div className="info-item"><span className="info-label">Đối tượng</span><span className="info-value">{selectedLog.bangDuLieu} (ID: #{selectedLog.idBanGhi})</span></div>
-                                <div className="info-item"><span className="info-label">Hành động</span><span className="info-value"><span className={`action-badge ${getActionClass(selectedLog.hanhDong)}`}>{selectedLog.hanhDong}</span></span></div>
+                        <div className="al-modal-body">
+                            <div className="al-modal-meta">
+                                <div className="al-meta-item"><strong>Nhân viên:</strong> @{selectedLog.nguoiThaoTac}</div>
+                                <div className="al-meta-item"><strong>Thời gian:</strong> {formatDateTime(selectedLog.thoiGian)}</div>
+                                <div className="al-meta-item"><strong>Mục:</strong> {selectedLog.bangDuLieu} (#{selectedLog.idBanGhi})</div>
+                                <div className="al-meta-item"><strong>Thao tác:</strong> <span className={`al-badge ${getActionClass(selectedLog.hanhDong)}`}>{selectedLog.hanhDong}</span></div>
                             </div>
-                            <div className="diff-container">
-                                <div className="diff-header">Nội dung thay đổi:</div>
-                                <div className="diff-content">{renderLogDetail(selectedLog)}</div>
+                            <div className="al-modal-diff-area">
+                                {renderLogDetail(selectedLog)}
                             </div>
                         </div>
                     </div>
