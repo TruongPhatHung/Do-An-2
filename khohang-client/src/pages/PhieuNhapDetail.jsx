@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/axiosConfig';
-import { FiArrowLeft, FiPrinter, FiPackage, FiUser, FiCalendar } from 'react-icons/fi';
+import { FiArrowLeft, FiPrinter, FiPackage, FiUser, FiCalendar, FiFileText } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import './LichSuNhapKho.css'; // Dùng chung file CSS hoặc tạo mới
+// 🎯 ĐÃ ĐỔI: Import file CSS mới
+import './PhieuNhapDetail.css';
 
 const PhieuNhapDetail = () => {
     const { id } = useParams();
@@ -14,6 +15,7 @@ const PhieuNhapDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
+                // Đảm bảo sếp dùng đúng ID khóa chính, ví dụ 'PNK-123...'
                 const res = await api.get(`/phieu-nhap/${id}`);
                 setPhieu(res.data);
             } catch (error) {
@@ -35,6 +37,7 @@ const PhieuNhapDetail = () => {
     return (
         <div className="detail-container">
             {/* Header điều hướng - Sẽ ẩn khi in */}
+            {/* 🎯 ĐÃ ĐỔI: Gom nút lên trên cùng */}
             <div className="no-print detail-header-actions">
                 <button onClick={() => navigate(-1)} className="btn-back">
                     <FiArrowLeft /> Quay lại
@@ -48,21 +51,22 @@ const PhieuNhapDetail = () => {
             <div className="printable-receipt">
                 <div className="receipt-header">
                     <h2>PHIẾU NHẬP KHO VẬT TƯ</h2>
-                    <p className="receipt-code">Mã phiếu: {phieu.maPhieuNhap || phieu.maPhieu}</p>
+                    {/* Sửa lại để lấy đúng mã khóa chính 'PNK-...' */}
+                    <p className="receipt-code">Mã phiếu: {phieu.maPhieuNhap}</p>
                 </div>
 
                 <div className="receipt-info-grid">
                     <div className="info-item">
-                        <FiUser /> <strong>Người nhập:</strong> {phieu.nguoiNhap}
+                        <FiUser /> <strong>Người nhập:</strong> {phieu.nguoiNhap || '---'}
                     </div>
                     <div className="info-item">
-                        <FiCalendar /> <strong>Ngày nhập:</strong> {new Date(phieu.ngayNhap).toLocaleString('vi-VN')}
+                        <FiCalendar /> <strong>Ngày nhập:</strong> {phieu.ngayNhap ? new Date(phieu.ngayNhap).toLocaleString('vi-VN') : '---'}
                     </div>
                     <div className="info-item">
-                        <FiPackage /> <strong>Nhà cung cấp:</strong> {phieu.nhaCungCap?.tenNCC}
+                        <FiPackage /> <strong>Nhà cung cấp:</strong> {phieu.nhaCungCap?.tenNCC || 'N/A'}
                     </div>
                     <div className="info-item">
-                        <strong>Đơn hàng gốc:</strong> {phieu.donDatHang?.maDon}
+                        <FiFileText /> <strong>Đơn hàng gốc:</strong> {phieu.donDatHang?.maDon || 'N/A'}
                     </div>
                 </div>
 
@@ -72,31 +76,34 @@ const PhieuNhapDetail = () => {
                             <th>STT</th>
                             <th>Mã Hàng</th>
                             <th>Tên Mặt Hàng</th>
-                            <th className="text-center">Số Lượng</th>
-                            <th className="text-right">Đơn Giá</th>
-                            <th className="text-right">Thành Tiền</th>
+                            <th>Số Lượng</th>
+                            <th>Đơn Giá</th>
+                            <th>Thành Tiền</th>
                         </tr>
                     </thead>
                     <tbody>
                         {phieu.chiTiets?.map((ct, index) => (
                             <tr key={index}>
                                 <td>{index + 1}</td>
+                                {/* 🎯 ĐÃ SỬA LỖI: Lấy đúng object hangHoa theo Entity mới */}
                                 <td>{ct.hangHoa?.maHang}</td>
                                 <td>{ct.hangHoa?.tenHang}</td>
-                                <td className="text-center">{ct.soLuong}</td>
-                                <td className="text-right">{(ct.donGia || 0).toLocaleString()} đ</td>
-                                <td className="text-right">{(ct.soLuong * (ct.donGia || 0)).toLocaleString()} đ</td>
+                                <td>{ct.soLuong}</td>
+                                <td>{(ct.donGia || 0).toLocaleString()} đ</td>
+                                <td>{(ct.soLuong * (ct.donGia || 0)).toLocaleString()} đ</td>
                             </tr>
                         ))}
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colSpan="5" className="text-right font-bold">TỔNG CỘNG CỦA PHIẾU:</td>
-                            <td className="text-right total-amount">{(phieu.tongTien || 0).toLocaleString()} VNĐ</td>
+                            <td colSpan="5" className="total-row-label">TỔNG CỘNG CỦA PHIẾU:</td>
+                            {/* 🎯 ĐÃ ĐỔI: Style màu đỏ in đậm */}
+                            <td className="total-amount">{(phieu.tongTien || 0).toLocaleString()} VNĐ</td>
                         </tr>
                     </tfoot>
                 </table>
 
+                {/* Khu vực chữ ký - Gom lại 2 bên */}
                 <div className="receipt-footer">
                     <div className="signature-box">
                         <p><strong>Người lập phiếu</strong></p>

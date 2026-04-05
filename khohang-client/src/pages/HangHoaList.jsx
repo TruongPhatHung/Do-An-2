@@ -3,12 +3,13 @@ import api from '../services/axiosConfig';
 import { AuthContext } from '../Context/AuthContext';
 import './HangHoaList.css';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiEye, FiEdit, FiAlertCircle, FiFilter } from 'react-icons/fi'; // Thêm FiFilter
+import { FiSearch, FiEye, FiEdit, FiAlertCircle, FiFilter, FiShoppingCart } from 'react-icons/fi';
+import { toast } from 'react-toastify'; // 🎯 Thêm Toast để bật popup
 
 const HangHoaList = () => {
     const [hangHoa, setHangHoa] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [stockFilter, setStockFilter] = useState('all'); // State mới cho bộ lọc số lượng
+    const [stockFilter, setStockFilter] = useState('all');
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -19,34 +20,50 @@ const HangHoaList = () => {
         const fetchHangHoa = async () => {
             try {
                 const response = await api.get('/products');
-                setHangHoa(Array.isArray(response.data) ? response.data : []);
+                const data = Array.isArray(response.data) ? response.data : [];
+                setHangHoa(data);
+
+                // 🎯 1. BẬT POPUP CẢNH BÁO KHI TẢI XONG DỮ LIỆU
+                const lowStockCount = data.filter(item => (item.soLuongTon || 0) < (item.soLuongToiThieu || 0)).length;
+                if (lowStockCount > 0) {
+                    toast.warn(`Cảnh báo: Có ${lowStockCount} mặt hàng đang dưới định mức, cần nhập kho!`, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        toastId: 'low-stock-alert' // Ngăn toast bị lặp lại nhiều lần
+                    });
+                }
+
             } catch (error) {
                 console.error("Lỗi khi tải danh sách hàng hóa:", error);
-                setHangHoa([]); 
+                setHangHoa([]);
             }
         };
         fetchHangHoa();
     }, []);
 
-    // Logic Lọc Dữ Liệu Kết Hợp (Tìm kiếm + Số lượng)
+    // 🎯 2. TÍNH TOÁN DANH SÁCH SẮP HẾT HÀNG CHO BANNER
+    const lowStockItems = hangHoa.filter(item => (item.soLuongTon || 0) < (item.soLuongToiThieu || 0));
+
+    // Logic Lọc Dữ Liệu Kết Hợp
     const filteredHangHoa = hangHoa.filter(item => {
         if (!item) return false;
-        
-        // 1. Lọc theo từ khóa (Tên, Mã, Loại hàng)
+
         const term = searchTerm.toLowerCase();
         const matchSearch = (item.tenHang || "").toLowerCase().includes(term) ||
-                            (item.maHang || "").toLowerCase().includes(term) ||
-                            (item.loaiHang?.tenLoai || "").toLowerCase().includes(term);
+            (item.maHang || "").toLowerCase().includes(term) ||
+            (item.loaiHang?.tenLoai || "").toLowerCase().includes(term);
 
-        // 2. Lọc theo số lượng tồn kho
         let matchStock = true;
         const stock = item.soLuongTon || 0;
-        
+        const minStock = item.soLuongToiThieu || 0;
+
         if (stockFilter === 'under10') matchStock = stock < 10;
         else if (stockFilter === 'under20') matchStock = stock < 20;
         else if (stockFilter === 'under50') matchStock = stock < 50;
         else if (stockFilter === 'over50') matchStock = stock >= 50;
         else if (stockFilter === 'outOfStock') matchStock = stock === 0;
+        // 🎯 3. THÊM LOGIC LỌC NHỮNG MÓN DƯỚI ĐỊNH MỨC
+        else if (stockFilter === 'lowStockWarning') matchStock = stock < minStock;
 
         return matchSearch && matchStock;
     });
@@ -56,7 +73,6 @@ const HangHoaList = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Reset về trang 1 khi thay đổi điều kiện lọc
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, stockFilter]);
@@ -67,7 +83,24 @@ const HangHoaList = () => {
                 <h2>📦 Quản Lý Danh Mục Hàng Hóa</h2>
             </div>
 
-            {/* Thanh công cụ Tìm kiếm & Lọc */}
+            {/* 🎯 4. BANNER CẢNH BÁO KHẨN CẤP TRÊN CÙNG */}
+            {lowStockItems.length > 0 && (
+                <div className="alert-banner">
+                    <div className="alert-banner-content">
+                        <FiAlertCircle size={28} className="alert-pulse" />
+                        <div>
+                            <strong>HỆ THỐNG CẢNH BÁO:</strong> Phát hiện <strong>{lowStockItems.length}</strong> mặt hàng có số lượng tồn kho thấp hơn định mức an toàn.
+                        </div>
+                    </div>
+                    <button
+                        className="btn-filter-alert"
+                        onClick={() => setStockFilter('lowStockWarning')}
+                    >
+                        <FiFilter /> Lọc xem ngay
+                    </button>
+                </div>
+            )}
+
             <div className="toolbar-container">
                 <div className="search-box">
                     <FiSearch className="search-icon" />
@@ -82,12 +115,14 @@ const HangHoaList = () => {
 
                 <div className="filter-box">
                     <FiFilter className="filter-icon" />
-                    <select 
+                    <select
                         className="filter-select"
                         value={stockFilter}
                         onChange={(e) => setStockFilter(e.target.value)}
                     >
                         <option value="all">Tất cả số lượng</option>
+                        {/* 🎯 Thêm option Lọc cảnh báo vào Menu */}
+                        <option value="lowStockWarning">⚠️ Cần nhập kho (Dưới định mức)</option>
                         <option value="under10">Tồn kho dưới 10</option>
                         <option value="under20">Tồn kho dưới 20</option>
                         <option value="under50">Tồn kho dưới 50</option>
@@ -127,14 +162,14 @@ const HangHoaList = () => {
                                         </span>
                                     </td>
                                     <td>{item.donViTinh || 'Cái'}</td>
-                                    
+
                                     <td>
                                         <div className={isLowStock ? "stock-warning" : "stock-normal"}>
                                             {item.soLuongTon ?? 0}
                                             {isLowStock && <FiAlertCircle className="warning-icon" title="Sắp hết hàng!" />}
                                         </div>
                                     </td>
-                                    
+
                                     <td className="text-muted">{item.soLuongToiThieu ?? 0}</td>
 
                                     {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
@@ -166,7 +201,7 @@ const HangHoaList = () => {
                         {currentItems.length === 0 && (
                             <tr>
                                 <td colSpan={user?.role === 'ADMIN' || user?.role === 'MUAHANG' ? 8 : 7} className="empty-message">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty" width="60" style={{opacity: 0.5, marginBottom: '10px'}}/>
+                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty" width="60" style={{ opacity: 0.5, marginBottom: '10px' }} />
                                     <p>Không tìm thấy hàng hóa nào phù hợp với điều kiện lọc.</p>
                                 </td>
                             </tr>

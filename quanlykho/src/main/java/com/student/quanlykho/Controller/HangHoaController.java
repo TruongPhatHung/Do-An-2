@@ -29,14 +29,27 @@ public class HangHoaController {
     // 1. Lấy toàn bộ danh sách hàng hóa
     @GetMapping
     public List<HangHoa> getAll() {
-        return hangHoaRepository.findAll();
+        List<HangHoa> danhSach = hangHoaRepository.findAll();
+
+        // 🎯 SỬA LỖI TẠI ĐÂY: Quét toàn bộ danh sách, chặn đứng giá trị NULL trước khi chuyển thành JSON
+        for (HangHoa hh : danhSach) {
+            if (hh.getSoLuongTon() == null) hh.setSoLuongTon(0);
+            if (hh.getSoLuongToiThieu() == null) hh.setSoLuongToiThieu(0);
+        }
+
+        return danhSach;
     }
 
     // 2. Lấy chi tiết 1 mặt hàng
     @GetMapping("/{id}")
     public ResponseEntity<HangHoa> getById(@PathVariable String id) {
         return hangHoaRepository.findById(id)
-                .map(ResponseEntity::ok)
+                .map(hh -> {
+                    // 🎯 SỬA LỖI TẠI ĐÂY: Bảo vệ API getById khỏi lỗi NULL
+                    if (hh.getSoLuongTon() == null) hh.setSoLuongTon(0);
+                    if (hh.getSoLuongToiThieu() == null) hh.setSoLuongToiThieu(0);
+                    return ResponseEntity.ok(hh);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -48,8 +61,11 @@ public class HangHoaController {
         hh.setMaHang(request.getMaHang());
         hh.setTenHang(request.getTenHang());
         hh.setDonViTinh(request.getDonViTinh());
+
+        // Đảm bảo không lưu NULL vào Database
         hh.setSoLuongTon(request.getSoLuongTon() != null ? request.getSoLuongTon() : 0);
         hh.setSoLuongToiThieu(request.getSoLuongToiThieu() != null ? request.getSoLuongToiThieu() : 0);
+
         hh.setGiaNhap(request.getGiaNhap());
         hh.setGiaBan(request.getGiaBan());
 
@@ -78,11 +94,14 @@ public class HangHoaController {
                     hangHoa.getTenHang(), (hangHoa.getLoaiHang() != null ? hangHoa.getLoaiHang().getTenLoai() : "N/A"));
 
             hangHoa.setTenHang(request.getTenHang());
-            hangHoa.setSoLuongTon(request.getSoLuongTon());
+
+            // 🎯 SỬA LỖI TẠI ĐÂY: Đảm bảo lúc Update cũng không được nhét NULL vào DB
+            hangHoa.setSoLuongTon(request.getSoLuongTon() != null ? request.getSoLuongTon() : 0);
+            hangHoa.setSoLuongToiThieu(request.getSoLuongToiThieu() != null ? request.getSoLuongToiThieu() : 0);
+
             hangHoa.setGiaNhap(request.getGiaNhap());
             hangHoa.setGiaBan(request.getGiaBan());
             hangHoa.setDonViTinh(request.getDonViTinh());
-            hangHoa.setSoLuongToiThieu(request.getSoLuongToiThieu());
 
             if (request.getLoaiHangId() != null) {
                 LoaiHang lh = loaiHangRepository.findById(request.getLoaiHangId())
