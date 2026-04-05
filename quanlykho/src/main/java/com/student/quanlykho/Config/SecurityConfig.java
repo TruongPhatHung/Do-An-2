@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/suppliers/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/suppliers/**").hasAuthority("ADMIN")
 
+
                         // 4. QUẢN LÝ LÊN ĐƠN HÀNG (Orders / PO)
                         .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG", "KHO")
                         .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG")
@@ -90,6 +91,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .requestMatchers("/api/thong-bao", "/api/thong-bao/**").permitAll()
+
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )

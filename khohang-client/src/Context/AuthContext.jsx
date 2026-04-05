@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
         try {
             console.log("Đang gửi yêu cầu đăng nhập qua Axios...");
 
-            const response = await fetch('http://10.10.80.70:8080/api/auth/login', {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
 
                 method: 'POST',
                 headers: {

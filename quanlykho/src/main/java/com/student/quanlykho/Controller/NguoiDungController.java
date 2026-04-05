@@ -4,6 +4,7 @@ import com.student.quanlykho.Entity.NguoiDung;
 import com.student.quanlykho.Repository.NguoiDungRepository;
 import com.student.quanlykho.Service.AuditLogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,71 +25,66 @@ public class NguoiDungController {
     private AuditLogService auditLogService;
 
     @GetMapping
-    public List<NguoiDung> getAll() {
-        return nguoiDungRepository.findAll();
+    public ResponseEntity<List<NguoiDung>> getAll() {
+        return ResponseEntity.ok(nguoiDungRepository.findAll());
     }
 
     @PostMapping
-    public NguoiDung addUser(@RequestBody NguoiDung user) {
-        if (user.getMaND() == null) {
-            user.setMaND("ND-" + System.currentTimeMillis());
-        }
-        if (user.getVaiTro() == null || user.getVaiTro().trim().isEmpty()) {
-            user.setVaiTro("KHO");
-        }
-        user.setMatKhau(passwordEncoder.encode(user.getMatKhau()));
+    public ResponseEntity<?> addUser(@RequestBody NguoiDung user) {
+        try {
+            if (user.getMaND() == null) user.setMaND("ND-" + System.currentTimeMillis());
+            if (user.getVaiTro() == null) user.setVaiTro("KHO");
 
-        NguoiDung saved = nguoiDungRepository.save(user);
-
-        // 🎯 GHI LOG: TẠO TÀI KHOẢN MỚI
-        String moi = String.format("User: %s, Quyền: %s, Cấp cho: %s",
-                saved.getTenDangNhap(), saved.getVaiTro(), saved.getHoTen());
-        auditLogService.ghiLog("THÊM", "TÀI KHOẢN", saved.getMaND(), "Chưa có", moi);
-
-        return saved;
-    }
-
-    @PutMapping("/{maND}/role")
-    public NguoiDung updateRole(@PathVariable String maND, @RequestBody String newRole) {
-        String role = newRole.replace("\"", "");
-
-        return nguoiDungRepository.findById(maND).map(user -> {
-            String cu = "Quyền cũ: " + user.getVaiTro();
-
-            user.setVaiTro(role);
+            user.setMatKhau(passwordEncoder.encode(user.getMatKhau()));
             NguoiDung saved = nguoiDungRepository.save(user);
 
-            // 🎯 GHI LOG: THAY ĐỔI QUYỀN TRUY CẬP
-            auditLogService.ghiLog("SỬA", "TÀI KHOẢN (QUYỀN)", maND, cu, "Quyền mới: " + saved.getVaiTro());
-
-            return saved;
-        }).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+            auditLogService.ghiLog("THÊM", "TÀI KHOẢN", saved.getMaND(), "N/A", "Tạo mới: " + saved.getTenDangNhap());
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/{maND}/password")
-    public String updatePassword(@PathVariable String maND, @RequestBody String newPassword) {
-        String cleanPassword = newPassword.replace("\"", "");
-
+    @PutMapping("/{maND}")
+    public ResponseEntity<?> updateUser(@PathVariable String maND, @RequestBody NguoiDung details) {
         return nguoiDungRepository.findById(maND).map(user -> {
-            user.setMatKhau(passwordEncoder.encode(cleanPassword));
+            String infoCu = String.format("Tên: %s, SĐT: %s, Đ/C: %s", user.getHoTen(), user.getSoDT(), user.getDiaChi());
+
+            user.setHoTen(details.getHoTen());
+            user.setEmail(details.getEmail());
+            user.setSoDT(details.getSoDT());
+            user.setVaiTro(details.getVaiTro());
+            user.setGioiTinh(details.getGioiTinh());
+            user.setNgaySinh(details.getNgaySinh());
+            user.setDiaChi(details.getDiaChi());
+
+            // 🎯 CẬP NHẬT ĐỊA CHỈ TẠI ĐÂY
+            user.setDiaChi(details.getDiaChi());
+
+            NguoiDung saved = nguoiDungRepository.save(user);
+            String infoMoi = String.format("Tên: %s, SĐT: %s, Đ/C: %s,GT: %s, NS: %s", saved.getHoTen(),saved.getGioiTinh(), saved.getNgaySinh(), saved.getSoDT(), saved.getDiaChi());
+
+            auditLogService.ghiLog("SỬA", "TÀI KHOẢN", maND, infoCu, infoMoi);
+            return ResponseEntity.ok(saved);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{maND}/password")
+    public ResponseEntity<String> updatePassword(@PathVariable String maND, @RequestBody String newPassword) {
+        return nguoiDungRepository.findById(maND).map(user -> {
+            user.setMatKhau(passwordEncoder.encode(newPassword.replace("\"", "")));
             nguoiDungRepository.save(user);
-
-            // 🎯 GHI LOG: ĐỔI MẬT KHẨU (Tuyệt đối không log pass thật)
-            auditLogService.ghiLog("SỬA", "TÀI KHOẢN (MẬT KHẨU)", maND, "Mật khẩu cũ: ***", "Mật khẩu đã bị thay đổi (***)");
-
-            return "Đổi mật khẩu thành công";
-        }).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng!"));
+            auditLogService.ghiLog("SỬA", "MẬT KHẨU", maND, "***", "Đã đổi");
+            return ResponseEntity.ok("Thành công");
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{maND}")
-    public String delete(@PathVariable String maND) {
-        NguoiDung user = nguoiDungRepository.findById(maND).orElse(null);
-        if(user != null) {
-            // 🎯 GHI LOG: XÓA TÀI KHOẢN
-            String cu = String.format("User: %s (%s)", user.getTenDangNhap(), user.getHoTen());
-            auditLogService.ghiLog("XÓA", "TÀI KHOẢN", maND, cu, "Đã khóa/Xóa tài khoản");
-            nguoiDungRepository.deleteById(maND);
-        }
-        return "Đã xóa tài khoản";
+    public ResponseEntity<?> delete(@PathVariable String maND) {
+        return nguoiDungRepository.findById(maND).map(user -> {
+            nguoiDungRepository.delete(user);
+            auditLogService.ghiLog("XÓA", "TÀI KHOẢN", maND, user.getTenDangNhap(), "Đã xóa");
+            return ResponseEntity.ok("Đã xóa");
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

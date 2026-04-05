@@ -19,7 +19,8 @@
 
         @Column(name = "ly_do_xuat")
         private String lyDoXuat; // Ví dụ: "BanHang", "HuyHang", "NoiBo"
-
+        @Column(name = "ghi_chu", columnDefinition = "TEXT")
+        private String ghiChu;
         @ManyToOne
         @JoinColumn(name = "ma_nd") // Nhân viên kho thực hiện xuất
         private NguoiDung nguoiDung;

@@ -25,7 +25,8 @@ public class PhieuNhap {
     @ManyToOne
     @JoinColumn(name = "ma_nha_cung_cap")
     private NhaCungCap nhaCungCap;
-
+    @Column(name = "ghi_chu", columnDefinition = "TEXT")
+    private String ghiChu;
     @ManyToOne
     @JoinColumn(name = "ma_don_dat_hang")
     @com.fasterxml.jackson.annotation.JsonIgnore

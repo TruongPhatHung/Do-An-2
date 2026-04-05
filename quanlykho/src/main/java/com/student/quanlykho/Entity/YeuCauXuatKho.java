@@ -52,6 +52,7 @@ public class YeuCauXuatKho {
         }
     }
 
+
     public int getTongSoLuongYeuCau() {
         if (this.chiTiets == null) return 0;
         return this.chiTiets.stream()

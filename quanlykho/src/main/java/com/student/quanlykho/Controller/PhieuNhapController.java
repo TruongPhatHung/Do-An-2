@@ -30,11 +30,15 @@ public class PhieuNhapController {
     @PostMapping
     public ResponseEntity<String> nhapKho(@RequestBody NhapKhoRequest request) {
         try {
-            // Ném hết việc qua Service xử lý
-            String result = nhapKhoService.taoPhieuNhap(request.getMaDonHang(), request.getNguoiNhap(), request.getChiTietNhap());
+            // 🎯 Thêm request.getGhiChu() vào tham số truyền đi
+            String result = nhapKhoService.taoPhieuNhap(
+                    request.getMaDonHang(),
+                    request.getNguoiNhap(),
+                    request.getChiTietNhap(),
+                    request.getGhiChu() // <--- Ống dẫn 1
+            );
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
-            // Bắt cái lỗi "Nhập quá số lượng" của sếp để quăng về cho React hiện màu đỏ!
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -50,6 +54,9 @@ public class PhieuNhapController {
     public static class NhapKhoRequest {
         private String maDonHang;
         private String nguoiNhap;
+        private String ghiChu;
+        public String getGhiChu() { return ghiChu; }
+        public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
         private Map<String, Integer> chiTietNhap;
         public String getMaDonHang() { return maDonHang; }
         public void setMaDonHang(String maDonHang) { this.maDonHang = maDonHang; }

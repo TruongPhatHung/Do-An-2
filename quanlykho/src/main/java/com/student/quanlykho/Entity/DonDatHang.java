@@ -27,6 +27,8 @@ public class DonDatHang {
 
     @OneToMany(mappedBy = "donDatHang", cascade = CascadeType.ALL)
     private List<ChiTietDonDatHang> chiTiets;
+    @Column(name = "ghi_chu", columnDefinition = "TEXT")
+    private String ghiChu;
 
     @OneToMany(mappedBy = "donDatHang")
     private List<PhieuNhap> donDatHang;
