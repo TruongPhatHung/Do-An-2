@@ -1,83 +1,223 @@
-/* --- Khu vực Form Thêm / Sửa --- */
-.category-form-container {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+/* Container & Header */
+.cm-container {
+    padding: 24px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-.category-form {
+.cm-header {
+    margin-bottom: 24px;
+}
+
+.cm-title-box h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 0 0 4px 0;
     display: flex;
-    gap: 15px;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+}
+
+.cm-title-icon { color: #8b5cf6; } /* Tím nhạt sang trọng */
+.cm-title-box p { color: #64748b; font-size: 0.95rem; margin: 0; }
+
+/* Form Card */
+.cm-form-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+}
+
+.cm-card-header h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.1rem;
+    color: #0f172a;
+    border-left: 4px solid #8b5cf6;
+    padding-left: 10px;
+}
+
+.cm-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.cm-input-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.cm-input-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.cm-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #334155;
+    transition: all 0.2s ease;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.cm-input:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.cm-input:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* Buttons in Form */
+.cm-form-actions {
+    display: flex;
+    gap: 12px;
     align-items: center;
 }
 
-.category-input {
-    padding: 8px 12px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.category-input:focus {
-    border-color: #3498db;
-}
-
-.category-input.flex-1 {
-    flex: 1; /* Phóng to chiếm hết chỗ trống */
-}
-
-.category-input:disabled {
-    background-color: #f4f6f6;
-    cursor: not-allowed;
-    color: #7f8c8d;
-}
-
-/* --- Khu vực Nút bấm (Buttons) --- */
-.btn {
-    padding: 8px 15px;
+.cm-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
-    font-weight: bold;
-    color: white;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
 }
 
-.btn-add { background-color: #27ae60; }
-.btn-add:hover { background-color: #219653; }
+.cm-btn-add { background-color: #10b981; color: white; }
+.cm-btn-add:hover { background-color: #059669; transform: translateY(-1px); }
 
-.btn-update { background-color: #f39c12; }
-.btn-update:hover { background-color: #d68910; }
+.cm-btn-update { background-color: #f59e0b; color: white; }
+.cm-btn-update:hover { background-color: #d97706; transform: translateY(-1px); }
 
-.btn-cancel { background-color: #95a5a6; }
-.btn-cancel:hover { background-color: #7f8c8d; }
+.cm-btn-cancel { background-color: #f1f5f9; color: #475569; }
+.cm-btn-cancel:hover { background-color: #e2e8f0; }
 
-/* --- Nút bấm nhỏ trên Bảng (Table) --- */
-.btn-sm {
-    padding: 5px 10px;
-    font-size: 13px;
-    margin-right: 8px;
+/* Table Wrapper */
+.cm-table-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
 }
 
-.btn-edit { background-color: #f1c40f; color: #333; }
-.btn-edit:hover { background-color: #f39c12; color: white; }
-
-.btn-delete { background-color: #e74c3c; color: white; }
-.btn-delete:hover { background-color: #c0392b; }
-
-/* --- Các thành phần phụ --- */
-.text-highlight {
-    color: #2980b9;
-    font-weight: bold;
+.cm-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.empty-row {
+.cm-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.cm-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.cm-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.text-center { text-align: center !important; }
+.text-muted { color: #94a3b8; font-style: italic; }
+
+/* Table Content Styling */
+.cm-badge-id {
+    background: #e0e7ff;
+    color: #4f46e5;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    font-family: monospace;
+}
+
+.cm-highlight-text {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.cm-desc-text {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Action Buttons in Table */
+.cm-action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.cm-btn-icon {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1.1rem;
+}
+
+.btn-edit { background-color: #fef3c7; color: #d97706; }
+.btn-edit:hover { background-color: #fde68a; color: #b45309; }
+
+.btn-delete { background-color: #fee2e2; color: #dc2626; }
+.btn-delete:hover { background-color: #fecaca; color: #b91c1c; }
+
+/* States */
+.cm-loading {
     text-align: center;
-    padding: 30px;
-    color: #7f8c8d;
-    font-style: italic;
+    padding: 40px !important;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.cm-empty-state {
+    text-align: center;
+    padding: 60px 20px !important;
+    color: #94a3b8;
+}
+
+.cm-empty-icon {
+    font-size: 3rem;
+    color: #cbd5e1;
+    margin-bottom: 10px;
 }

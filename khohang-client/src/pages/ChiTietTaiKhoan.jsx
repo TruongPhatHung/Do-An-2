@@ -103,7 +103,7 @@ const ChiTietTaiKhoan = () => {
                             <FiPhone className="ct-icon" />
                             <div>
                                 <label>Số điện thoại</label>
-                                <p>{user.soDienThoai || '---'}</p>
+                                <p>{user.so_dt || '---'}</p>
                             </div>
                         </div>
                         <div className="ct-info-item full-width">

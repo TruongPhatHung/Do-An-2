@@ -355,3 +355,31 @@
 .btn-eye:hover { background: var(--primary); color: white; }
 .tk-btn-icon.btn-edit { color: #f59e0b; background: #fef3c7; }
 .tk-btn-icon.btn-edit:hover { background: #fde68a; }
+/* Styling riêng cho nút Khóa / Mở khóa */
+.btn-lock {
+    color: #e67e22; /* Màu cam */
+    background-color: #fdf2e9;
+}
+.btn-lock:hover {
+    background-color: #e67e22;
+    color: white;
+}
+
+.btn-unlock {
+    color: #27ae60; /* Màu xanh lá */
+    background-color: #eafaf1;
+}
+.btn-unlock:hover {
+    background-color: #27ae60;
+    color: white;
+}
+
+/* Hiệu ứng khi bị khóa */
+.grayscale {
+    filter: grayscale(100%);
+    opacity: 0.6;
+}
+.tk-row-locked td {
+    background-color: #fcfcfc;
+    color: #95a5a6;
+}

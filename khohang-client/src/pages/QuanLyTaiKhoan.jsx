@@ -5,8 +5,8 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import adminAvatar from "../components/avarta/Screenshot 2026-03-21 185323 copy.png";
 import khoAvatar from "../components/avarta/Screenshot 2026-03-21 185359.png";
-// 🎯 Đã import thêm FiEdit vào đây nhé
-import { FiUserPlus, FiX, FiKey, FiTrash2, FiEye, FiEdit } from 'react-icons/fi';
+// 🎯 THÊM FiLock và FiUnlock vào danh sách icon
+import { FiUserPlus, FiX, FiKey, FiTrash2, FiEye, FiEdit, FiLock, FiUnlock } from 'react-icons/fi';
 
 const QuanLyTaiKhoan = () => {
     const [users, setUsers] = useState([]);
@@ -17,7 +17,7 @@ const QuanLyTaiKhoan = () => {
         fetchUsers();
         const interval = setInterval(() => {
             fetchUsers();
-        }, 30000); 
+        }, 30000);
         return () => clearInterval(interval);
     }, []);
 
@@ -52,7 +52,7 @@ const QuanLyTaiKhoan = () => {
         }
 
         try {
-            await api.put(`/users/${maND}/password`, newPw, {
+            await api.patch(`/users/${maND}/password`, newPw, {
                 headers: { 'Content-Type': 'application/json' }
             });
             toast.success("✅ Đã cập nhật mật khẩu mới thành công!");
@@ -68,7 +68,24 @@ const QuanLyTaiKhoan = () => {
                 toast.success("✅ Xóa thành công!");
                 fetchUsers();
             } catch (error) {
-                toast.error("❌ Xóa thất bại!");
+                toast.error("❌ Xóa thất bại! Có thể tài khoản này đang dính dữ liệu.");
+            }
+        }
+    };
+
+    // 🎯 THÊM HÀM MỚI: Khóa / Mở khóa tài khoản
+    const handleToggleLock = async (id, isCurrentlyLocked) => {
+        const actionText = isCurrentlyLocked ? "mở khóa" : "khóa";
+        if (window.confirm(`❗ Bạn có chắc muốn ${actionText} tài khoản này?`)) {
+            try {
+                // Giả định sếp có API này, nếu tên API khác thì sếp đổi lại chữ /status nhé
+                await api.patch(`/users/${id}/status`, !isCurrentlyLocked, {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                toast.success(`✅ Đã ${actionText} tài khoản!`);
+                fetchUsers();
+            } catch (error) {
+                toast.error(`❌ Lỗi khi ${actionText} tài khoản!`);
             }
         }
     };
@@ -77,7 +94,6 @@ const QuanLyTaiKhoan = () => {
         navigate(`/chi-tiet-tai-khoan/${id}`);
     };
 
-    // 🎯 THÊM HÀM XỬ LÝ NÚT SỬA
     const handleEdit = (id) => {
         navigate(`/sua-tai-khoan/${id}`);
     };
@@ -123,36 +139,41 @@ const QuanLyTaiKhoan = () => {
                     <tbody>
                         {users.map((acc) => {
                             const isUserOnline = acc.isOnline !== undefined ? acc.isOnline : (acc.vaiTro === 'ADMIN');
+                            // 🎯 Biến kiểm tra xem tài khoản có đang bị khóa không (Lấy từ DB)
+                            const isLocked = acc.isLocked || acc.trangThai === false;
 
                             return (
-                                <tr key={acc.id || acc.maND}>
+                                <tr key={acc.id || acc.maND} className={isLocked ? 'tk-row-locked' : ''}>
                                     <td className="tk-id-col">#{acc.id || acc.maND}</td>
-                                    
+
                                     <td>
                                         <div className="tk-profile-cell">
                                             <div className="tk-avatar-wrapper">
                                                 <img
                                                     src={getRoleAvatar(acc.avatar, acc.vaiTro)}
                                                     alt="avatar"
-                                                    className="tk-avatar"
+                                                    className={`tk-avatar ${isLocked ? 'grayscale' : ''}`}
                                                     onClick={() => setSelectedImage(getRoleAvatar(acc.avatar, acc.vaiTro))}
                                                 />
-                                                <span className={`tk-status-dot ${isUserOnline ? 'online' : 'offline'}`}></span>
+                                                {!isLocked && <span className={`tk-status-dot ${isUserOnline ? 'online' : 'offline'}`}></span>}
                                             </div>
                                             <div className="tk-profile-info">
                                                 <span className="tk-username">{acc.tenDangNhap}</span>
-                                                <span className="tk-status-text">{isUserOnline ? 'Online' : 'Offline'}</span>
+                                                <span className="tk-status-text">
+                                                    {isLocked ? <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>Bị Khóa</span> : (isUserOnline ? 'Online' : 'Offline')}
+                                                </span>
                                             </div>
                                         </div>
                                     </td>
 
                                     <td className="tk-name-col">{acc.hoTen || 'N/A'}</td>
-                                    
+
                                     <td className="tk-email-col">{acc.email || '---'}</td>
-                                    
+
                                     <td>
                                         <select
                                             value={acc.vaiTro}
+                                            disabled={isLocked} // Nếu bị khóa thì không cho đổi quyền
                                             onChange={(e) => handleUpdateRole(acc.maND || acc.id, e.target.value)}
                                             className={`tk-role-badge role-${acc.vaiTro?.toLowerCase()}`}
                                         >
@@ -162,39 +183,50 @@ const QuanLyTaiKhoan = () => {
                                             <option value="ADMIN">Admin</option>
                                         </select>
                                     </td>
-                                    
+
                                     <td className="tk-actions-col">
                                         <div className="tk-action-buttons">
                                             {/* Nút Xem chi tiết */}
-                                            <button 
-                                                className="tk-btn-icon btn-eye" 
+                                            <button
+                                                className="tk-btn-icon btn-eye"
                                                 title="Xem chi tiết"
                                                 onClick={() => handleViewDetails(acc.maND || acc.id)}
                                             >
                                                 <FiEye />
                                             </button>
-                                            
-                                            {/* 🎯 NÚT SỬA MỚI THÊM VÀO ĐÂY */}
-                                            <button 
-                                                className="tk-btn-icon btn-edit" 
+
+                                            {/* Nút Sửa */}
+                                            <button
+                                                className="tk-btn-icon btn-edit"
                                                 title="Sửa thông tin"
+                                                disabled={isLocked}
                                                 onClick={() => handleEdit(acc.maND || acc.id)}
                                             >
                                                 <FiEdit />
                                             </button>
 
                                             {/* Nút Đổi mật khẩu */}
-                                            <button 
-                                                className="tk-btn-icon btn-key" 
+                                            <button
+                                                className="tk-btn-icon btn-key"
                                                 title="Đổi mật khẩu"
+                                                disabled={isLocked}
                                                 onClick={() => handleUpdatePassword(acc.maND || acc.id)}
                                             >
                                                 <FiKey />
                                             </button>
-                                            
-                                            {/* Nút Xóa */}
-                                            <button 
-                                                className="tk-btn-icon btn-trash" 
+
+                                            {/* 🎯 NÚT KHÓA / MỞ KHÓA VỪA THÊM */}
+                                            <button
+                                                className={`tk-btn-icon ${isLocked ? 'btn-unlock' : 'btn-lock'}`}
+                                                title={isLocked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
+                                                onClick={() => handleToggleLock(acc.maND || acc.id, isLocked)}
+                                            >
+                                                {isLocked ? <FiUnlock /> : <FiLock />}
+                                            </button>
+
+                                            {/* Nút Xóa (Giữ nguyên) */}
+                                            <button
+                                                className="tk-btn-icon btn-trash"
                                                 title="Xóa tài khoản"
                                                 onClick={() => handleDelete(acc.maND || acc.id)}
                                             >
@@ -208,7 +240,7 @@ const QuanLyTaiKhoan = () => {
                         {users.length === 0 && (
                             <tr>
                                 <td colSpan="6" className="tk-empty-state">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="No data" width="60"/>
+                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="No data" width="60" />
                                     <p>Chưa có dữ liệu tài khoản nào!</p>
                                 </td>
                             </tr>
