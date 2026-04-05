@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiEye, FiCalendar } from 'react-icons/fi';
+import { FiSearch, FiEye, FiCalendar, FiFileText } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import './LichSuNhapKho.css';
 
@@ -15,7 +15,6 @@ const LichSuNhapKho = () => {
         const fetchHistory = async () => {
             try {
                 const res = await api.get('/phieu-nhap');
-                // Đảm bảo dữ liệu là mảng
                 setHistory(Array.isArray(res.data) ? res.data : []);
             } catch (error) {
                 toast.error("Không thể tải lịch sử nhập kho!");
@@ -26,14 +25,15 @@ const LichSuNhapKho = () => {
         };
         fetchHistory();
     }, []);
+    
 
-    // 🎯 ĐÃ SỬA: Lọc theo maPhieuNhap (tên cột đúng trong Entity)
     const filteredHistory = history.filter(item =>
         (item.maPhieuNhap || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.nguoiNhap || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.nhaCungCap?.tenNCC || "").toLowerCase().includes(searchTerm.toLowerCase())
+        (item.nhaCungCap?.tenNCC || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        // 🎯 Vét cả ghi chú để tìm kiếm cho sếp
+        (item.ghiChu || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     if (loading) return <div className="loading">⏳ Đang tải lịch sử...</div>;
 
     return (
@@ -44,7 +44,7 @@ const LichSuNhapKho = () => {
                     <FiSearch className="search-icon" />
                     <input
                         type="text"
-                        placeholder="Tìm theo mã phiếu, NCC, người nhập..."
+                        placeholder="Tìm mã phiếu, NCC, ghi chú..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -60,13 +60,12 @@ const LichSuNhapKho = () => {
                             <th>Nhà Cung Cấp</th>
                             <th>Người Nhập</th>
                             <th className="text-right">Tổng Tiền</th>
-                            <th>Ghi Chú</th>
+                            <th>Ghi Chú</th> {/* 🎯 Cột Ghi chú mới */}
                             <th className="text-center">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredHistory.map((item) => (
-                            // 🎯 FIX LỖI 1: Dùng maPhieuNhap làm key duy nhất
                             <tr key={item.maPhieuNhap || Math.random()}>
                                 <td className="font-bold text-blue">{item.maPhieuNhap}</td>
                                 <td>
@@ -79,11 +78,16 @@ const LichSuNhapKho = () => {
                                 <td className="text-right price">
                                     {(item.tongTien || 0).toLocaleString()} đ
                                 </td>
-                                <td className="note-cell">{item.ghiChu || '---'}</td>
+                                <td>
+                                    {/* 🎯 Ghi chú kiểu Badge giống bên Yêu cầu */}
+                                    <span className="note-badge-custom">
+                                        <FiFileText className="note-icon" />
+                                        {item.ghiChu || item.lyDo || "---"}
+                                    </span>
+                                </td>
                                 <td className="text-center">
                                     <button
                                         className="btn-view"
-                                        // 🎯 FIX LỖI 2: Truyền maPhieuNhap vào URL để không bị undefined
                                         onClick={() => navigate(`/chi-tiet-phieu-nhap/${item.maPhieuNhap}`)}
                                     >
                                         <FiEye /> Chi tiết
@@ -93,12 +97,6 @@ const LichSuNhapKho = () => {
                         ))}
                     </tbody>
                 </table>
-
-                {filteredHistory.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '30px', color: '#888' }}>
-                        Không tìm thấy dữ liệu phiếu nhập nào.
-                    </div>
-                )}
             </div>
         </div>
     );
