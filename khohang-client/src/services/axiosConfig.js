@@ -1,12 +1,14 @@
-import axios from 'axios';
-
+import axios from 'axios'; // Chữ 'axios' phải viết thường hết nha,npm install axios
 const api = axios.create({
+
 
 
     baseURL: 'http://10.10.80.70:8080/api', // Chỉnh lại cho đúng port Backend của bạn
 
 
+
 });
+
 
 
 // 🎯 ĐÂY LÀ ĐOẠN CODE SẼ GIẢI CỨU LỖI 403 CỦA BẠN

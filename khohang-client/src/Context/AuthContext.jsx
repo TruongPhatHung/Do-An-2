@@ -1,32 +1,26 @@
 import React, { createContext, useState } from 'react';
-import api from '../services/axiosConfig';
+import api from '../services/axiosConfig'; // Đã có sẵn baseURL là link Pinggy
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [error, setError] = useState(null);
     
-    // SỬA Ở ĐÂY: Khởi tạo user bằng cách đọc từ localStorage thay vì để null
     const [user, setUser] = useState(() => {
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
         const displayName = localStorage.getItem('displayName');
         
-        // Nếu có token và thông tin, khôi phục lại state user
         if (token && role) {
-            return {
-                role: role,
-                displayName: displayName
-            };
+            return { role, displayName };
         }
         return null;
     });
 
     const login = async (username, password) => {
-        setError(null); // Xóa lỗi cũ trước khi gửi request mới
+        setError(null);
         try {
-            // Gửi request tới Backend Spring Boot
-            console.log("Sending login request...");
+            console.log("Đang gửi yêu cầu đăng nhập qua Axios...");
 
 
             const response = await fetch('http://10.10.80.70:8080/api/auth/login', {
@@ -49,30 +43,32 @@ export const AuthProvider = ({ children }) => {
             const data = await response.json();
             console.log("Response from server:", data);
 
+
             if (data.token) {
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('role', data.role); // Lưu role vào localStorage
+                localStorage.setItem('role', data.role);
                 localStorage.setItem('displayName', data.username);
 
-                // Cập nhật state user để dùng trong app
                 setUser({
-                    role: data.role, 
+                    role: data.role,
                     displayName: data.username
                 });
 
                 return true;
             } else {
-                setError(data.message);
+                setError(data.message || "Đăng nhập thất bại");
                 return false;
             }
         } catch (err) {
             console.error("Lỗi kết nối server:", err);
-            setError("Không thể kết nối đến máy chủ!");
+            
+            // Xử lý thông báo lỗi từ Server hoặc lỗi Network
+            const msg = err.response?.data?.message || "Không thể kết nối đến máy chủ hoặc lỗi CORS!";
+            setError(msg);
             return false;
         }
     };
 
-    // Hàm đăng xuất
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
