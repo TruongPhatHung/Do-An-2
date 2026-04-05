@@ -45,7 +45,7 @@ const DuyetYeuCauXuat = () => {
             <div className="dyx-header">
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <h2 style={{ display: 'flex', alignItems: 'center', margin: '0 0 5px 0' }}>
-                        👑 Duyệt Lệnh Xuất Kho
+                         Duyệt Lệnh Xuất Kho
                         {/* 🎯 ĐÂY LÀ CHỖ HIỂN THỊ SỐ LƯỢNG LỆNH CẦN DUYỆT */}
                         {requests.length > 0 && (
                             <span style={{

@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
             console.log("Response from server:", data);
 
 
+
             if (data.token) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('role', data.role);

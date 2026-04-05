@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
 import NotificationBell from './NotificationBell';
 import { FiRefreshCw } from 'react-icons/fi'; // Import icon làm mới
+import { FaWarehouse } from 'react-icons/fa'; // 👈 THÊM DÒNG NÀY: Import icon từ FontAwesome
 import './Navbar.css';
 
 const Navbar = ({ onToggleSidebar }) => {
@@ -41,14 +42,14 @@ const Navbar = ({ onToggleSidebar }) => {
                     ☰
                 </button>
             </div>
-
             {/* --- Ở GIỮA: Logo WMS-SYSTEM --- */}
             <div 
                 className="nav-center-area" 
                 onClick={() => navigate('/dashboard')} 
                 title="Về trang chủ"
             >
-                📦 WMS-SYSTEM
+                {/* 👈 SỬA Ở ĐÂY: Thay cục 📦 bằng thẻ icon */}
+                <FaWarehouse className="nav-logo-icon" /> WMS-SYSTEM
             </div>
 
             {/* --- BÊN PHẢI: Refresh, Thông báo, Profile & Đăng xuất --- */}

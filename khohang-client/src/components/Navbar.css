@@ -135,3 +135,16 @@
     background-color: #c0392b;
     transform: translateY(-1px);
 }
+/* --- Cấu hình cho Icon Logo FontAwesome --- */
+.nav-logo-icon {
+    color: #f39c12; /* Màu vàng cam cho giống màu kiện hàng/kho vận */
+    font-size: 24px;
+    margin-right: 5px; /* Tạo khoảng cách 1 chút với chữ WMS-SYSTEM */
+}
+
+/* Hiệu ứng nhấp nháy/phát sáng nhẹ khi hover vào cụm Logo */
+.nav-center-area:hover .nav-logo-icon {
+    color: #f1c40f;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}

@@ -78,7 +78,7 @@ const DuyetYeuCauMua = () => {
             <div className="dyc-header">
                 <div>
                     <h2 style={{ display: 'flex', alignItems: 'center' }}>
-                        👑 Duyệt Yêu Cầu Mua Hàng (Sếp)
+                          Duyệt Yêu Cầu Mua Hàng (Sếp)
                         {filterStatus === 'Chờ Duyệt' && yeuCaus.length > 0 && (
                             <span style={{
                                 backgroundColor: '#ef4444',
