@@ -4,18 +4,14 @@ import com.student.quanlykho.Security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.List;
 
 @Configuration
@@ -34,68 +30,63 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
 
-
+                        // 1. AUTHENTICATION (Ai cũng vào được)
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 2. QUẢN LÝ TÀI KHOẢN (Chỉ Admin)
+                        // 2. QUẢN LÝ TÀI KHOẢN & HỒ SƠ
+                        // 🎯 Cho phép xem danh sách và thống kê (profile-stats) nếu đã đăng nhập
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/profile-stats").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*").authenticated()
+                        // 🎯 Các thao tác Thêm/Sửa/Xóa tài khoản vẫn giữ cho ADMIN
                         .requestMatchers("/api/users/**").hasAuthority("ADMIN")
 
-                        // 3. QUẢN LÝ NHÀ CUNG CẤP (Suppliers)
+                        // 3. NHÀ CUNG CẤP
                         .requestMatchers(HttpMethod.GET, "/api/suppliers/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/suppliers/**").hasAnyAuthority("ADMIN", "MUAHANG")
                         .requestMatchers(HttpMethod.PUT, "/api/suppliers/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/suppliers/**").hasAuthority("ADMIN")
 
-
-                        // 4. QUẢN LÝ LÊN ĐƠN HÀNG (Orders / PO)
-                        .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG", "KHO")
+                        // 4. ĐƠN ĐẶT HÀNG (Orders / PO) - Đã mở thêm cho KHO xem
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**", "/api/don-hang/**").hasAnyAuthority("ADMIN", "MUAHANG", "KHO", "QUANLYKHO")
                         .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG")
                         .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG")
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasAuthority("ADMIN")
 
-                        // 5. QUẢN LÝ HÀNG HÓA TRONG KHO (Products)
+                        // 5. HÀNG HÓA (Products)
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/hang-hoa/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/products/**", "/api/hang-hoa/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
                         .requestMatchers(HttpMethod.PUT, "/api/products/**", "/api/hang-hoa/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**", "/api/hang-hoa/**").hasAuthority("ADMIN")
 
-                        // 6. QUẢN LÝ NHẬP KHO (Receipts)
+                        // 6. NHẬP KHO
                         .requestMatchers(HttpMethod.GET, "/api/phieu-nhap/**").hasAnyAuthority("ADMIN", "KHO", "MUAHANG", "QUANLYKHO")
                         .requestMatchers(HttpMethod.POST, "/api/phieu-nhap/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
 
-                        // 7. QUẢN LÝ XUẤT KHO (Issues)
+                        // 7. XUẤT KHO
                         .requestMatchers(HttpMethod.GET, "/api/phieu-xuat/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
                         .requestMatchers(HttpMethod.POST, "/api/phieu-xuat/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
 
-                        // 8. BÁO CÁO / THỐNG KÊ (Dashboard)
-                        .requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAuthority("ADMIN")
+                        // 8. DASHBOARD / BÁO CÁO
+                        .requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAnyAuthority("ADMIN", "QUANLYKHO")
 
-                        // 9. QUẢN LÝ YÊU CẦU XUẤT KHO (Lệnh xuất)
+                        // 9. YÊU CẦU XUẤT KHO (Lệnh xuất)
                         .requestMatchers(HttpMethod.GET, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "KHO", "QUANLYKHO")
-                        .requestMatchers(HttpMethod.POST, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "QUANLYKHO")
+                        .requestMatchers(HttpMethod.POST, "/api/yeu-cau-xuat/**").hasAnyAuthority("ADMIN", "QUANLYKHO", "KHO")
+                        .requestMatchers(HttpMethod.PUT, "/api/yeu-cau-xuat/*/duyet").hasAnyAuthority("ADMIN", "QUANLYKHO")
 
-                        .requestMatchers(HttpMethod.PUT, "/api/yeu-cau-xuat/*/duyet").hasAuthority("ADMIN")
-                        // =========================================================
-                        // 🎯 10. MỚI: QUẢN LÝ YÊU CẦU MUA HÀNG (Quy trình PR -> PO)
-                        // =========================================================
-                        .requestMatchers(HttpMethod.GET, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").authenticated()
+                        // 10. YÊU CẦU MUA HÀNG (PR)
+                        .requestMatchers(HttpMethod.GET, "/api/yeu-cau-mua/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/yeu-cau-mua/**").hasAnyAuthority("KHO", "QUANLYKHO", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/yeu-cau-mua/*/duyet").hasAnyAuthority("ADMIN", "MUAHANG")
 
-                        // CHỈ CÓ KHO HOẶC QUẢN LÝ KHO mới được lập phiếu đề xuất
-                         .requestMatchers(HttpMethod.POST, "/api/yeu-cau-mua", "/api/yeu-cau-mua/**").hasAnyAuthority("KHO", "QUANLYKHO", "ADMIN")
+                        // 11. CÁC MODULE KHÁC
+                        .requestMatchers("/api/trao-doi/**", "/api/thong-bao/**").authenticated()
 
-                        // CHỈ CÓ SẾP (ADMIN) mới được quyền vào duyệt hoặc từ chối
-                        .requestMatchers(HttpMethod.PUT, "/api/yeu-cau-mua/*/duyet").hasAuthority("ADMIN")
-                        .requestMatchers("/api/trao-doi", "/api/trao-doi/**").permitAll()
-                        // --- CHỐT CHẶN CUỐI CÙNG ---
-                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        .requestMatchers("/api/thong-bao", "/api/thong-bao/**").permitAll()
-
-                        .requestMatchers("/error").permitAll()
+                        // --- CHỐT CHẶN ---
                         .anyRequest().authenticated()
                 )
-                // GẮN CÁI KHIÊN JWT VÀO ĐÂY!
                 .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -105,8 +96,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-        // 3. Cho phép tất cả Header (để nó nhận cái x-pinggy-no-screen từ bạn ông)
+        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(false);
 

@@ -21,7 +21,9 @@ public class PhieuNhap {
 
     @Column(name = "tong_tien")
     private Double tongTien; // Tổng giá trị lô hàng nhập về
-
+    @ManyToOne
+    @JoinColumn(name = "ma_nd")
+    private NguoiDung nguoiDung;
     @ManyToOne
     @JoinColumn(name = "ma_nha_cung_cap")
     private NhaCungCap nhaCungCap;

@@ -24,6 +24,9 @@ public class DonDatHang {
     @ManyToOne
     @JoinColumn(name = "ma_ncc")
     private NhaCungCap nhaCungCap;
+    @ManyToOne
+    @JoinColumn(name = "nguoi_tao_id") // Sếp có thể đổi tên cột này cho khớp với DB thực tế nếu cần
+    private NguoiDung nguoiTao;
 
     @OneToMany(mappedBy = "donDatHang", cascade = CascadeType.ALL)
     private List<ChiTietDonDatHang> chiTiets;

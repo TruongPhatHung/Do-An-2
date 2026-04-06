@@ -16,7 +16,8 @@ public class NguoiDung {
 
     @Column(name = "ten_dang_nhap", unique = true)
     private String tenDangNhap;
-
+    @Column(name = "ngay_tao")
+    private LocalDate ngayTao;
     @Column(name = "ho_ten")
     private String hoTen;
 

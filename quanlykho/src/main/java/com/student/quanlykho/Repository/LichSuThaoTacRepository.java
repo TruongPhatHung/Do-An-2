@@ -9,4 +9,5 @@ import java.util.List;
 public interface LichSuThaoTacRepository extends JpaRepository<LichSuThaoTac, Long> {
     // Lấy danh sách mới nhất lên đầu
     Page<LichSuThaoTac> findAll(Pageable pageable);
+    List<LichSuThaoTac> findTop10ByNguoiThaoTacOrderByThoiGianDesc(String nguoiThaoTac);
 }

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface NguoiDungRepository extends JpaRepository<NguoiDung, String> {
+public interface    NguoiDungRepository extends JpaRepository<NguoiDung, String> {
     Optional<NguoiDung> findByTenDangNhap(String tenDangNhap);
 }
