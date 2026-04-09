@@ -30,17 +30,28 @@ const POList = () => {
     }, []);
 
     const getStatusLabel = (status) => {
-        const normalizedStatus = status ? status.toUpperCase() : '';
+        // 🎯 1. Xử lý vụ DB bị NULL hoặc rỗng
+        if (!status || status.trim() === '') {
+            return <span style={{ padding: '6px 12px', borderRadius: '20px', backgroundColor: '#e2e8f0', color: '#475569', fontWeight: 'bold', fontSize: '0.85rem' }}>Chờ xử lý</span>;
+        }
+
+        const normalizedStatus = status.trim().toUpperCase();
+
         switch (normalizedStatus) {
             case 'MỚI TẠO':
-                return <span className="status-badge status-new">Mới Tạo</span>;
+                return <span style={{ padding: '6px 12px', borderRadius: '20px', backgroundColor: '#e0f2fe', color: '#0369a1', fontWeight: 'bold', fontSize: '0.85rem' }}>Mới Tạo</span>;
+
+            case 'ĐANG GIAO': // 🎯 Thêm case Đang Giao cho sếp
             case 'GIAO THIẾU':
-                return <span className="status-badge status-partial">Giao Thiếu</span>;
+                return <span style={{ padding: '6px 12px', borderRadius: '20px', backgroundColor: '#fef3c7', color: '#b45309', fontWeight: 'bold', fontSize: '0.85rem' }}>{status}</span>;
+
             case 'HOÀN THÀNH':
             case 'HOÀN TẤT':
-                return <span className="status-badge status-completed">Hoàn Tất</span>;
+                return <span style={{ padding: '6px 12px', borderRadius: '20px', backgroundColor: '#dcfce7', color: '#15803d', fontWeight: 'bold', fontSize: '0.85rem' }}>Hoàn Tất</span>;
+
             default:
-                return <span className="status-badge" style={{ backgroundColor: '#95a5a6', color: 'white' }}>{status}</span>;
+                // Nếu có trạng thái lạ nào khác, nó vẫn sẽ hiện cái nền xám và tên trạng thái
+                return <span style={{ padding: '6px 12px', borderRadius: '20px', backgroundColor: '#f1f5f9', color: '#334155', fontWeight: 'bold', fontSize: '0.85rem' }}>{status}</span>;
         }
     };
 

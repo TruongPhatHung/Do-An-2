@@ -23,7 +23,12 @@ const QuanLyTaiKhoan = () => {
 
     const fetchUsers = async () => {
         try {
-            const res = await api.get('/users');
+            // 🎯 THÊM THAM SỐ CHỐNG CACHE VÀO ĐÂY
+            const res = await api.get(`/users?t=${new Date().getTime()}`);
+
+            // Log ra xem dữ liệu thực tế Backend trả về là gì
+            console.log("Dữ liệu Users mới nhất:", res.data);
+
             setUsers(res.data);
         } catch (error) {
             console.error("Lỗi tải danh sách:", error);
@@ -138,7 +143,7 @@ const QuanLyTaiKhoan = () => {
                     </thead>
                     <tbody>
                         {users.map((acc) => {
-                            const isUserOnline = acc.isOnline !== undefined ? acc.isOnline : (acc.vaiTro === 'ADMIN');
+                            const isUserOnline = acc.isOnline === true; 
                             // 🎯 Biến kiểm tra xem tài khoản có đang bị khóa không (Lấy từ DB)
                             const isLocked = acc.isLocked || acc.trangThai === false;
 

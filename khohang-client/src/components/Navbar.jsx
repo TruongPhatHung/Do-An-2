@@ -10,9 +10,28 @@ const Navbar = ({ onToggleSidebar }) => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+    const handleLogout = async () => {
+        try {
+            console.log("1. Bắt đầu quá trình Đăng xuất...");
+            const username = localStorage.getItem("username");
+            console.log("2. Username lấy được từ localStorage:", username);
+
+            if (username) {
+                console.log("3. Đang gọi API báo Server tắt đèn cho:", username);
+                const response = await api.post('/auth/logout', { username: username });
+                console.log("4. Phản hồi từ Server:", response.data);
+            } else {
+                console.warn("⚠️ Không tìm thấy username trong LocalStorage, bỏ qua gọi API");
+            }
+        } catch (error) {
+            console.error("❌ Lỗi khi gọi API đăng xuất:", error.response || error);
+        } finally {
+            console.log("5. Xóa dữ liệu máy khách và chuyển trang...");
+            logout(); // Giả định hàm này gọi removeItem
+            // Thêm chắc cú:
+            localStorage.removeItem("username");
+            navigate('/login');
+        }
     };
 
     // Hàm lấy ảnh đại diện dựa trên Role hoặc URL có sẵn

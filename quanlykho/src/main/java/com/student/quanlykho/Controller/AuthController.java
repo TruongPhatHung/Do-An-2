@@ -66,13 +66,27 @@ public class AuthController {
             response.put("token", token);
             response.put("type", "Bearer");
             response.put("role", user.getVaiTro());
-            response.put("username", user.getHoTen());
-
-            // Trả về thêm tenDangNhap để frontend dễ lấy
-            response.put("tenDangNhap", user.getTenDangNhap());
+            response.put("username", user.getTenDangNhap()); // 🎯 CHUẨN: username phải là tên đăng nhập
+            response.put("hoTen", user.getHoTen()); // 🎯 Thêm biến này để Frontend hiển thị "Xin chào, Trương Phát Hưng"
             response.put("message","Đăng nhập thành công");
         }
-        else {
+        // Trong hàm login của AuthController.java
+        if (user != null && passwordEncoder.matches(password, user.getMatKhau())){
+            user.setIsOnline(true);
+            user.setLastActiveTime(java.time.LocalDateTime.now());
+            nguoiDungRepository.save(user);
+
+            String token = jwtUtils.generteToken(user.getTenDangNhap());
+
+            response.put("token", token);
+            response.put("type", "Bearer");
+            response.put("role", user.getVaiTro());
+            response.put("hoTen", user.getHoTen());
+            // 🎯 THIẾU DÒNG NÀY ĐÂY SẾP ƠI!!!
+            response.put("username", user.getTenDangNhap());
+
+            response.put("message","Đăng nhập thành công");
+        }    else {
             response.put("message", "Sai tài khoản hoặc mật khẩu");
             response.put("status", "error");
         }

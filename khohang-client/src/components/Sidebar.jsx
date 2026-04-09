@@ -36,10 +36,10 @@ const Sidebar = () => {
         <aside className="sidebar">
             <div className="sidebar-user-panel">
                 <div className="user-avatar">
-                    {user?.displayName?.charAt(0) || 'A'}
+                    {user?.hoTen?.charAt(0) || 'A'}
                 </div>
                 <div className="user-info">
-                    <p className="user-name">{user?.displayName || 'Người dùng'}</p>
+                    <p className="user-name">{user?.hoTen  || 'Người dùng'}</p>
                     <span className="user-role">{role}</span>
                 </div>
             </div>
