@@ -40,6 +40,7 @@ const Navbar = ({ onToggleSidebar }) => {
 
         const role = user?.role?.toUpperCase();
         if (role === 'ADMIN') return 'src/components/avarta/Screenshot 2026-03-21 185323.png'; 
+        if (role === 'QUANLYKHO') return 'src/components/avarta/Screenshot 2026-03-21 185323.png';
         if (role === 'KHO') return 'src/components/avarta/Screenshot 2026-03-21 185323.png';   
         if (role === 'MUAHANG') return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
         return 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; 
