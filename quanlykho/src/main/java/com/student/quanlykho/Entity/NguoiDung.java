@@ -50,4 +50,9 @@ public class NguoiDung {
 
     @Column(name = "is_online")
     private Boolean isOnline = false;
+    @Column(name = "thoi_gian_dang_nhap")
+    private LocalDateTime thoiGianDangNhap;
+
+    @Column(name = "tong_thoi_gian_online")
+    private Long tongThoiGianOnline = 0L; // Tổng số giây đã làm việc
 }

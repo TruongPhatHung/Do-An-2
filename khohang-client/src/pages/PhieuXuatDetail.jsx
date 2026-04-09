@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import { FiArrowLeft, FiPrinter, FiUser, FiCalendar, FiFileText, FiTruck, FiMapPin, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import './PhieuNhapDetail.css';
+import './PhieuNhapDetail.css'; 
 
 const PhieuXuatDetail = () => {
     const { id } = useParams();
@@ -126,16 +126,27 @@ const PhieuXuatDetail = () => {
                     </tfoot>
                 </table>
 
-                
+                <div className="receipt-footer-notes">
+                    <p><i>* Ghi chú: {phieu.ghiChu || 'Không có ghi chú thêm.'}</i></p>
+                </div>
 
-                <div className="receipt-footer">
-                    <div className="signature-box">
+                <div className="receipt-signature-area">
+                    <div className="sig-box">
                         <p><strong>Người lập phiếu</strong></p>
-                        <p>(Ký, họ tên)</p>
+                        <p className="sig-sub">(Ký, ghi rõ họ tên)</p>
+                        <div className="sig-space"></div>
+                        <p><b>{phieu.nguoiDung?.hoTen || phieu.nguoiTao || ''}</b></p>
                     </div>
-                    <div className="signature-box">
+                    <div className="sig-box">
                         <p><strong>Thủ kho</strong></p>
-                        <p>(Ký, họ tên)</p>
+                        <p className="sig-sub">(Ký, ghi rõ họ tên)</p>
+                        <div className="sig-space"></div>
+                    </div>
+                    <div className="sig-box">
+                        <p><strong>Người nhận hàng</strong></p>
+                        <p className="sig-sub">(Ký, ghi rõ họ tên)</p>
+                        <div className="sig-space"></div>
+                        <p><b>{phieu.tenNguoiNhan || ''}</b></p>
                     </div>
                 </div>
             </div>

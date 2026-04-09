@@ -15,7 +15,7 @@ const POList = () => {
     const navigate = useNavigate();
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 6;
+    const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchOrders = async () => {

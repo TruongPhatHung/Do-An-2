@@ -328,3 +328,37 @@
     /* Diệt thanh cuộn lì lợm của Chrome */
     ::-webkit-scrollbar { display: none !important; }
 }
+/* =========================================
+   ĐỊNH DẠNG KHU VỰC CHỮ KÝ (DÀN HÀNG NGANG)
+   ========================================= */
+.receipt-signature-area {
+    display: flex;
+    justify-content: space-between; /* Đẩy 3 ông ra 3 góc */
+    align-items: flex-start;
+    margin-top: 40px;
+    padding: 0 20px;
+}
+
+.sig-box {
+    flex: 1; /* Chia đều không gian cho 3 người */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Canh giữa nội dung */
+    text-align: center;
+}
+
+.sig-box p {
+    margin: 5px 0;
+}
+
+.sig-sub {
+    font-style: italic;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+/* Tạo khoảng trống mông mênh cho người ta ký tay */
+.sig-space {
+    height: 80px; 
+    width: 100%;
+}
