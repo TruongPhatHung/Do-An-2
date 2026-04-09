@@ -3,109 +3,115 @@ package com.student.quanlykho.Controller;
 import com.student.quanlykho.Entity.NguoiDung;
 import com.student.quanlykho.Repository.NguoiDungRepository;
 import com.student.quanlykho.utils.JwtUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private NguoiDungRepository nguoiDungRepository;
 
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @PostMapping("/register")
-    public String register(@RequestBody NguoiDung user) {
-        if (nguoiDungRepository.findByTenDangNhap(user.getTenDangNhap()).isPresent()) {
-            return "Lỗi: Tên đăng nhập đã tồn tại!";
-        }
-
-        user.setMatKhau(passwordEncoder.encode(user.getMatKhau()));
-        if (user.getMaND() == null) {
-            user.setMaND("ND-" + System.currentTimeMillis());
-        }
-
-        if (user.getVaiTro() == null || user.getVaiTro().trim().isEmpty()) {
-            user.setVaiTro("USER");
-        }
-
-        if (user.getTenDangNhap().toLowerCase().contains("admin")) {
-            user.setVaiTro("ADMIN");
-        }
-
-        nguoiDungRepository.save(user);
-        return "Đăng ký thành công! Vai trò được cấp: " + user.getVaiTro();
-    }
+    @Autowired private NguoiDungRepository nguoiDungRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> request){
-        String username = request.get("username");
-        String password = request.get("password");
+    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String password = body.get("password");
 
         NguoiDung user = nguoiDungRepository.findByTenDangNhap(username).orElse(null);
-        Map<String, Object> response = new HashMap<>();
 
-        if (user != null && passwordEncoder.matches(password, user.getMatKhau())){
-
-            // 🎯 1. BẬT ĐÈN ONLINE VÀ CẬP NHẬT THỜI GIAN HOẠT ĐỘNG
+        if (user != null && passwordEncoder.matches(password, user.getMatKhau())) {
             user.setIsOnline(true);
-            user.setLastActiveTime(java.time.LocalDateTime.now());
+            user.setLastActiveTime(LocalDateTime.now());
+            user.setThoiGianDangNhap(LocalDateTime.now()); // Đánh dấu bắt đầu ca làm
             nguoiDungRepository.save(user);
 
-            // Tạo token
-            String token = jwtUtils.generteToken(user.getTenDangNhap());
+            String token = jwtUtils.generateToken(username, user.getVaiTro());
 
+            Map<String, Object> response = new HashMap<>();
             response.put("token", token);
-            response.put("type", "Bearer");
-            response.put("role", user.getVaiTro());
-            response.put("username", user.getTenDangNhap()); // 🎯 CHUẨN: username phải là tên đăng nhập
-            response.put("hoTen", user.getHoTen()); // 🎯 Thêm biến này để Frontend hiển thị "Xin chào, Trương Phát Hưng"
-            response.put("message","Đăng nhập thành công");
-        }
-        // Trong hàm login của AuthController.java
-        if (user != null && passwordEncoder.matches(password, user.getMatKhau())){
-            user.setIsOnline(true);
-            user.setLastActiveTime(java.time.LocalDateTime.now());
-            nguoiDungRepository.save(user);
-
-            String token = jwtUtils.generteToken(user.getTenDangNhap());
-
-            response.put("token", token);
-            response.put("type", "Bearer");
             response.put("role", user.getVaiTro());
             response.put("hoTen", user.getHoTen());
-            // 🎯 THIẾU DÒNG NÀY ĐÂY SẾP ƠI!!!
             response.put("username", user.getTenDangNhap());
 
-            response.put("message","Đăng nhập thành công");
-        }    else {
-            response.put("message", "Sai tài khoản hoặc mật khẩu");
-            response.put("status", "error");
+            return ResponseEntity.ok(response);
         }
-        return response;
+        return ResponseEntity.status(401).body(Map.of("message", "Sai tài khoản hoặc mật khẩu"));
     }
 
-    // 🎯 2. API ĐĂNG XUẤT ĐỂ TẮT ĐÈN ONLINE
+    // 🎯 ĐÃ SỬA HÀM LOGOUT CHUẨN XỊN
     @PostMapping("/logout")
-    public Map<String, Object> logout(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        NguoiDung user = nguoiDungRepository.findByTenDangNhap(username).orElse(null);
-
-        if (user != null) {
-            user.setIsOnline(false); // Tắt đèn
-            nguoiDungRepository.save(user);
+    @Transactional // 🎯 Phải có cái này để nó cam kết lưu vào DB
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.badRequest().body("Thiếu username");
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Đã đăng xuất & Tắt trạng thái Online");
-        return response;
+        return nguoiDungRepository.findByTenDangNhap(username).map(user -> {
+            // 1. Chốt trạng thái Offline
+            user.setIsOnline(false);
+
+            // 2. Tính tiền (giờ làm)
+            if (user.getThoiGianDangNhap() != null) {
+                long sessionSeconds = ChronoUnit.SECONDS.between(user.getThoiGianDangNhap(), LocalDateTime.now());
+                long currentTotal = (user.getTongThoiGianOnline() == null) ? 0L : user.getTongThoiGianOnline();
+
+                user.setTongThoiGianOnline(currentTotal + sessionSeconds);
+
+                // 🎯 QUAN TRỌNG: Chốt sổ xong phải xóa giờ đăng nhập đi (set null)
+                user.setThoiGianDangNhap(null);
+                System.out.println("=== Đã chốt sổ cho " + username + ": +" + sessionSeconds + " giây ===");
+            }
+
+            nguoiDungRepository.save(user);
+            return ResponseEntity.ok("Đăng xuất thành công");
+        }).orElse(ResponseEntity.status(404).body("Không tìm thấy user"));
+    }
+
+    @PostMapping("/ping")
+    public ResponseEntity<?> ping(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        if (username != null) {
+            nguoiDungRepository.findByTenDangNhap(username).ifPresent(user -> {
+                user.setIsOnline(true);
+                user.setLastActiveTime(LocalDateTime.now());
+                nguoiDungRepository.save(user);
+            });
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void cleanupGhostSessions() {
+        LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(1);
+        List<NguoiDung> ghostUsers = nguoiDungRepository.findByIsOnlineTrueAndLastActiveTimeBefore(oneMinuteAgo);
+
+        for (NguoiDung user : ghostUsers) {
+            user.setIsOnline(false);
+            if (user.getThoiGianDangNhap() != null) {
+                long sessionSeconds = ChronoUnit.SECONDS.between(user.getThoiGianDangNhap(), LocalDateTime.now());
+                long currentTotal = (user.getTongThoiGianOnline() == null) ? 0L : user.getTongThoiGianOnline();
+                user.setTongThoiGianOnline(currentTotal + sessionSeconds);
+                user.setThoiGianDangNhap(null); // Chốt sổ xong reset luôn
+            }
+        }
+
+        if (!ghostUsers.isEmpty()) {
+            nguoiDungRepository.saveAll(ghostUsers);
+            System.out.println("🧹 Đã dọn dẹp " + ghostUsers.size() + " bóng ma Online.");
+        }
     }
 }

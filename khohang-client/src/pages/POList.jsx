@@ -15,7 +15,7 @@ const POList = () => {
     const navigate = useNavigate();
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 6;
+    const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -56,8 +56,16 @@ const POList = () => {
     };
 
     const calculateTotal = (chiTiets) => {
-        return (chiTiets || []).reduce((sum, item) => sum + (item.soLuongDat * item.donGia), 0);
-    };
+        if (!chiTiets || chiTiets.length === 0) return 0;
+
+        return chiTiets.reduce((sum, item) => {
+            // 🎯 Tui thêm logic check cả 2 tên biến, sếp dùng cái nào nó cũng nhận
+            const soLuong = item.soLuongDat || item.soLuongYeuCau || item.soLuong || 0;
+            const gia = item.donGia || (item.hangHoa?.giaNhap) || (item.hangHoa?.giaBan) || 0;
+
+            return sum + (soLuong * gia);
+        }, 0);
+    }
 
     // --- LOGIC XỬ LÝ THỜI GIAN ---
     const checkTimeFilter = (dateString, filterType, selectedDateStr) => {

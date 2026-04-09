@@ -10,9 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
-
-
-
 @Component
 public class JwtUtils {
     @Value("${app.jwtSecret}")
@@ -21,19 +18,21 @@ public class JwtUtils {
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
-
-    public String generteToken(String username){
+    // 🎯 ĐÃ SỬA: Sửa chính tả thành generateToken và thêm tham số 'role'
+    public String generateToken(String username, String role){
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role) // 🎯 Tiện tay nhét luôn Role vào Token cho xịn
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
-
     }
+
     private Key key(){
         return Keys.hmacShaKeyFor(JwtSecret.getBytes(StandardCharsets.UTF_8));
     }
+
     public boolean validateToken(String authToken) {
         try {
             Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken);
@@ -44,7 +43,7 @@ public class JwtUtils {
         return false;
     }
 
-    // 2. Hàm đọc Tên đăng nhập từ trong ruột cái Token ra
+    // Hàm đọc Tên đăng nhập từ trong ruột cái Token ra
     public String getUsernameFromJWT(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key())

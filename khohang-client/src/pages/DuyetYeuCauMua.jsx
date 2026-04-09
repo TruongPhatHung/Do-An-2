@@ -27,7 +27,7 @@ const DuyetYeuCauMua = () => {
         if (!window.confirm(`Sếp xác nhận DUYỆT yêu cầu ${maYeuCau}?`)) return;
         try {
             await api.put(`/yeu-cau-mua/${maYeuCau}/duyet`, {
-                trangThai: "Đã Duyệt",
+                trangThai: "Đã Duyệt", // 🎯 Đồng bộ đúng chữ này để lọt qua trang Lên Đơn PO
                 lyDoTuChoi: ""
             });
             toast.success("✅ Đã phê duyệt đề xuất chi mua hàng!");
