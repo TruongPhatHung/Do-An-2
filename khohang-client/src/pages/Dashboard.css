@@ -503,3 +503,92 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+/* --- CSS CHO NÚT VÀ MENU XUẤT BÁO CÁO MỚI --- */
+.btn-export-main {
+    background-color: #4e73df;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 6px rgba(78, 115, 223, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-export-main:hover {
+    background-color: #2e59d9;
+}
+
+.custom-dropdown {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #e3e6f0;
+    border-radius: 8px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    width: 250px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    animation: fadeInDropdown 0.2s ease;
+}
+
+.custom-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: #3a3b45;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.custom-dropdown .dropdown-item:hover {
+    background-color: #f8f9fc;
+}
+
+.custom-dropdown .item-icon {
+    margin-right: 12px;
+    font-size: 1.1rem;
+    color: #858796;
+}
+
+/* Đổi màu icon khi hover cho đẹp */
+.custom-dropdown .excel-item:hover .item-icon { color: #1cc88a; }
+.custom-dropdown .pdf-item:hover .item-icon { color: #e74a3b; }
+
+@keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* --- NÚT XUẤT EXCEL/PDF NHỎ TRONG DROPDOWN --- */
+.export-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fafafa;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.export-action-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}

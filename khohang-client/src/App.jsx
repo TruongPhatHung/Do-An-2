@@ -110,7 +110,7 @@ function App() {
                 <Route path="/nhap-kho" element={<ProtectedRoute><NhapKho /></ProtectedRoute>} />
                 <Route path="/xuat-kho" element={<ProtectedRoute><PhieuXuatKho /></ProtectedRoute>} />
                 <Route path="/lich-su-xuat-kho" element={<ProtectedRoute><LichSuXuatKho /></ProtectedRoute>} />
-                <Route path="//chi-tiet-phieu-xuat/:id" element={<ProtectedRoute><ChiTietPhieuXuat /></ProtectedRoute>} />
+                <Route path="/chi-tiet-phieu-xuat/:id" element={<ProtectedRoute><ChiTietPhieuXuat /></ProtectedRoute>} />
                 <Route path="/lich-su-yeu-cau-mua" element={<ProtectedRoute><LichSuYeuCauMua /></ProtectedRoute>} />
                 <Route path="/lich-su-yeu-cau-xuat" element={<ProtectedRoute><LichSuYeuCauXuat></LichSuYeuCauXuat></ProtectedRoute>} />
                 <Route path="/chi-tiet-phieu-nhap/:id" element={<ProtectedRoute><PhieuNhapDetail /></ProtectedRoute>} />

@@ -1,94 +1,243 @@
-.detail-container {
-    padding: 20px;
+/* Tổng quan Wrapper */
+.product-detail-wrapper {
+    padding: 24px;
+    background-color: #f1f5f9; /* Nền xám xanh hiện đại */
+    min-height: 100vh;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
     display: flex;
-    justify-content: center;
-}
-
-.detail-card {
-    background: white;
-    width: 100%;
-    max-width: 700px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    overflow: hidden;
-}
-
-.detail-header {
-    background-color: #2c3e50;
-    color: white;
-    padding: 20px 30px;
-    display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
 }
 
-.detail-header h2 {
-    margin: 0;
+/* Header trang */
+.page-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    margin-bottom: 24px;
+    gap: 20px;
+}
+
+.page-title {
     font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
 }
 
 .btn-back {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 10px 16px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
-    transition: 0.3s;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .btn-back:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background-color: #f8fafc;
+    color: #0f172a;
+    border-color: #94a3b8;
 }
 
-.detail-body {
+/* Thẻ thông tin chính */
+.product-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+/* Header của thẻ */
+.card-header {
+    background-color: #ffffff;
+    padding: 30px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.product-title-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.product-avatar {
+    width: 64px;
+    height: 64px;
+    background-color: #e0e7ff;
+    color: #4f46e5;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+}
+
+.product-name-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.6rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.product-sku {
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.product-sku strong {
+    color: #334155;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 1.1rem;
+}
+
+.product-category-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #f0fdf4;
+    color: #16a34a;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 1px solid #bbf7d0;
+}
+
+/* Thân thẻ */
+.card-body {
     padding: 30px;
 }
 
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
+.section-title {
+    margin: 0 0 20px 0;
+    font-size: 1.1rem;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.detail-item {
+/* Lưới thông tin */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+/* Các hộp thông tin nhỏ */
+.info-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s;
+}
+
+.info-box:hover {
+    transform: translateY(-2px);
+}
+
+.box-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+/* Màu sắc theo ngữ cảnh */
+.box-icon.neutral { background: #e2e8f0; color: #475569; }
+
+/* Trạng thái tồn kho Ok */
+.success-box { background: #f0fdfa; border-color: #ccfbf1; }
+.success-box .box-icon { background: #14b8a6; color: white; }
+
+/* Trạng thái tồn kho Cảnh báo */
+.warning-box { background: #fef2f2; border-color: #fecaca; }
+.warning-box .box-icon { background: #ef4444; color: white; }
+.warning-text { color: #dc2626; font-size: 0.85rem; font-weight: 600; margin-top: 4px; display: block; }
+
+/* Box giá tiền */
+.price-box { background: #fffbeb; border-color: #fef08a; }
+.price-box .box-icon { background: #f59e0b; color: white; }
+.text-price { color: #b45309 !important; }
+
+.box-content {
     display: flex;
     flex-direction: column;
-    gap: 5px;
 }
 
-.detail-item label {
+.box-content label {
     font-size: 0.85rem;
-    color: #7f8c8d;
-    font-weight: 600;
-    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 6px;
 }
 
-.detail-item .value {
-    font-size: 1.1rem;
-    color: #2c3e50;
+.box-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.box-value .unit {
+    font-size: 0.9rem;
+    color: #94a3b8;
     font-weight: 500;
 }
 
-/* Các kiểu hiển thị đặc biệt */
-.value.badge-category {
-    background-color: #e8f4f8;
-    color: #2980b9;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    display: inline-block;
-}
-
-.value.stock-warning { color: #e74c3c; font-weight: bold; }
-.value.stock-ok { color: #27ae60; font-weight: bold; }
-.value.price-tag { color: #d35400; font-weight: bold; font-size: 1.2rem; }
-
-.detail-footer {
-    padding: 20px 30px;
-    background: #f8f9fa;
-    border-top: 1px solid #eee;
+/* Footer thẻ */
+.card-footer {
+    padding: 16px 30px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
     text-align: right;
 }
+
+.system-note {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* Loading & Error States */
+.loading-state, .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: #ef4444;
+    margin-bottom: 16px;
+}
+
+.error-state h2 { color: #0f172a; margin-bottom: 8px; }
+.error-state p { color: #64748b; margin-bottom: 24px; }

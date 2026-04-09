@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import './NhaCungCapForm.css'; // Dùng chung CSS form cho đẹp
 import { toast } from 'react-toastify';
+
 const SuaHangHoa = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ const SuaHangHoa = () => {
                     tenHang: p.tenHang,
                     donViTinh: p.donViTinh,
                     soLuongTon: p.soLuongTon,
-                    soLuongToiThieu: p.soLuongToiThieu,
+                    soLuongToiThieu: p.soLuongToiThieu, // Dữ liệu định mức cũ
                     giaNhap: p.giaNhap,
                     loaiHangId: p.loaiHang ? p.loaiHang.id : '' // Lấy ID loại hàng hiện tại
                 });
@@ -74,6 +75,7 @@ const SuaHangHoa = () => {
                             <label>Mã Hàng (Không được sửa)</label>
                             <input value={formData.maHang} disabled style={{ backgroundColor: '#f0f0f0' }} />
                         </div>
+                        
                         <div className="ncc-input-group">
                             <label>Tên Mặt Hàng (*)</label>
                             <input
@@ -82,6 +84,7 @@ const SuaHangHoa = () => {
                                 required
                             />
                         </div>
+
                         <div className="ncc-input-group">
                             <label>Phân Loại / Ngành Hàng (*)</label>
                             <select
@@ -96,6 +99,7 @@ const SuaHangHoa = () => {
                                 ))}
                             </select>
                         </div>
+
                         <div className="ncc-input-group">
                             <label>Đơn Vị Tính</label>
                             <input
@@ -103,6 +107,19 @@ const SuaHangHoa = () => {
                                 onChange={e => setFormData({ ...formData, donViTinh: e.target.value })}
                             />
                         </div>
+
+                        {/* THÊM MỚI: TRƯỜNG NHẬP ĐỊNH MỨC TỐI THIỂU */}
+                        <div className="ncc-input-group">
+                            <label>Định Mức Tối Thiểu</label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={formData.soLuongToiThieu}
+                                onChange={e => setFormData({ ...formData, soLuongToiThieu: Number(e.target.value) })}
+                                required
+                            />
+                        </div>
+
                     </div>
                 </div>
 

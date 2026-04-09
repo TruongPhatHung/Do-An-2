@@ -25,7 +25,7 @@ const HangHoaList = () => {
                 setHangHoa(data);
 
                 // 🎯 1. BẬT POPUP CẢNH BÁO KHI TẢI XONG DỮ LIỆU
-                const lowStockCount = data.filter(item => (item.soLuongTon || 0) < (item.soLuongToiThieu || 0)).length;
+                const lowStockCount = data.filter(item => Number(item.soLuongTon || 0) < Number(item.soLuongToiThieu || 0)).length;
                 if (lowStockCount > 0) {
                     toast.warn(`Cảnh báo: Có ${lowStockCount} mặt hàng đang dưới định mức, cần nhập kho!`, {
                         position: "top-right",
@@ -41,9 +41,8 @@ const HangHoaList = () => {
         };
         fetchHangHoa();
     }, []);
-
     // 🎯 2. TÍNH TOÁN DANH SÁCH SẮP HẾT HÀNG CHO BANNER
-    const lowStockItems = hangHoa.filter(item => (item.soLuongTon || 0) < (item.soLuongToiThieu || 0));
+    const lowStockItems = hangHoa.filter(item => Number(item.soLuongTon || 0) < Number(item.soLuongToiThieu || 0));
 
     // Logic Lọc Dữ Liệu Kết Hợp
     const filteredHangHoa = hangHoa.filter(item => {
@@ -54,17 +53,17 @@ const HangHoaList = () => {
             (item.maHang || "").toLowerCase().includes(term) ||
             (item.loaiHang?.tenLoai || "").toLowerCase().includes(term);
 
-        let matchStock = true;
-        const stock = item.soLuongTon || 0;
-        const minStock = item.soLuongToiThieu || 0;
+    let matchStock = true;
+    const stock = Number(item.soLuongTon || 0);
+    const minStock = Number(item.soLuongToiThieu || 0);
 
-        if (stockFilter === 'under10') matchStock = stock < 10;
-        else if (stockFilter === 'under20') matchStock = stock < 20;
-        else if (stockFilter === 'under50') matchStock = stock < 50;
-        else if (stockFilter === 'over50') matchStock = stock >= 50;
-        else if (stockFilter === 'outOfStock') matchStock = stock === 0;
-        // 🎯 3. THÊM LOGIC LỌC NHỮNG MÓN DƯỚI ĐỊNH MỨC
-        else if (stockFilter === 'lowStockWarning') matchStock = stock < minStock;
+    if (stockFilter === 'under10') matchStock = stock < 10;
+    else if (stockFilter === 'under20') matchStock = stock < 20;
+    else if (stockFilter === 'under50') matchStock = stock < 50;
+    else if (stockFilter === 'over50') matchStock = stock >= 50;
+    else if (stockFilter === 'outOfStock') matchStock = stock === 0;
+    // 🎯 3. THÊM LOGIC LỌC NHỮNG MÓN DƯỚI ĐỊNH MỨC
+    else if (stockFilter === 'lowStockWarning') matchStock = stock < minStock;
 
         return matchSearch && matchStock;
     });
@@ -154,7 +153,7 @@ const HangHoaList = () => {
                     </thead>
                     <tbody>
                         {currentItems.map((item) => {
-                            const isLowStock = (item.soHolgTon || 0) < (item.soLuongToiThieu || 0);
+                           const isLowStock = Number(item.soLuongTon || 0) < Number(item.soLuongToiThieu || 0);
 
                             return (
                                 <tr key={item.maHang || Math.random()}>
@@ -172,12 +171,20 @@ const HangHoaList = () => {
                                     </td>
                                     <td className="col-unit text-center">{item.donViTinh || 'Cái'}</td>
 
-                                    <td className="col-stock text-right">
-                                        <div className={isLowStock ? "stock-warning" : "stock-normal"} style={{justifyContent: 'flex-end'}}>
-                                            {item.soLuongTon ?? 0}
-                                            {isLowStock && <FiAlertCircle className="warning-icon" title="Sắp hết hàng!" />}
-                                        </div>
-                                    </td>
+                                  <td className="col-stock text-right">
+                                    <div 
+                                        className={isLowStock ? "stock-warning" : "stock-normal"} 
+                                        style={{ 
+                                            display: 'inline-flex', /* 🎯 Quan trọng: Dùng inline-flex để nó tuân theo text-align: right của thẻ td */
+                                            alignItems: 'center', 
+                                            gap: '6px',
+                                            whiteSpace: 'nowrap' /* 🎯 Quan trọng: Cấm tuyệt đối việc rớt dòng */
+                                        }}
+                                    >
+                                        <span>{item.soLuongTon ?? 0}</span>
+                                        {isLowStock && <FiAlertCircle className="warning-icon" title="Sắp hết hàng!" style={{ flexShrink: 0 }} />}
+                                    </div>
+                                </td>
 
                                     <td className="col-min-stock text-muted text-right">{item.soLuongToiThieu ?? 0}</td>
 
