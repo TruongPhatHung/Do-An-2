@@ -13,7 +13,6 @@ const DuyetYeuCauXuat = () => {
     const fetchRequests = async () => {
         try {
             const res = await api.get('/yeu-cau-xuat');
-            // Chỉ lấy những đơn Chờ Duyệt
             setRequests(res.data.filter(i => i.trangThai === 'Chờ Duyệt'));
         } catch (e) { toast.error("Lỗi tải dữ liệu!"); }
     };
@@ -76,7 +75,6 @@ const DuyetYeuCauXuat = () => {
                 </table>
             </div>
 
-            {/* Modal giữ nguyên logic nhưng sếp nhớ thêm CSS bên dưới nhé */}
             {selected && (
                 <div className="dyx-modal-overlay">
                     <div className="dyx-modal-content">
