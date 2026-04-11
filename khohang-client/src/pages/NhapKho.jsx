@@ -2,17 +2,19 @@ import React, { useState, useEffect, useContext } from 'react';
 import api from '../services/axiosConfig';
 import './NhapKho.css';
 import { toast } from 'react-toastify';
-import { FiCheckCircle, FiAlertTriangle, FiCalendar, FiSave } from 'react-icons/fi';
-// 🎯 BỔ SUNG: Import Context để lấy tên người đang đăng nhập
+import { FiCalendar, FiSave, FiTruck, FiEdit3, FiPackage } from 'react-icons/fi';
 import { AuthContext } from '../Context/AuthContext';
 
 const NhapKho = () => {
-    // 🎯 Lấy thông tin user hiện tại
     const { user } = useContext(AuthContext);
 
     const [pendingPOs, setPendingPOs] = useState([]);
-    const [selectedPO, setSelectedPO] = useState(null);
-    const [thucNhap, setThucNhap] = useState({});
+    const [suppliers, setSuppliers] = useState([]); 
+    const [selectedSupplier, setSelectedSupplier] = useState('');
+    
+    const [thucNhap, setThucNhap] = useState({}); 
+    const [ghiChu, setGhiChu] = useState({}); 
+    
     const [ngayNhapThucTe, setNgayNhapThucTe] = useState(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
@@ -22,75 +24,91 @@ const NhapKho = () => {
     const fetchPendingPOs = async () => {
         try {
             const response = await api.get('/orders/importable');
-            setPendingPOs(response.data);
+            const pos = response.data;
+            setPendingPOs(pos);
+
+            const uniqueSuppliers = Array.from(new Set(pos.map(po => po.nhaCungCap?.tenNCC))).filter(Boolean);
+            setSuppliers(uniqueSuppliers);
+            
+            if (!uniqueSuppliers.includes(selectedSupplier)) {
+                setSelectedSupplier('');
+            }
         } catch (error) {
             console.error("Lỗi tải PO chờ nhập:", error);
         }
     };
 
-    const handleSelectPO = (e) => {
-        const po = pendingPOs.find(p => p.maDon === e.target.value);
-        setSelectedPO(po);
-        setThucNhap({});
+    const handleSelectSupplier = (e) => {
+        setSelectedSupplier(e.target.value);
     };
 
-    const handleInputChange = (maHang, value, maxAllowed) => {
+    const handleInputChange = (maDon, maHang, value, maxAllowed) => {
         let val = parseInt(value) || 0;
         if (val > maxAllowed) val = maxAllowed;
         if (val < 0) val = 0;
-        setThucNhap({ ...thucNhap, [maHang]: val });
+        
+        setThucNhap(prev => ({
+            ...prev,
+            [maDon]: {
+                ...(prev[maDon] || {}),
+                [maHang]: val
+            }
+        }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleNoteChange = (maDon, value) => {
+        setGhiChu(prev => ({
+            ...prev,
+            [maDon]: value
+        }));
+    };
+
+    const handleSubmitPO = async (e, po) => {
         e.preventDefault();
 
-        const isAnyItemInputted = Object.values(thucNhap).some(val => val > 0);
+        const poThucNhap = thucNhap[po.maDon] || {};
+        const isAnyItemInputted = Object.values(poThucNhap).some(val => val > 0);
+        
         if (!isAnyItemInputted) {
-            return toast.warn("Vui lòng nhập số lượng thực nhận ít nhất 1 mặt hàng!");
+            return toast.warn(`Vui lòng nhập số lượng thực nhận ít nhất 1 mặt hàng cho đơn ${po.maDon}!`);
         }
 
         const payload = {
-            maDonHang: selectedPO.maDon,
-            // 🎯 QUAN TRỌNG: Gửi kèm tên người nhập để Backend lưu vào Lịch sử
+            maDonHang: po.maDon,
             nguoiNhap: user?.displayName || 'Thủ kho',
-            chiTietNhap: thucNhap
+            chiTietNhap: poThucNhap,
+            ghiChu: ghiChu[po.maDon] || '', 
+            ngayNhap: ngayNhapThucTe
         };
 
         try {
             await api.post('/phieu-nhap', payload);
-            toast.success("✅ Xác nhận nhập kho thành công!");
-            setSelectedPO(null); // Reset lại form
-            fetchPendingPOs(); // Tải lại danh sách PO mới nhất
+            toast.success(`✅ Nhập kho thành công cho đơn ${po.maDon}!`);
+            
+            setThucNhap(prev => { const newState = {...prev}; delete newState[po.maDon]; return newState; });
+            setGhiChu(prev => { const newState = {...prev}; delete newState[po.maDon]; return newState; });
+            
+            fetchPendingPOs(); 
         } catch (error) {
-            toast.error("❌ Lỗi khi lưu phiếu nhập! (Vui lòng kiểm tra lại)");
+            toast.error(`❌ Lỗi khi lưu phiếu nhập đơn ${po.maDon}!`);
             console.error(error);
         }
     };
 
-    const renderDeliveryStatus = () => {
-        if (!selectedPO.ngayDuKienGiao) return <span className="status-unknown">Chưa hẹn ngày</span>;
-
-        const duKien = new Date(selectedPO.ngayDuKienGiao).getTime();
-        const thucTe = new Date(ngayNhapThucTe).getTime();
-
-        if (thucTe > duKien) {
-            return <span className="status-late"><FiAlertTriangle className="icon-align" /> Trễ hạn giao</span>;
-        }
-        return <span className="status-ontime"><FiCheckCircle className="icon-align" /> Đúng tiến độ</span>;
-    };
+    const posToDisplay = pendingPOs.filter(po => po.nhaCungCap?.tenNCC === selectedSupplier);
 
     return (
         <div className="nhapkho-container">
             <h2 className="nhapkho-title">📥 Tiếp Nhận Hàng Nhập Kho</h2>
 
-            <div className="nhapkho-card">
+            <div className="nhapkho-card top-control-card">
                 <div className="nhapkho-top-bar">
                     <div className="nhapkho-form-group">
-                        <label>📌 Chọn Đơn Hàng (PO) cần nhập:</label>
-                        <select className="nhapkho-input" onChange={handleSelectPO} value={selectedPO?.maDon || ''}>
-                            <option value="">-- Click chọn đơn hàng đang chờ giao --</option>
-                            {pendingPOs.map(po => (
-                                <option key={po.maDon} value={po.maDon}>{po.maDon} - Công ty {po.nhaCungCap?.tenNCC}</option>
+                        <label><FiTruck className="icon-align" /> Chọn Nhà Cung Cấp có hàng giao đến:</label>
+                        <select className="nhapkho-input" onChange={handleSelectSupplier} value={selectedSupplier}>
+                            <option value="">-- Click chọn Nhà Cung Cấp --</option>
+                            {suppliers.map((ncc, idx) => (
+                                <option key={idx} value={ncc}>{ncc}</option>
                             ))}
                         </select>
                     </div>
@@ -105,18 +123,26 @@ const NhapKho = () => {
                         />
                     </div>
                 </div>
+            </div>
 
-                {selectedPO && (
-                    <form onSubmit={handleSubmit}>
-                        <div className="nhapkho-info-box">
-                            <div className="info-left">
-                                <p><strong>Mã Đơn:</strong> {selectedPO.maDon}</p>
-                                <p><strong>Nhà Cung Cấp:</strong> {selectedPO.nhaCungCap?.tenNCC}</p>
-                            </div>
-                            <div className="info-right">
-                                <p><strong>Dự kiến giao:</strong> {selectedPO.ngayDuKienGiao ? new Date(selectedPO.ngayDuKienGiao).toLocaleDateString('vi-VN') : 'N/A'}</p>
-                                <p><strong>Trạng thái:</strong> {renderDeliveryStatus()}</p>
-                            </div>
+            {selectedSupplier && posToDisplay.length === 0 && (
+                <div className="empty-state-message">
+                    <FiPackage size={40} style={{ marginBottom: '10px', color: '#cbd5e1' }} />
+                    <p>Không còn đơn hàng chờ nhập cho nhà cung cấp này.</p>
+                </div>
+            )}
+
+            {selectedSupplier && posToDisplay.map((po) => (
+                <div key={po.maDon} className="nhapkho-card po-block-card">
+                    <form onSubmit={(e) => handleSubmitPO(e, po)}>
+                        
+                        {/* GIAO DIỆN HEADER MỚI (Đã bỏ Status và viền xanh) */}
+                        <div className="nhapkho-info-header">
+                            <h3 className="po-title-highlight">
+                                <FiPackage className="icon-align" style={{ marginRight: '8px' }} /> 
+                                Mã Đơn (PO): {po.maDon}
+                            </h3>
+                            <span className="po-supplier-badge">NCC: {po.nhaCungCap?.tenNCC}</span>
                         </div>
 
                         <div className="nhapkho-table-responsive">
@@ -132,12 +158,11 @@ const NhapKho = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {selectedPO.chiTiets?.map((item) => {
-                                        // 🎯 SỬA LỖI Ở ĐÂY: Trích xuất chính xác mã hàng và tên hàng
+                                    {po.chiTiets?.map((item) => {
                                         const actualMaHang = item.hangHoa?.maHang || item.maHang;
                                         const actualTenHang = item.hangHoa?.tenHang || item.tenHang;
-
                                         const conLai = item.soLuongDat - (item.soLuongDaNhap || 0);
+                                        
                                         if (conLai <= 0) return null;
 
                                         return (
@@ -151,8 +176,8 @@ const NhapKho = () => {
                                                     <input
                                                         type="number"
                                                         className="nhapkho-input-number"
-                                                        value={thucNhap[actualMaHang] === 0 ? '' : (thucNhap[actualMaHang] || '')}
-                                                        onChange={(e) => handleInputChange(actualMaHang, e.target.value, conLai)}
+                                                        value={thucNhap[po.maDon]?.[actualMaHang] === 0 ? '' : (thucNhap[po.maDon]?.[actualMaHang] || '')}
+                                                        onChange={(e) => handleInputChange(po.maDon, actualMaHang, e.target.value, conLai)}
                                                         placeholder={`Tối đa ${conLai}`}
                                                     />
                                                 </td>
@@ -163,14 +188,26 @@ const NhapKho = () => {
                             </table>
                         </div>
 
-                        <div className="nhapkho-footer">
-                            <button type="submit" className="btn-submit-nhapkho">
-                                <FiSave className="icon-align" /> HOÀN TẤT NHẬP KHO
-                            </button>
+                        <div className="nhapkho-po-footer">
+                            <div className="note-section">
+                                <label><FiEdit3 className="icon-align" /> Ghi chú tình trạng nhập kho:</label>
+                                <textarea 
+                                    className="nhapkho-textarea" 
+                                    placeholder="Ví dụ: Hàng trầy xước nhẹ, thiếu biên bản bàn giao..."
+                                    value={ghiChu[po.maDon] || ''}
+                                    onChange={(e) => handleNoteChange(po.maDon, e.target.value)}
+                                    rows="2"
+                                ></textarea>
+                            </div>
+                            <div className="action-section">
+                                <button type="submit" className="btn-submit-nhapkho">
+                                    <FiSave className="icon-align" /> HOÀN TẤT NHẬP ĐƠN
+                                </button>
+                            </div>
                         </div>
                     </form>
-                )}
-            </div>
+                </div>
+            ))}
         </div>
     );
 };

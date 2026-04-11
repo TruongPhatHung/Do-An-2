@@ -106,8 +106,7 @@
 }
 
 .input-wrapper input {
-    width: 100%;
-    padding: 14px 45px 14px 15px; 
+   width: 100%;
     border: 1.5px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
     font-size: 15px;
@@ -115,6 +114,18 @@
     background-color: rgba(255, 255, 255, 0.15); 
     transition: all 0.3s ease;
     box-sizing: border-box;
+}
+/* =========================================
+   1. CHỈNH KHOẢNG TRỐNG GÕ CHỮ (PADDING)
+========================================= */
+/* Ô Tên đăng nhập: Chừa 45px bên TRÁI để nhường chỗ cho icon User */
+.input-group:nth-child(1) .input-wrapper input {
+    padding: 14px 15px 14px 45px; /* Top:14, Right:15, Bottom:14, Left:45 */
+}
+
+/* Ô Mật khẩu: Chừa 45px bên PHẢI để nhường chỗ cho icon Mắt */
+.input-group:nth-child(2) .input-wrapper input {
+    padding: 14px 45px 14px 15px; /* Top:14, Right:45, Bottom:14, Left:15 */
 }
 
 /* Màu chữ placeholder */
@@ -130,14 +141,20 @@
     outline: none;
 }
 
-/* Icon tĩnh (User) - Chuyển sang bên phải */
+/* =========================================
+   2. VỊ TRÍ CÁC ICON
+========================================= */
+/* Icon tĩnh (User) - Đặt cố định bên TRÁI */
 .input-icon {
     position: absolute;
-    right: 14px; 
+    left: 14px;  /* 🎯 Chốt ở bên trái */
+    right: auto; /* Hủy các cài đặt bên phải cũ */
     display: flex;
     align-items: center;
     pointer-events: none;
-    z-index: 10; /* Đảm bảo nổi lên trên input */
+    z-index: 10;
+    color: #475569;
+    opacity: 0.8;
 }
 
 /* 🎯 ĐỔI MÀU ICON Ở ĐÂY: Dùng màu xám đậm để nổi trên nền input trắng */
@@ -147,19 +164,23 @@
     z-index: 10;
 }
 
-/* Icon mắt bên phải (Mật khẩu) */
+/* Icon mắt (Mật khẩu) - Đặt cố định bên PHẢI */
 .toggle-password {
     position: absolute;
-    right: 14px;
+    right: 14px; /* 🎯 Chốt ở bên phải */
+    left: auto;
     cursor: pointer;
     display: flex;
     align-items: center;
     padding: 5px;
     transition: color 0.2s;
+    color: #475569;
+    opacity: 0.8;
+    z-index: 10;
 }
 
 .toggle-password:hover {
-    color: #0f172a; /* Hover vào thì chuyển sang màu đen/xanh than đậm */
+    color: #0f172a;
     opacity: 1;
 }
 

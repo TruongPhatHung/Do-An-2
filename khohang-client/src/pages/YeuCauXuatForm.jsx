@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiTrash2, FiArrowLeft, FiAlertTriangle, FiSend } from 'react-icons/fi';
+import { 
+    FiPlus, FiTrash2, FiArrowLeft, FiAlertTriangle, 
+    FiSend, FiUploadCloud, FiTruck, FiBox, FiFileText 
+} from 'react-icons/fi';
 import './YeuCauXuatForm.css';
 
 const YeuCauXuatForm = () => {
@@ -47,7 +50,10 @@ const YeuCauXuatForm = () => {
     const isInvalidQuantity = items.some(item => item.soLuongYeuCau <= 0);
 
     // Cảnh báo màu vàng cho Kinh doanh biết kho đang thiếu hàng, Sếp sẽ thấy
-    const isWarningQuantity = items.some(item => item.soLuongYeuCau > item.tonKho);
+    const isWarningQuantity = items.some(item => item.maHang && item.soLuongYeuCau > item.tonKho);
+
+    // Tổng số lượng
+    const totalQuantity = items.reduce((sum, item) => sum + (Number(item.soLuongYeuCau) || 0), 0);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -74,14 +80,13 @@ const YeuCauXuatForm = () => {
         try {
             await api.post('/yeu-cau-xuat', payload);
 
-            // 🎯 ĐÃ SỬA: Thông báo rõ ràng là đang chờ duyệt
             if (isWarningQuantity) {
                 toast.warning("Đã gửi lệnh cho Sếp! Lưu ý: Kho đang thiếu hàng, lệnh có thể bị Sếp từ chối.");
             } else {
                 toast.success("✅ Đã trình lệnh xuất kho. Vui lòng chờ Sếp phê duyệt!");
             }
 
-            navigate('/dashboard'); // Hoặc điều hướng về trang Lịch sử của họ
+            navigate('/dashboard'); 
         } catch (error) {
             toast.error(error.response?.data?.message || "❌ Lỗi: Không thể tạo Lệnh xuất kho!");
             console.error(error);
@@ -91,118 +96,159 @@ const YeuCauXuatForm = () => {
     return (
         <div className="ycx-wrapper">
             <div className="ycx-header">
-                <button type="button" className="btn-back" onClick={() => navigate(-1)}>
+                <button type="button" className="ycx-btn-back" onClick={() => navigate(-1)}>
                     <FiArrowLeft /> Quay lại
                 </button>
-                <div style={{ marginLeft: '15px' }}>
-                    <h2 style={{ margin: 0, color: '#1e293b' }}>📤 Lập Lệnh Yêu Cầu Xuất Kho</h2>
-                    <p style={{ margin: '5px 0 0 0', color: '#64748b' }}>Lập danh sách hàng hóa cần xuất để trình Giám đốc phê duyệt</p>
+                <div className="ycx-header-titles">
+                    <div className="title-with-icon">
+                        <div className="title-icon-box"><FiUploadCloud /></div>
+                        <h2>Lập Lệnh Yêu Cầu Xuất Kho</h2>
+                    </div>
+                    <p className="ycx-subtitle">Đề xuất danh sách hàng hóa cần xuất để trình Giám đốc phê duyệt</p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="ycx-card">
+            <form onSubmit={handleSubmit} className="ycx-form-container">
                 {/* PHẦN 1: THÔNG TIN LỆNH XUẤT */}
-                <div className="ycx-section">
-                    <h4 className="section-title">1. Thông tin lệnh xuất</h4>
-                    <div className="form-grid">
-                        <div className="input-group">
-                            <label>Nơi nhận hàng (Đại lý/Xưởng) <span className="required">*</span></label>
-                            <input
-                                type="text" required placeholder="Nhập tên người nhận hoặc địa chỉ..."
-                                value={noiNhan} onChange={e => setNoiNhan(e.target.value)}
-                            />
-                        </div>
-                        <div className="input-group">
-                            <label>Hạn chót xuất kho <span className="required">*</span></label>
-                            <input
-                                type="datetime-local" required
-                                value={ngayCanXuat} onChange={e => setNgayCanXuat(e.target.value)}
-                            />
-                        </div>
-                        <div className="input-group full-width">
-                            <label>Ghi chú lệnh xuất (Gửi Sếp)</label>
-                            <input
-                                type="text" placeholder="VD: Khách Vip giao gấp, đang nợ 2 cái chờ hàng về..."
-                                value={ghiChu} onChange={e => setGhiChu(e.target.value)}
-                            />
+                <div className="ycx-card">
+                    <div className="ycx-card-header">
+                        <FiTruck className="ycx-card-icon" />
+                        <h4 className="ycx-card-title">Thông tin giao nhận</h4>
+                    </div>
+                    <div className="ycx-card-body">
+                        <div className="ycx-form-grid">
+                            <div className="ycx-form-group">
+                                <label>Nơi nhận hàng (Đại lý/Xưởng) <span className="ycx-required">*</span></label>
+                                <input
+                                    type="text" 
+                                    className="ycx-input-control"
+                                    required 
+                                    placeholder="Nhập tên người nhận hoặc địa chỉ..."
+                                    value={noiNhan} 
+                                    onChange={e => setNoiNhan(e.target.value)}
+                                />
+                            </div>
+                            <div className="ycx-form-group">
+                                <label>Hạn chót xuất kho <span className="ycx-required">*</span></label>
+                                <input
+                                    type="datetime-local" 
+                                    className="ycx-input-control"
+                                    required
+                                    value={ngayCanXuat} 
+                                    onChange={e => setNgayCanXuat(e.target.value)}
+                                />
+                            </div>
+                            <div className="ycx-form-group full-width">
+                                <label><FiFileText style={{marginRight: '5px'}}/>Ghi chú lệnh xuất (Gửi Sếp)</label>
+                                <input
+                                    type="text" 
+                                    className="ycx-input-control"
+                                    placeholder="VD: Khách Vip giao gấp, đang nợ 2 cái chờ hàng về..."
+                                    value={ghiChu} 
+                                    onChange={e => setGhiChu(e.target.value)}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* PHẦN 2: CHỌN MẶT HÀNG */}
-                <div className="ycx-section">
-                    <h4 className="section-title">2. Danh sách mặt hàng cần xuất</h4>
-                    <div className="table-responsive">
-                        <table className="ycx-modern-table">
-                            <thead>
-                                <tr>
-                                    <th width="45%">Sản phẩm trong kho</th>
-                                    <th width="20%" style={{ textAlign: 'center' }}>Tồn kho hiện tại</th>
-                                    <th width="25%">SL Yêu cầu xuất</th>
-                                    <th width="10%"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {items.map((item, index) => {
-                                    const isShortage = item.soLuongYeuCau > item.tonKho;
-
-                                    return (
-                                        <tr key={index} className={isShortage ? 'row-warning' : ''}>
-                                            <td>
-                                                <select
-                                                    value={item.maHang}
-                                                    onChange={(e) => handleItemChange(index, 'maHang', e.target.value)}
-                                                    required
-                                                >
-                                                    <option value="">-- Chọn mặt hàng --</option>
-                                                    {products.map(p => (
-                                                        <option key={p.maHang} value={p.maHang}>
-                                                            {p.tenHang} {p.soLuongTon <= 0 ? '(Kho đang hết)' : ''}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </td>
-                                            <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
-                                                {item.maHang ? item.tonKho : '-'}
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="number" min="1" required
-                                                    value={item.soLuongYeuCau === '' ? '' : item.soLuongYeuCau}
-                                                    onChange={(e) => {
-                                                        const val = parseInt(e.target.value);
-                                                        handleItemChange(index, 'soLuongYeuCau', isNaN(val) ? '' : val);
-                                                    }}
-                                                    disabled={!item.maHang}
-                                                    style={isShortage ? { borderColor: '#f59e0b', outlineColor: '#f59e0b' } : {}}
-                                                />
-                                                {isShortage && (
-                                                    <div style={{ color: '#d97706', fontSize: '12px', marginTop: '4px', fontWeight: 'bold' }}>
-                                                        <FiAlertTriangle /> Kho không đủ (Sẽ nợ / Sếp có thể từ chối)
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <button type="button" className="btn-remove" onClick={() => removeRow(index)}>
-                                                    <FiTrash2 />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                <div className="ycx-card">
+                    <div className="ycx-card-header">
+                        <FiBox className="ycx-card-icon" />
+                        <h4 className="ycx-card-title">Danh sách mặt hàng cần xuất</h4>
                     </div>
-                    <button type="button" className="btn-add-row" onClick={addRow}>
-                        <FiPlus /> Thêm sản phẩm
-                    </button>
+                    <div className="ycx-card-body">
+                        <div className="ycx-table-responsive">
+                            <table className="ycx-modern-table">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" className="text-center">STT</th>
+                                        <th width="45%">Sản phẩm trong kho</th>
+                                        <th width="15%" className="text-center">Tồn kho</th>
+                                        <th width="25%" className="text-center">SL Yêu cầu xuất</th>
+                                        <th width="10%" className="text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {items.map((item, index) => {
+                                        const isShortage = item.maHang && item.soLuongYeuCau > item.tonKho;
+
+                                        return (
+                                            <tr key={index} className={isShortage ? 'row-warning' : ''}>
+                                                <td className="text-center text-muted fw-bold">{index + 1}</td>
+                                                <td>
+                                                    <select
+                                                        className="ycx-input-control"
+                                                        value={item.maHang}
+                                                        onChange={(e) => handleItemChange(index, 'maHang', e.target.value)}
+                                                        required
+                                                    >
+                                                        <option value="" disabled>-- Chọn mặt hàng --</option>
+                                                        {products.map(p => (
+                                                            // 🎯 ĐÃ SỬA: CHỈ HIỂN THỊ MÃ SP VÀ TÊN SP
+                                                            <option key={p.maHang} value={p.maHang}>
+                                                                [{p.maHang}] - {p.tenHang}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </td>
+                                                <td className="text-center fw-bold text-primary">
+                                                    {item.maHang ? item.tonKho : '-'}
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="number" 
+                                                        className={`ycx-input-control text-center fw-bold ${isShortage ? 'input-warning' : ''}`}
+                                                        min="1" 
+                                                        required
+                                                        value={item.soLuongYeuCau === '' ? '' : item.soLuongYeuCau}
+                                                        onChange={(e) => {
+                                                            const val = parseInt(e.target.value);
+                                                            handleItemChange(index, 'soLuongYeuCau', isNaN(val) ? '' : val);
+                                                        }}
+                                                        disabled={!item.maHang}
+                                                        placeholder="0"
+                                                    />
+                                                    {isShortage && (
+                                                        <div className="warning-text">
+                                                            <FiAlertTriangle /> Vượt quá tồn kho
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="text-center">
+                                                    <button 
+                                                        type="button" 
+                                                        className="ycx-btn-remove" 
+                                                        onClick={() => removeRow(index)}
+                                                        disabled={items.length === 1}
+                                                        title={items.length === 1 ? "Phải có ít nhất 1 mặt hàng" : "Xóa dòng này"}
+                                                    >
+                                                        <FiTrash2 />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div className="ycx-table-footer">
+                            <button type="button" className="ycx-btn-add-row" onClick={addRow}>
+                                <FiPlus /> Thêm dòng mới
+                            </button>
+                            <div className="ycx-total-summary">
+                                Tổng SL xuất: <span>{totalQuantity}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* PHẦN 3: XÁC NHẬN */}
-                <div className="ycx-footer" style={{ justifyContent: 'flex-end', display: 'flex', marginTop: '20px' }}>
-                    {/* 🎯 ĐÃ SỬA: Tên nút rõ ràng mục đích */}
-                    <button type="submit" className="btn-submit-ycx" disabled={isInvalidQuantity || items[0].maHang === ''} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#3b82f6', color: 'white', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
-                        <FiSend /> TRÌNH SẾP DUYỆT LỆNH
+                {/* PHẦN 3: ACTION FOOTER */}
+                <div className="ycx-action-footer">
+                    <button type="submit" className="ycx-btn-submit" disabled={isInvalidQuantity || items[0].maHang === ''}>
+                        <FiSend className="ycx-icon-lg" /> TRÌNH SẾP DUYỆT LỆNH
                     </button>
                 </div>
             </form>

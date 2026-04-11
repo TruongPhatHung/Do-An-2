@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiTrash2, FiArrowLeft, FiEdit3, FiPackage, FiFilePlus } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiArrowLeft, FiEdit3, FiPackage, FiFilePlus, FiTruck, FiBox, FiClipboard } from 'react-icons/fi';
 import './LapYeuCauMuaForm.css';
 
 const LapYeuCauMuaForm = () => {
@@ -174,7 +174,7 @@ const LapYeuCauMuaForm = () => {
                                         <FiPackage /> Đơn Yêu Cầu #{reqIndex + 1}
                                     </h4>
 
-                                    {/* 🎯 SỬA CHỖ NÀY: Bỏ chặn isAutoMode, cho phép xóa phiếu bất kể đang tạo thủ công hay tự động */}
+                                    {/* SỬA CHỖ NÀY: Bỏ chặn isAutoMode, cho phép xóa phiếu bất kể đang tạo thủ công hay tự động */}
                                     {batchRequests.length > 1 && (
                                         <button
                                             type="button"
@@ -248,7 +248,7 @@ const LapYeuCauMuaForm = () => {
                                                                 <option value="">-- Chọn mặt hàng --</option>
                                                                 {availableProducts.map(p => (
                                                                     <option key={p.maHang} value={p.maHang}>
-                                                                        {p.tenHang} (Tồn: {p.soLuongTon || 0})
+                                                                        [{p.maHang}] - {p.tenHang} (Tồn: {p.soLuongTon || 0})
                                                                     </option>
                                                                 ))}
                                                             </select>
