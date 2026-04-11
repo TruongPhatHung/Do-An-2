@@ -3,12 +3,13 @@ import api from '../services/axiosConfig';
 import { AuthContext } from '../Context/AuthContext';
 import './HangHoaList.css';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiEye, FiEdit, FiAlertCircle, FiFilter, FiShoppingCart } from 'react-icons/fi';
-import { FaBoxes } from 'react-icons/fa'; // 🎯 Thêm dòng này để lấy icon FontAwesome
-import { toast } from 'react-toastify'; // 🎯 Thêm Toast để bật popup
+import { FiSearch, FiEye, FiEdit, FiAlertCircle, FiFilter, FiShoppingCart, FiTruck } from 'react-icons/fi';
+import { FaBoxes } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const HangHoaList = () => {
     const [hangHoa, setHangHoa] = useState([]);
+    const [pendingItems, setPendingItems] = useState({}); // 🎯 Đổi thành Object (Dictionary)
     const [searchTerm, setSearchTerm] = useState('');
     const [stockFilter, setStockFilter] = useState('all');
     const { user } = useContext(AuthContext);
@@ -18,33 +19,71 @@ const HangHoaList = () => {
     const itemsPerPage = 20;
 
     useEffect(() => {
-        const fetchHangHoa = async () => {
+        const fetchData = async () => {
             try {
-                const response = await api.get('/products');
-                const data = Array.isArray(response.data) ? response.data : [];
-                setHangHoa(data);
+                const [resProducts, resPending] = await Promise.all([
+                    api.get('/products'),
+                    api.get('/yeu-cau-mua/hang-dang-cho-ve')
+                ]);
 
-                // 🎯 1. BẬT POPUP CẢNH BÁO KHI TẢI XONG DỮ LIỆU
-                const lowStockCount = data.filter(item => Number(item.soLuongTon || 0) < Number(item.soLuongToiThieu || 0)).length;
-                if (lowStockCount > 0) {
-                    toast.warn(`Cảnh báo: Có ${lowStockCount} mặt hàng đang dưới định mức, cần nhập kho!`, {
-                        position: "top-right",
-                        autoClose: 5000,
-                        toastId: 'low-stock-alert' // Ngăn toast bị lặp lại nhiều lần
+                const productsData = Array.isArray(resProducts.data) ? resProducts.data : [];
+                setHangHoa(productsData);
+
+                // 🎯 Nhận cục Data MỚI: { "H01": 5, "H02": 10 }
+                const pendingData = resPending.data || {};
+                setPendingItems(pendingData);
+
+                // Check cảnh báo khẩn
+                const itemsToOrder = productsData.filter(item => {
+                    const stock = Number(item.soLuongTon || 0);
+                    const minStock = Number(item.soLuongToiThieu || 0);
+                    const incomingQty = pendingData[item.maHang] || 0; // Lấy SL đang về
+                    return (stock + incomingQty) < minStock; // 🎯 So sánh Tổng dự kiến với Định mức
+                });
+
+                if (itemsToOrder.length > 0) {
+                    toast.warn(`Cảnh báo: Có ${itemsToOrder.length} mặt hàng đang thiếu hụt, cần đặt thêm!`, {
+                        position: "top-right", autoClose: 5000, toastId: 'low-stock-alert'
                     });
                 }
-
             } catch (error) {
-                console.error("Lỗi khi tải danh sách hàng hóa:", error);
-                setHangHoa([]);
+                console.error("Lỗi khi tải danh sách:", error);
             }
         };
-        fetchHangHoa();
+        fetchData();
     }, []);
-    // 🎯 2. TÍNH TOÁN DANH SÁCH SẮP HẾT HÀNG CHO BANNER
-    const lowStockItems = hangHoa.filter(item => Number(item.soLuongTon || 0) < Number(item.soLuongToiThieu || 0));
 
-    // Logic Lọc Dữ Liệu Kết Hợp
+    // ==========================================================
+    // 🎯 LOGIC MỚI: CHIA NHÓM CHUẨN XÁC THEO SỐ LƯỢNG
+    // ==========================================================
+    const lowStockItems = hangHoa.filter(item => {
+        const stock = Number(item.soLuongTon || 0);
+        const incomingQty = pendingItems[item.maHang] || 0;
+        return (stock + incomingQty) < Number(item.soLuongToiThieu || 0);
+    });
+
+    const incomingItems = hangHoa.filter(item => {
+        const stock = Number(item.soLuongTon || 0);
+        const minStock = Number(item.soLuongToiThieu || 0);
+        const incomingQty = pendingItems[item.maHang] || 0;
+        // Thực tế đang thiếu, nhưng đã đặt đủ (hoặc dư) thì vô nhóm Xanh
+        return stock < minStock && (stock + incomingQty) >= minStock;
+    });
+
+    const handleChuyenSangTrangLapYeuCau = () => {
+        if (lowStockItems.length === 0) return toast.info("Không có hàng cần nhập!");
+
+        // 🎯 TÍNH LUÔN SỐ LƯỢNG THỰC TẾ CẦN MUA BÙ
+        const dataToOrder = lowStockItems.map(item => {
+            const stock = Number(item.soLuongTon || 0);
+            const incomingQty = pendingItems[item.maHang] || 0;
+            // Ép nó hiểu là tồn kho hiện tại đã bao gồm cả hàng đang về để Form nó trừ đúng
+            return { ...item, soLuongTon: stock + incomingQty };
+        });
+
+        navigate('/lap-lenh-yeu-cau-mua', { state: { items: dataToOrder } });
+    };
+
     const filteredHangHoa = hangHoa.filter(item => {
         if (!item) return false;
 
@@ -53,53 +92,64 @@ const HangHoaList = () => {
             (item.maHang || "").toLowerCase().includes(term) ||
             (item.loaiHang?.tenLoai || "").toLowerCase().includes(term);
 
-    let matchStock = true;
-    const stock = Number(item.soLuongTon || 0);
-    const minStock = Number(item.soLuongToiThieu || 0);
+        let matchStock = true;
+        const stock = Number(item.soLuongTon || 0);
+        const minStock = Number(item.soLuongToiThieu || 0);
+        const incomingQty = pendingItems[item.maHang] || 0;
+        const totalExpected = stock + incomingQty;
 
-    if (stockFilter === 'under10') matchStock = stock < 10;
-    else if (stockFilter === 'under20') matchStock = stock < 20;
-    else if (stockFilter === 'under50') matchStock = stock < 50;
-    else if (stockFilter === 'over50') matchStock = stock >= 50;
-    else if (stockFilter === 'outOfStock') matchStock = stock === 0;
-    // 🎯 3. THÊM LOGIC LỌC NHỮNG MÓN DƯỚI ĐỊNH MỨC
-    else if (stockFilter === 'lowStockWarning') matchStock = stock < minStock;
+        if (stockFilter === 'under10') matchStock = stock < 10;
+        else if (stockFilter === 'under20') matchStock = stock < 20;
+        else if (stockFilter === 'under50') matchStock = stock < 50;
+        else if (stockFilter === 'over50') matchStock = stock >= 50;
+        else if (stockFilter === 'outOfStock') matchStock = stock === 0;
+        else if (stockFilter === 'lowStockWarning') matchStock = totalExpected < minStock; // Đỏ
+        else if (stockFilter === 'incoming') matchStock = stock < minStock && totalExpected >= minStock; // Xanh
 
         return matchSearch && matchStock;
     });
 
     const totalPages = Math.ceil(filteredHangHoa.length / itemsPerPage);
     const currentItems = filteredHangHoa.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, stockFilter]);
+    useEffect(() => { setCurrentPage(1); }, [searchTerm, stockFilter]);
 
     return (
         <div className="hanghoa-container">
             <div className="hanghoa-header">
-                {/* 🎯 Thay thế emoji bằng icon FontAwesome và thêm class canh chỉnh */}
-                <h2 className="page-title">
-                    <FaBoxes className="title-icon" /> Quản Lý Danh Mục Hàng Hóa
-                </h2>
+                <h2 className="page-title"><FaBoxes className="title-icon" /> Quản Lý Danh Mục Hàng Hóa</h2>
             </div>
 
-            {/* 🎯 4. BANNER CẢNH BÁO KHẨN CẤP TRÊN CÙNG */}
             {lowStockItems.length > 0 && (
                 <div className="alert-banner">
                     <div className="alert-banner-content">
                         <FiAlertCircle size={28} className="alert-pulse" />
                         <div>
-                            <strong>HỆ THỐNG CẢNH BÁO:</strong> Phát hiện <strong>{lowStockItems.length}</strong> mặt hàng có số lượng tồn kho thấp hơn định mức an toàn.
+                            <strong>HỆ THỐNG CẢNH BÁO:</strong> Có <strong>{lowStockItems.length}</strong> mặt hàng hụt định mức, cần bổ sung.
                         </div>
                     </div>
-                    <button
-                        className="btn-filter-alert"
-                        onClick={() => setStockFilter('lowStockWarning')}
-                    >
-                        <FiFilter /> Lọc xem ngay
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button className="btn-filter-alert" onClick={() => setStockFilter('lowStockWarning')}>
+                            <FiFilter /> Lọc xem ngay
+                        </button>
+                        <button className="btn-filter-alert" onClick={handleChuyenSangTrangLapYeuCau} style={{ background: '#fff', color: '#e74a3b', border: '1px solid #e74a3b' }}>
+                            <FiShoppingCart /> Tự động lên Đơn
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {incomingItems.length > 0 && (
+                <div className="alert-banner pending-banner">
+                    <div className="alert-banner-content">
+                        <FiTruck size={28} style={{ color: '#1976d2' }} />
+                        <div>
+                            <strong>THÔNG TIN:</strong> Có <strong>{incomingItems.length}</strong> mặt hàng tồn kho thấp nhưng <strong>ĐÃ ĐẶT ĐỦ</strong>, đang chờ về.
+                        </div>
+                    </div>
+                    <button className="btn-filter-alert" onClick={() => setStockFilter('incoming')} style={{ background: '#1976d2', color: '#fff', border: 'none' }}>
+                        <FiFilter /> Xem hàng đang về
                     </button>
                 </div>
             )}
@@ -107,25 +157,15 @@ const HangHoaList = () => {
             <div className="toolbar-container">
                 <div className="search-box">
                     <FiSearch className="search-icon" />
-                    <input
-                        type="text"
-                        className="search-bar"
-                        placeholder="Tìm theo mã, tên hoặc loại hàng..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                    <input type="text" className="search-bar" placeholder="Tìm theo mã, tên hoặc loại hàng..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
 
                 <div className="filter-box">
                     <FiFilter className="filter-icon" />
-                    <select
-                        className="filter-select"
-                        value={stockFilter}
-                        onChange={(e) => setStockFilter(e.target.value)}
-                    >
+                    <select className="filter-select" value={stockFilter} onChange={(e) => setStockFilter(e.target.value)}>
                         <option value="all">Tất cả số lượng</option>
-                        {/* 🎯 Thêm option Lọc cảnh báo vào Menu */}
-                        <option value="lowStockWarning">⚠️ Cần nhập kho (Dưới định mức)</option>
+                        <option value="lowStockWarning">⚠️ Cần nhập kho (Thiếu hụt)</option>
+                        <option value="incoming">🚚 Đã lên đơn đủ (Đang chờ về)</option>
                         <option value="under10">Tồn kho dưới 10</option>
                         <option value="under20">Tồn kho dưới 20</option>
                         <option value="under50">Tồn kho dưới 50</option>
@@ -142,7 +182,7 @@ const HangHoaList = () => {
                             <th className="col-id">Mã Hàng</th>
                             <th className="col-name">Tên Hàng</th>
                             <th className="col-category">Loại Hàng</th>
-                            <th className="col-unit">Đơn Vị Tính</th>
+                            <th className="col-unit">ĐVT</th>
                             <th className="col-stock text-right">Số Lượng Tồn</th>
                             <th className="col-min-stock text-right">Định Mức</th>
                             {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
@@ -153,40 +193,38 @@ const HangHoaList = () => {
                     </thead>
                     <tbody>
                         {currentItems.map((item) => {
-                           const isLowStock = Number(item.soLuongTon || 0) < Number(item.soLuongToiThieu || 0);
+                            const stock = Number(item.soLuongTon || 0);
+                            const minStock = Number(item.soLuongToiThieu || 0);
+                            const incomingQty = pendingItems[item.maHang] || 0;
+                            const totalExpected = stock + incomingQty;
+
+                            // 🎯 TÍNH TOÁN CLASS DỰA TRÊN TỔNG DỰ KIẾN
+                            let stockClass = "stock-normal";
+                            let iconObj = null;
+
+                            if (totalExpected < minStock) {
+                                stockClass = "stock-warning"; // Chưa đủ hàng -> Báo đỏ
+                                iconObj = <FiAlertCircle className="warning-icon" title={`Thiếu ${minStock - totalExpected} cái!`} />;
+                            } else if (stock < minStock && totalExpected >= minStock) {
+                                stockClass = "stock-pending"; // Đã đặt đủ bù định mức -> Báo xanh
+                                iconObj = <FiTruck title={`Đang chờ về ${incomingQty} cái!`} />;
+                            }
 
                             return (
                                 <tr key={item.maHang || Math.random()}>
                                     <td className="font-medium col-id">{item.maHang || 'N/A'}</td>
-                                    {/* 🎯 Thêm title để khi di chuột vào sẽ hiện tên đầy đủ */}
-                                    <td className="col-name">
-                                        <span className="truncate-text" title={item.tenHang}>
-                                            {item.tenHang || 'Không tên'}
-                                        </span>
-                                    </td>
-                                    <td className="col-category">
-                                        <span className="badge-category">
-                                            {item.loaiHang ? item.loaiHang.tenLoai : 'Chưa phân loại'}
-                                        </span>
-                                    </td>
+                                    <td className="col-name"><span className="truncate-text" title={item.tenHang}>{item.tenHang || 'Không tên'}</span></td>
+                                    <td className="col-category"><span className="badge-category">{item.loaiHang ? item.loaiHang.tenLoai : 'Chưa phân loại'}</span></td>
                                     <td className="col-unit text-center">{item.donViTinh || 'Cái'}</td>
 
-                                  <td className="col-stock text-right">
-                                    <div 
-                                        className={isLowStock ? "stock-warning" : "stock-normal"} 
-                                        style={{ 
-                                            display: 'inline-flex', /* 🎯 Quan trọng: Dùng inline-flex để nó tuân theo text-align: right của thẻ td */
-                                            alignItems: 'center', 
-                                            gap: '6px',
-                                            whiteSpace: 'nowrap' /* 🎯 Quan trọng: Cấm tuyệt đối việc rớt dòng */
-                                        }}
-                                    >
-                                        <span>{item.soLuongTon ?? 0}</span>
-                                        {isLowStock && <FiAlertCircle className="warning-icon" title="Sắp hết hàng!" style={{ flexShrink: 0 }} />}
-                                    </div>
-                                </td>
+                                    <td className="col-stock text-right">
+                                        <div className={stockClass} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                                            <span>{stock}</span>
+                                            {iconObj}
+                                        </div>
+                                    </td>
 
-                                    <td className="col-min-stock text-muted text-right">{item.soLuongToiThieu ?? 0}</td>
+                                    <td className="col-min-stock text-muted text-right">{minStock}</td>
 
                                     {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
                                         <td className="col-price price-text text-right">
@@ -195,20 +233,8 @@ const HangHoaList = () => {
                                     )}
 
                                     <td className="col-actions action-buttons">
-                                        <button
-                                            className="btn-action btn-view"
-                                            onClick={() => navigate(`/product-detail/${item.maHang}`)}
-                                            title="Xem chi tiết"
-                                        >
-                                            <FiEye /> Xem
-                                        </button>
-                                        <button
-                                            className="btn-action btn-edit"
-                                            onClick={() => navigate(`/edit-product/${item.maHang}`)}
-                                            title="Chỉnh sửa"
-                                        >
-                                            <FiEdit /> Sửa
-                                        </button>
+                                        <button className="btn-action btn-view" onClick={() => navigate(`/product-detail/${item.maHang}`)} title="Xem chi tiết"><FiEye /> Xem</button>
+                                        <button className="btn-action btn-edit" onClick={() => navigate(`/edit-product/${item.maHang}`)} title="Chỉnh sửa"><FiEdit /> Sửa</button>
                                     </td>
                                 </tr>
                             );
@@ -230,9 +256,7 @@ const HangHoaList = () => {
                 <div className="pagination">
                     <button className="page-btn" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>Trước</button>
                     {[...Array(totalPages)].map((_, index) => (
-                        <button key={index + 1} className={`page-btn ${currentPage === index + 1 ? 'active' : ''}`} onClick={() => paginate(index + 1)}>
-                            {index + 1}
-                        </button>
+                        <button key={index + 1} className={`page-btn ${currentPage === index + 1 ? 'active' : ''}`} onClick={() => paginate(index + 1)}>{index + 1}</button>
                     ))}
                     <button className="page-btn" onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages}>Sau</button>
                 </div>

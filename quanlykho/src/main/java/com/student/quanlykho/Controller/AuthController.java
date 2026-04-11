@@ -50,7 +50,7 @@ public class AuthController {
         return ResponseEntity.status(401).body(Map.of("message", "Sai tài khoản hoặc mật khẩu"));
     }
 
-    // 🎯 ĐÃ SỬA HÀM LOGOUT CHUẨN XỊN
+    // 🎯 ĐÃ SỬA HÀM LOGOUT CHUẨN
     @PostMapping("/logout")
     @Transactional // 🎯 Phải có cái này để nó cam kết lưu vào DB
     public ResponseEntity<?> logout(@RequestBody Map<String, String> body) {

@@ -29,7 +29,7 @@ public class ChiTietDonDatHang {
     // 🎯 THAY ĐỔI 2: Dùng `int` nguyên thủy thay vì `Integer` Object.
     // Mặc định nó sẽ là 0, vĩnh viễn không bao giờ xuất hiện lỗi NULL nữa!
     @Column(name = "so_luong_da_nhap", columnDefinition = "int default 0")
-    private int soLuongDaNhap = 0;
+    private Integer soLuongDaNhap = 0;
 
     @Column(name = "don_gia")
     private Double donGia;

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/yeu-cau-mua")
@@ -23,6 +24,8 @@ public class YeuCauMuaHangController {
     @Autowired private SanPhamNCCRepository sanPhamNCCRepository;
     @Autowired private ThongBaoRepository thongBaoRepository;
     @Autowired private AuditLogService auditLogService; // 🎯 Để ghi log hiện lên Timeline hồ sơ
+    @Autowired
+    private DonDatHangRepository donDatHangRepository;
 
     // ========================================================
     // 📦 1. TẠO PHIẾU YÊU CẦU MUA HÀNG (Dành cho Quản lý kho)
@@ -148,6 +151,95 @@ public class YeuCauMuaHangController {
             ycm.setTrangThai("Đã Lên PO");
             yeuCauMuaHangRepository.save(ycm);
         });
+    }
+    // ========================================================
+    // 🚀 TÍNH NĂNG MỚI: TẠO YÊU CẦU MUA HÀNG LOẠT (TỪ CẢNH BÁO TỒN KHO)
+    // ========================================================
+    @PostMapping("/tao-hang-loat")
+    @Transactional
+    public ResponseEntity<?> taoYeuCauHangLoat(@RequestBody List<YeuCauMuaRequest> requests) {
+        try {
+            String username = org.springframework.security.core.context.SecurityContextHolder
+                    .getContext().getAuthentication().getName();
+
+            List<YeuCauMuaHang> savedList = new ArrayList<>();
+
+            for (YeuCauMuaRequest req : requests) {
+                YeuCauMuaHang ycm = new YeuCauMuaHang();
+                // Tự động sinh mã Yêu Cầu ngẫu nhiên để không bị trùng
+                ycm.setMaYeuCau("YCM-AUTO-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000));
+                ycm.setNguoiTao(username);
+                ycm.setGhiChu(req.getGhiChu());
+                ycm.setTrangThai("Chờ Duyệt");
+                ycm.setNgayYeuCau(LocalDateTime.now());
+
+                NhaCungCap ncc = nhaCungCapRepository.findByMaNCC(req.getMaNhaCungCap())
+                        .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy NCC " + req.getMaNhaCungCap()));
+                ycm.setNhaCungCap(ncc);
+
+                List<ChiTietYeuCauMua> dsChiTiet = new ArrayList<>();
+                for (ChiTietYeuCauMuaRequest item : req.getChiTiets()) {
+                    HangHoa hangHoa = hangHoaRepository.findById(item.getMaHang())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy hàng hóa!"));
+
+                    ChiTietYeuCauMua chiTiet = new ChiTietYeuCauMua();
+                    chiTiet.setYeuCauMuaHang(ycm);
+                    chiTiet.setHangHoa(hangHoa);
+                    chiTiet.setSoLuongCanMua(item.getSoLuongCanMua());
+                    dsChiTiet.add(chiTiet);
+                }
+
+                ycm.setChiTiets(dsChiTiet);
+                savedList.add(yeuCauMuaHangRepository.save(ycm));
+
+                // Ghi log cho từng phiếu
+                auditLogService.ghiLog("TẠO TỰ ĐỘNG", "YÊU CẦU MUA", ycm.getMaYeuCau(), "N/A", "Lập tự động từ cảnh báo tồn kho");
+            }
+
+            // Rung chuông báo Admin có lô hàng mới
+            ThongBao tb = new ThongBao();
+            tb.setTieuDe("🚨 Yêu cầu mua khẩn cấp!");
+            tb.setNoiDung("Quản lý kho vừa dùng tính năng Auto để tạo " + savedList.size() + " phiếu yêu cầu mua hàng.");
+            tb.setNguoiNhan("ADMIN");
+            tb.setDuongDan("/duyet-yeu-cau-mua");
+            thongBaoRepository.save(tb);
+
+            return ResponseEntity.ok("Đã tạo thành công " + savedList.size() + " Yêu cầu mua hàng!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi tạo yêu cầu hàng loạt: " + e.getMessage());
+        }
+    }
+
+    // 🚀 TÍNH NĂNG: LẤY DANH SÁCH HÀNG ĐANG TRÊN ĐƯỜNG VỀ (TỪ ĐƠN ĐẶT HÀNG - PO)
+    // 🚀 ĐÃ NÂNG CẤP: Lấy danh sách hàng đang về (Kèm theo SỐ LƯỢNG)
+    @GetMapping("/hang-dang-cho-ve")
+    public ResponseEntity<java.util.Map<String, Integer>> getHangDangChoVeTuPO() {
+
+        // Mốc thời gian 3 ngày
+        LocalDateTime mocThoiGian = LocalDateTime.now().minusDays(3);
+
+        List<DonDatHang> activePOs = donDatHangRepository.findAll().stream()
+                .filter(po -> !po.getTrangThai().equalsIgnoreCase("Hoàn Tất")
+                        && !po.getTrangThai().equalsIgnoreCase("Đã Hủy")
+                        && !po.getTrangThai().equalsIgnoreCase("Từ Chối"))
+                .filter(po -> po.getNgayTao() != null && po.getNgayTao().isAfter(mocThoiGian))
+                .collect(Collectors.toList());
+
+        // 🎯 Dùng Map để lưu: Mã Hàng -> Tổng số lượng đang về
+        java.util.Map<String, Integer> hangPendingMap = new java.util.HashMap<>();
+
+        for (DonDatHang po : activePOs) {
+            for (ChiTietDonDatHang ct : po.getChiTiets()) {
+                if(ct.getHangHoa() != null) {
+                    String maHang = ct.getHangHoa().getMaHang();
+                    int soLuongDangCho = ct.getSoLuongDat(); // Lấy số lượng đặt của món này
+
+                    // Cộng dồn vào Map
+                    hangPendingMap.put(maHang, hangPendingMap.getOrDefault(maHang, 0) + soLuongDangCho);
+                }
+            }
+        }
+        return ResponseEntity.ok(hangPendingMap);
     }
 
     // ========================================================

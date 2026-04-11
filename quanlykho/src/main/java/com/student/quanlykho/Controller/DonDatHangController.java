@@ -12,8 +12,11 @@ import com.student.quanlykho.Repository.SanPhamNCCRepository;
 import com.student.quanlykho.Service.AuditLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -112,6 +115,44 @@ public class DonDatHangController {
         auditLogService.ghiLog("THÊM", "ĐƠN ĐẶT HÀNG (PO)", saved.getMaDon(), "Chưa có", moi);
 
         return saved;
+    }
+    // 🚀 TÍNH NĂNG: LẤY DANH SÁCH HÀNG ĐANG CHỜ VỀ (CÓ LỌC THEO THỜI GIAN)
+    // 🚀 ĐÃ NÂNG CẤP: Trả về Map<Mã Hàng, Tổng số lượng đang chờ về>
+    // 🚀 ĐÃ NÂNG CẤP LẦN CUỐI: Fix lỗi "Hoàn Tất" và tính đúng số lượng CÒN THIẾU
+    @GetMapping("/hang-dang-cho-ve")
+    public ResponseEntity<java.util.Map<String, Integer>> getHangDangChoVeTuPO() {
+
+        LocalDateTime mocThoiGian = LocalDateTime.now().minusDays(3);
+
+        List<DonDatHang> activePOs = donDatHangRepository.findAll().stream()
+                // 🎯 FIX 1: Chặn đứng cả "Hoàn Tất" và "Hoàn Thành" cho chắc cú
+                .filter(po -> !po.getTrangThai().equalsIgnoreCase("Hoàn Tất")
+                        && !po.getTrangThai().equalsIgnoreCase("Hoàn Thành")
+                        && !po.getTrangThai().equalsIgnoreCase("Đã Hủy")
+                        && !po.getTrangThai().equalsIgnoreCase("Từ Chối"))
+                .filter(po -> po.getNgayTao() != null && po.getNgayTao().isAfter(mocThoiGian))
+                .collect(Collectors.toList());
+
+        java.util.Map<String, Integer> hangPendingMap = new java.util.HashMap<>();
+
+        for (DonDatHang po : activePOs) {
+            for (ChiTietDonDatHang ct : po.getChiTiets()) {
+                if(ct.getHangHoa() != null) {
+                    String maHang = ct.getHangHoa().getMaHang();
+
+                    // 🎯 FIX 2: Tính số lượng THỰC SỰ đang chờ về trên đường
+                    // Nếu ct.getSoLuongDaNhap() bị null thì cho nó bằng 0
+                    int daNhap = (ct.getSoLuongDaNhap() != null) ? ct.getSoLuongDaNhap() : 0;
+                    int soLuongThucCho = ct.getSoLuongDat() - daNhap;
+
+                    // Chỉ cộng những món thực sự chưa giao tới
+                    if (soLuongThucCho > 0) {
+                        hangPendingMap.put(maHang, hangPendingMap.getOrDefault(maHang, 0) + soLuongThucCho);
+                    }
+                }
+            }
+        }
+        return ResponseEntity.ok(hangPendingMap);
     }
 
     // --- DTO CLASSES ---
