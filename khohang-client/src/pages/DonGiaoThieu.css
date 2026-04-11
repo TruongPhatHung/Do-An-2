@@ -497,3 +497,38 @@
     font-weight: 600;
     font-size: 0.85rem;
 }
+/* CSS cho cột Ngày Hẹn Giao Bù */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-unknown {
+    background-color: #f1f5f9;
+    color: #64748b;
+    border: 1px dashed #cbd5e1;
+}
+
+.status-overdue {
+    background-color: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+}
+
+.status-warning {
+    background-color: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fcd34d;
+}
+
+.status-safe {
+    background-color: #f0fdf4;
+    color: #10b981;
+    border: 1px solid #6ee7b7;
+}

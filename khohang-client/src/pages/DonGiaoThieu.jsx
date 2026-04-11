@@ -11,20 +11,18 @@ const DonGiaoThieu = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [chatHistory, setChatHistory] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [ngayHen, setNgayHen] = useState(''); // 🎯 Thêm state để chọn ngày hẹn trong Chat
+    const [ngayHen, setNgayHen] = useState('');
     const chatBodyRef = useRef(null);
 
     useEffect(() => {
         fetchDonGiaoThieu();
     }, []);
 
-    // 🎯 Đã nâng cấp: Giữ nguyên việc lấy danh sách, cộng thêm Quét tồn kho ẩn bên dưới
     const fetchDonGiaoThieu = async () => {
         try {
             const response = await api.get('/yeu-cau-xuat');
             const thieuList = response.data.filter(req => req.trangThai === 'Giao Thiếu');
 
-            // Quét xem đơn nào đang có hàng trong kho để làm sáng nút Giao Bù
             const enrichedList = thieuList.map(don => {
                 let tongThieu = 0;
                 let coTheGiaoBu = false;
@@ -45,7 +43,7 @@ const DonGiaoThieu = () => {
 
     const openChat = async (order) => {
         setSelectedOrder(order);
-        setNgayHen(''); // Reset ngày hẹn mỗi khi mở chat mới
+        setNgayHen('');
         try {
             const res = await api.get(`/trao-doi/${order.maYeuCau}`);
             setChatHistory(res.data);
@@ -60,9 +58,6 @@ const DonGiaoThieu = () => {
         }
     }, [chatHistory]);
 
-    // ========================================================
-    // 🤖 1. HÀM BOT TỰ ĐỘNG PHẢN HỒI (Giữ nguyên 100%)
-    // ========================================================
     const autoReplyCustomer = async (orderInfo) => {
         const danhSachCauTraLoi = [
             "Ok shop, giao sớm giúp mình nhé!",
@@ -87,9 +82,6 @@ const DonGiaoThieu = () => {
         }
     };
 
-    // ========================================================
-    // 👤 2. NHÂN VIÊN GỬI TIN NHẮN (Giữ nguyên 100%)
-    // ========================================================
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!newMessage.trim()) return;
@@ -116,17 +108,13 @@ const DonGiaoThieu = () => {
         }
     };
 
-    // ========================================================
-    // 📅 3. HÀM CHỐT LỊCH HẸN MỚI
-    // ========================================================
     const handleChotNgayHen = async () => {
         if (!ngayHen) return toast.warn("Vui lòng chọn ngày hẹn!");
         try {
             await api.put(`/yeu-cau-xuat/${selectedOrder.maYeuCau}/hen-giao-bu`, { ngayHenGiaoBu: ngayHen });
             toast.success("Đã chốt lịch hẹn giao bù với khách!");
-            fetchDonGiaoThieu(); // Refresh bảng ngoài
+            fetchDonGiaoThieu();
 
-            // Bắn tin nhắn hệ thống vào Chat
             const msgRes = await api.post('/trao-doi', {
                 maYeuCau: selectedOrder.maYeuCau,
                 nguoiGui: "Hệ Thống",
@@ -151,18 +139,32 @@ const DonGiaoThieu = () => {
         }
     };
 
-    // (Giữ nguyên 100%)
+    // 🎯 Hàm chống đạn: Xử lý mọi loại dữ liệu hỏng của ngày hẹn
     const renderDeadline = (ngayHen) => {
-        if (!ngayHen) return <span className="status-badge status-unknown"><FiInfo /> Chưa hẹn ngày</span>;
+        const badgeStyle = {
+            padding: '6px 12px',
+            borderRadius: '6px',
+            fontWeight: 'bold',
+            fontSize: '0.85rem',
+            display: 'inline-block'
+        };
+
+        if (!ngayHen || ngayHen === 'null') {
+            return <span style={{ ...badgeStyle, background: '#f1f5f9', color: '#64748b' }}>⏳ Chưa hẹn</span>;
+        }
+
         const deadline = new Date(ngayHen).getTime();
+        if (isNaN(deadline)) {
+            return <span style={{ ...badgeStyle, background: '#f1f5f9', color: '#64748b' }}>⏳ Chưa hẹn</span>;
+        }
+
         const now = new Date().getTime();
         const daysLeft = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
 
-        if (daysLeft < 0) return <span className="status-badge status-overdue"><FiAlertCircle /> Trễ {Math.abs(daysLeft)} ngày</span>;
-        if (daysLeft === 0) return <span className="status-badge status-warning"><FiClock /> Giao trong hôm nay</span>;
-        return <span className="status-badge status-safe"><FiClock /> Còn {daysLeft} ngày</span>;
+        if (daysLeft < 0) return <span style={{ ...badgeStyle, background: '#fef2f2', color: '#ef4444', border: '1px solid #fca5a5' }}>🚨 Trễ {Math.abs(daysLeft)} ngày</span>;
+        if (daysLeft === 0) return <span style={{ ...badgeStyle, background: '#fffbeb', color: '#d97706', border: '1px solid #fcd34d' }}>🔥 Giao hôm nay</span>;
+        return <span style={{ ...badgeStyle, background: '#f0fdf4', color: '#10b981', border: '1px solid #6ee7b7' }}>✅ Còn {daysLeft} ngày</span>;
     };
-
     return (
         <div className="backorder-container">
             <div className="backorder-header">
@@ -195,7 +197,10 @@ const DonGiaoThieu = () => {
                                 <tr key={don.maYeuCau}>
                                     <td className="fw-bold text-primary">#{don.maYeuCau}</td>
                                     <td className="fw-bold text-dark">{don.noiNhan}</td>
-                                    <td className="text-muted">{new Date(don.ngayCanXuat).toLocaleDateString('vi-VN')}</td>
+
+                                    {/* 🎯 ĐÃ FIX Ở ĐÂY: Dùng don.ngayTao thay vì don.ngayCanXuat */}
+                                    <td className="text-muted">{new Date(don.ngayTao).toLocaleDateString('vi-VN')}</td>
+
                                     <td>
                                         <span className="badge-missing">Nợ {don.tongThieu || '?'} món</span>
                                     </td>
@@ -206,7 +211,6 @@ const DonGiaoThieu = () => {
                                                 <FiMessageSquare /> Chat
                                             </button>
 
-                                            {/* 🎯 Nút Giao bù thông minh: Sáng khi có hàng, xám khi hết hàng */}
                                             <button
                                                 className={`btn-action ${don.coTheGiaoBu ? 'btn-export-bu active' : 'btn-export-bu disabled'}`}
                                                 onClick={() => don.coTheGiaoBu ? navigate('/xuat-kho', { state: { maYeuCauTuDong: don.maYeuCau } }) : toast.info("Kho chưa có hàng để giao bù!")}
@@ -247,7 +251,6 @@ const DonGiaoThieu = () => {
                                 </div>
                             </div>
 
-                            {/* 🎯 Đã chèn bộ hẹn lịch vào đây */}
                             <div className="chat-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', borderRadius: '6px', padding: '4px', border: '1px solid #cbd5e1' }}>
                                     <input
@@ -278,7 +281,7 @@ const DonGiaoThieu = () => {
                             ) : (
                                 chatHistory.map((msg, index) => {
                                     const isInternal = msg.vaiTro === 'INTERNAL';
-                                    const isSystem = msg.nguoiGui === 'Hệ Thống'; // 🎯 Style riêng cho tin nhắn hệ thống
+                                    const isSystem = msg.nguoiGui === 'Hệ Thống';
 
                                     if (isSystem) {
                                         return (

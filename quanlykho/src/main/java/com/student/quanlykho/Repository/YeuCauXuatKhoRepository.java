@@ -2,6 +2,7 @@ package com.student.quanlykho.Repository;
 
 import com.student.quanlykho.Entity.NguoiDung;
 import com.student.quanlykho.Entity.YeuCauXuatKho;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,5 +18,7 @@ public interface YeuCauXuatKhoRepository extends JpaRepository<YeuCauXuatKho, St
     long countByTrangThaiNotAndNgayTaoBetween(String trangThai, LocalDateTime start, LocalDateTime end);
     // Trong YeuCauXuatKhoRepository
     long countByNguoiTao(String nguoiTao); // Đếm tổng không care ngày
-
+    @Override
+    @EntityGraph(attributePaths = {"chiTiets", "chiTiets.hangHoa"})
+    List<YeuCauXuatKho> findAll();
 }

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -116,6 +117,34 @@ public class YeuCauXuatKhoController {
 
         yeuCauXuatKhoRepository.save(ycx);
         return ResponseEntity.ok("Cập nhật trạng thái lệnh xuất thành công!");
+    }
+    // 🎯 API LƯU NGÀY HẸN GIAO BÙ (Đã fix lỗi lệch kiểu thời gian)
+    // 🎯 API LƯU NGÀY HẸN GIAO BÙ VÀO DATABASE
+    @PutMapping("/{id}/hen-giao-bu")
+    @Transactional // <--- Cực kỳ quan trọng: Ép nó lưu xuống Database
+    public ResponseEntity<?> updateNgayHenGiaoBu(@PathVariable String id, @RequestBody Map<String, String> request) {
+        try {
+            YeuCauXuatKho ycx = yeuCauXuatKhoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy lệnh xuất!"));
+
+            String ngayHenStr = request.get("ngayHenGiaoBu");
+
+            // In ra màn hình đen để sếp check xem React có gửi đúng lên không
+            System.out.println(">>> React đang gửi ngày hẹn: " + ngayHenStr + " cho đơn: " + id);
+
+            if (ngayHenStr != null && !ngayHenStr.isEmpty()) {
+                // Parse chuỗi ngày thành LocalDate (chỉ ngày, không có giờ phút)
+                LocalDate date = LocalDate.parse(ngayHenStr.substring(0, 10));
+                ycx.setNgayHenGiaoBu(date);
+
+                yeuCauXuatKhoRepository.save(ycx);
+                System.out.println(">>> Đã lưu thành công vào Database!");
+            }
+            return ResponseEntity.ok("Chốt ngày thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi Backend: " + e.getMessage());
+        }
     }
 
     // --- DTO (Data Transfer Objects) để hứng dữ liệu từ React ---
