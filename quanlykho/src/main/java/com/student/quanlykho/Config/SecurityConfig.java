@@ -50,8 +50,8 @@ public class SecurityConfig {
 
                         // 4. ĐƠN ĐẶT HÀNG (Orders / PO) - Đã mở thêm cho KHO xem
                         .requestMatchers(HttpMethod.GET, "/api/orders/**", "/api/don-hang/**").hasAnyAuthority("ADMIN", "MUAHANG", "KHO", "QUANLYKHO")
-                        .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG")
-                        .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG")
+                        .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG","KHO", "QUANLYKHO")
+                        .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasAnyAuthority("ADMIN", "MUAHANG","KHO", "QUANLYKHO")
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasAuthority("ADMIN")
 
                         // 5. HÀNG HÓA (Products)

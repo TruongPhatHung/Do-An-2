@@ -451,3 +451,49 @@
     background: #cbd5e1;
     cursor: not-allowed;
 }
+.btn-export-bu {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+/* Khi CÓ HÀNG -> Sáng đèn báo hiệu dội bom */
+.btn-export-bu.active {
+    background-color: #10b981; /* Xanh lá */
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+    animation: pulse-green 2s infinite;
+}
+
+.btn-export-bu.active:hover {
+    background-color: #059669;
+    transform: translateY(-2px);
+}
+
+/* Khi CHƯA CÓ HÀNG -> Xám xịt, cấm bấm */
+.btn-export-bu.disabled {
+    background-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.badge-missing {
+    background-color: #fee2e2;
+    color: #ef4444;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
