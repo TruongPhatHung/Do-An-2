@@ -3,22 +3,26 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/axiosConfig';
 import './EditNhaCungCap.css';
 import { toast } from 'react-toastify';
+
+// Import thư viện icon đồng bộ với form Thêm Mới
+import { 
+    FiEdit, FiInfo, FiHash, FiBriefcase, FiGrid, 
+    FiMail, FiMapPin, FiBox, FiPlusCircle, 
+    FiTrash2, FiXCircle, FiSave, FiLoader
+} from 'react-icons/fi';
+
 const EditNhaCungCap = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
-    // 1. STATE CHO LOẠI HÀNG
     const [categories, setCategories] = useState([]);
-
-    // Thêm loaiHangId vào state
     const [supplier, setSupplier] = useState({ maNCC: '', tenNCC: '', email: '', diaChi: '', loaiHangId: '' });
     const [products, setProducts] = useState([]);
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                // 2. GỌI SONG SONG 2 API: Lấy thông tin NCC và lấy Danh mục loại hàng
                 const [supplierRes, categoriesRes] = await Promise.all([
                     api.get(`/suppliers/${id}`),
                     api.get('/categories')
@@ -31,7 +35,6 @@ const EditNhaCungCap = () => {
                     tenNCC: supplierRes.data.tenNCC || supplierRes.data.tenNhaCungCap,
                     email: supplierRes.data.email,
                     diaChi: supplierRes.data.diaChi,
-                    // Lấy ID loại hàng hiện tại của NCC (nếu có)
                     loaiHangId: supplierRes.data.loaiHang ? supplierRes.data.loaiHang.id : ''
                 });
 
@@ -72,116 +75,144 @@ const EditNhaCungCap = () => {
         }
     };
 
-    if (loading) return <div className="edit-container">⏳ Đang tải dữ liệu...</div>;
+    if (loading) {
+        return (
+            <div className="edit-container loading-state">
+                <FiLoader className="icon-spin" size={32} />
+                <p>Đang tải dữ liệu...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="edit-container">
             <div className="edit-card">
                 <div className="edit-header">
-                    <h2>🏢 Cập Nhật Nhà Cung Cấp & Hàng Hóa</h2>
+                    <h2><FiEdit className="heading-icon"/> Cập Nhật Nhà Cung Cấp</h2>
+                    <p className="subtitle">Chỉnh sửa thông tin đối tác cung cấp và danh mục hàng hóa.</p>
                 </div>
 
                 <form onSubmit={handleSave}>
-                    <div className="form-section-title">📦 1. Thông tin Nhà cung cấp</div>
-                    <div className="input-grid">
-                        <div className="form-group">
-                            <label>Mã Nhà Cung Cấp (*)</label>
-                            <input className="form-control" value={supplier.maNCC} disabled />
+                    {/* Phần 1: Thông tin NCC */}
+                    <div className="form-section">
+                        <div className="form-section-title">
+                            <span>1</span> <FiInfo className="section-icon"/> Thông tin Nhà cung cấp
                         </div>
-                        <div className="form-group">
-                            <label>Tên nhà cung cấp (*)</label>
-                            <input
-                                className="form-control"
-                                value={supplier.tenNCC}
-                                onChange={(e) => setSupplier({ ...supplier, tenNCC: e.target.value })}
-                                required
-                            />
-                        </div>
+                        <div className="input-grid">
+                            <div className="form-group">
+                                <label><FiHash className="label-icon"/> Mã Nhà Cung Cấp <span className="required">*</span></label>
+                                <input className="form-control" value={supplier.maNCC} disabled />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label><FiBriefcase className="label-icon"/> Tên nhà cung cấp <span className="required">*</span></label>
+                                <input
+                                    className="form-control"
+                                    value={supplier.tenNCC}
+                                    onChange={(e) => setSupplier({ ...supplier, tenNCC: e.target.value })}
+                                    required
+                                    placeholder="Ví dụ: Công ty TNHH..."
+                                />
+                            </div>
 
-                        {/* --- 3. THÊM DROPDOWN LOẠI HÀNG VÀO FORM SỬA --- */}
-                        <div className="form-group">
-                            <label>Lĩnh Vực / Loại Hàng (*)</label>
-                            <select
-                                className="form-control"
-                                value={supplier.loaiHangId}
-                                onChange={(e) => setSupplier({ ...supplier, loaiHangId: e.target.value })}
-                                required
-                            >
-                                <option value="">-- Chọn lĩnh vực --</option>
-                                {categories.map(cat => (
-                                    <option key={cat.id} value={cat.id}>{cat.tenLoai}</option>
-                                ))}
-                            </select>
-                        </div>
+                            <div className="form-group">
+                                <label><FiGrid className="label-icon"/> Lĩnh Vực / Loại Hàng <span className="required">*</span></label>
+                                <select
+                                    className="form-control"
+                                    value={supplier.loaiHangId}
+                                    onChange={(e) => setSupplier({ ...supplier, loaiHangId: e.target.value })}
+                                    required
+                                >
+                                    <option value="">-- Chọn lĩnh vực --</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>{cat.tenLoai}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        <div className="form-group">
-                            <label>Gmail liên hệ</label>
-                            <input
-                                className="form-control"
-                                value={supplier.email}
-                                onChange={(e) => setSupplier({ ...supplier, email: e.target.value })}
-                            />
+                            <div className="form-group">
+                                <label><FiMail className="label-icon"/> Email liên hệ</label>
+                                <input
+                                    type="email"
+                                    className="form-control"
+                                    value={supplier.email}
+                                    onChange={(e) => setSupplier({ ...supplier, email: e.target.value })}
+                                    placeholder="example@domain.com"
+                                />
+                            </div>
+                            
+                            <div className="form-group full-width">
+                                <label><FiMapPin className="label-icon"/> Địa chỉ văn phòng / Kho</label>
+                                <input
+                                    className="form-control"
+                                    value={supplier.diaChi}
+                                    onChange={(e) => setSupplier({ ...supplier, diaChi: e.target.value })}
+                                    placeholder="Số nhà, đường, Phường/Xã..."
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label>Địa chỉ văn phòng / Kho</label>
-                        <input
-                            className="form-control"
-                            value={supplier.diaChi}
-                            onChange={(e) => setSupplier({ ...supplier, diaChi: e.target.value })}
-                        />
-                    </div>
+                    {/* Phần 2: Hàng hóa */}
+                    <div className="form-section">
+                        <div className="section-header">
+                            <div className="form-section-title">
+                                <span>2</span> <FiBox className="section-icon"/> Danh mục hàng hóa
+                            </div>
+                            <button type="button" className="btn-add" onClick={addProductRow}>
+                                <FiPlusCircle size={16}/> Thêm mặt hàng
+                            </button>
+                        </div>
 
-                    <div className="section-header">
-                        <div className="form-section-title">🛒 2. Danh mục hàng hóa</div>
-                        <button type="button" className="btn-add" onClick={addProductRow}>
-                            + Thêm Mặt Hàng
-                        </button>
-                    </div>
-
-                    <div className="table-responsive">
-                        <table className="product-table">
-                            <thead>
-                                <tr>
-                                    <th>Mã Hàng</th>
-                                    <th>Tên Mặt Hàng</th>
-                                    <th>Giá Bán (VNĐ)</th>
-                                    <th style={{ width: '80px', textAlign: 'center' }}>Thao Tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {products.length > 0 ? (
-                                    products.map((p, idx) => (
-                                        <tr key={idx}>
-                                            <td>
-                                                <input type="text" className="form-control table-input" value={p.maHang || ''} onChange={(e) => handleProductChange(idx, 'maHang', e.target.value)} placeholder="Nhập mã..." required />
-                                            </td>
-                                            <td>
-                                                <input type="text" className="form-control table-input" value={p.tenHang || ''} onChange={(e) => handleProductChange(idx, 'tenHang', e.target.value)} placeholder="Nhập tên..." required />
-                                            </td>
-                                            <td>
-                                                <input type="number" className="form-control table-input" value={p.giaBan || ''} onChange={(e) => handleProductChange(idx, 'giaBan', e.target.value ? Number(e.target.value) : '')} placeholder="0" />
-                                            </td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <button type="button" className="btn-delete" onClick={() => removeProductRow(idx)} title="Xóa dòng này">Xóa</button>
+                        <div className="table-responsive">
+                            <table className="product-table">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '25%' }}>Mã Hàng</th>
+                                        <th style={{ width: '45%' }}>Tên Mặt Hàng</th>
+                                        <th style={{ width: '20%' }}>Giá Bán (VNĐ)</th>
+                                        <th style={{ width: '10%', textAlign: 'center' }}>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {products.length > 0 ? (
+                                        products.map((p, idx) => (
+                                            <tr key={idx}>
+                                                <td>
+                                                    <input type="text" className="form-control table-input" value={p.maHang || ''} onChange={(e) => handleProductChange(idx, 'maHang', e.target.value)} placeholder="Mã SP..." required />
+                                                </td>
+                                                <td>
+                                                    <input type="text" className="form-control table-input" value={p.tenHang || ''} onChange={(e) => handleProductChange(idx, 'tenHang', e.target.value)} placeholder="Tên SP..." required />
+                                                </td>
+                                                <td>
+                                                    <input type="number" min="0" className="form-control table-input" value={p.giaBan || ''} onChange={(e) => handleProductChange(idx, 'giaBan', e.target.value ? Number(e.target.value) : '')} placeholder="0" />
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <button type="button" className="btn-delete" onClick={() => removeProductRow(idx)} title="Xóa dòng này">
+                                                        <FiTrash2 size={18} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="empty-table-msg">
+                                                Chưa có hàng hóa nào. Bấm "Thêm mặt hàng" để bắt đầu.
                                             </td>
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="4" className="empty-table-msg">
-                                            Chưa có hàng hóa nào. Bấm "+ Thêm Mặt Hàng" để bắt đầu.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div className="form-actions">
-                        <button type="button" className="btn-cancel" onClick={() => navigate('/suppliers')}>Hủy bỏ</button>
-                        <button type="submit" className="btn-save">💾 Lưu Thông Tin</button>
+                        <button type="button" className="btn-cancel" onClick={() => navigate('/suppliers')}>
+                            <FiXCircle size={18}/> Hủy bỏ
+                        </button>
+                        <button type="submit" className="btn-save">
+                            <FiSave size={18}/> Lưu Thay Đổi
+                        </button>
                     </div>
                 </form>
             </div>

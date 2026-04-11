@@ -1,122 +1,193 @@
 /* =========================================
-   GIAO DIỆN LẬP YÊU CẦU MUA HÀNG (KHO)
+   GIAO DIỆN LẬP YÊU CẦU MUA HÀNG - HIỆN ĐẠI
 ========================================= */
 
+:root {
+    --primary: #4338ca;      /* Xanh Indigo chủ đạo */
+    --primary-hover: #3730a3;
+    --secondary: #64748b;    /* Xám nhẹ cho chữ */
+    --success: #10b981;      /* Xanh lá */
+    --success-hover: #059669;
+    --danger: #ef4444;       /* Đỏ cảnh báo */
+    --danger-hover: #dc2626;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --input-border: #cbd5e1;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --radius-lg: 16px;
+    --radius-md: 8px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
 .ycm-wrapper {
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 30px auto;
     padding: 0 20px;
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    color: #334155;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    color: var(--text-main);
 }
 
 /* --- HEADER --- */
 .ycm-header {
-    margin-bottom: 25px;
+    margin-bottom: 30px;
 }
 
 .ycm-btn-back {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #ffffff;
-    color: #475569;
-    border: 1px solid #cbd5e1;
+    background: var(--card-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
 }
 
 .ycm-btn-back:hover {
-    background: #f8fafc;
-    color: #0f172a;
-    border-color: #94a3b8;
+    background: var(--bg-main);
+    color: var(--text-main);
+    border-color: var(--input-border);
 }
 
-.ycm-header-titles .title-with-icon {
+.ycm-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.ycm-title-box {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 16px;
 }
 
-.title-icon-box {
-    background: linear-gradient(135deg, #f97316, #ea580c);
-    color: white;
-    width: 45px;
-    height: 45px;
+.ycm-icon-box {
+    width: 50px;
+    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 12px;
-    font-size: 22px;
-    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.2);
+    border-radius: 14px;
+    font-size: 24px;
+    color: white;
+    box-shadow: var(--shadow-md);
 }
 
-.ycm-header-titles h2 {
-    margin: 0;
-    color: #0f172a;
+.ycm-icon-box.auto-mode { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.ycm-icon-box.manual-mode { background: linear-gradient(135deg, #10b981, #059669); }
+
+.ycm-title-box h2 {
+    margin: 0 0 4px 0;
     font-size: 1.75rem;
     font-weight: 800;
     letter-spacing: -0.5px;
+    color: var(--text-main);
 }
 
 .ycm-subtitle {
-    margin: 8px 0 0 60px; /* Thụt lề cho khớp chữ */
-    color: #64748b;
+    margin: 0;
+    color: var(--text-muted);
     font-size: 0.95rem;
 }
 
-/* --- FORM CARDS --- */
+/* --- CARDS --- */
 .ycm-form-container {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 24px;
 }
 
 .ycm-card {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    border: 1px solid #e2e8f0;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: box-shadow 0.3s ease;
     overflow: hidden;
 }
+
+.ycm-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-border-auto { border-top: 4px solid #3b82f6; }
+.card-border-manual { border-top: 4px solid #10b981; }
 
 .ycm-card-header {
     background: #f8fafc;
     padding: 16px 24px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
 }
 
-.ycm-card-icon {
-    color: #f97316;
-    font-size: 18px;
-}
-
-.ycm-card-title {
+.ycm-section-title {
     margin: 0;
     font-size: 1.1rem;
-    color: #1e293b;
+    color: var(--primary);
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+}
+
+.icon-mr {
+    margin-right: 8px;
+}
+
+.ycm-btn-delete-req {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid transparent;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ycm-btn-delete-req:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
 }
 
 .ycm-card-body {
     padding: 24px;
 }
 
-/* --- GRID LAYOUT --- */
+.ycm-section-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 24px 0;
+}
+
+.ycm-sub-title {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+}
+
+/* --- FORMS --- */
 .ycm-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 25px;
+    gap: 24px;
 }
 
 .ycm-form-group {
@@ -126,63 +197,57 @@
 
 .ycm-form-group label {
     font-weight: 600;
-    color: #475569;
+    color: var(--text-main);
     margin-bottom: 8px;
     font-size: 0.95rem;
 }
 
 .ycm-required {
-    color: #ef4444;
+    color: var(--danger);
+    margin-left: 4px;
 }
 
-/* --- INPUTS --- */
 .ycm-input-control {
     width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-md);
     font-size: 0.95rem;
-    color: #1e293b;
+    color: var(--text-main);
+    background-color: var(--card-bg);
     transition: all 0.2s ease;
-    background-color: #fff;
+    box-sizing: border-box;
 }
 
 select.ycm-input-control {
     cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
 }
 
 .ycm-input-control:focus {
     outline: none;
-    border-color: #f97316;
-    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15);
 }
 
 .ycm-input-control:disabled {
-    background-color: #f1f5f9;
-    color: #94a3b8;
+    background-color: var(--bg-main);
+    color: var(--text-muted);
     cursor: not-allowed;
-    border-color: #e2e8f0;
+    border-color: var(--border-color);
 }
 
-.ycm-hint-text {
-    font-size: 0.85rem;
-    color: #ea580c;
-    margin: 8px 0 0 0;
-    display: flex;
-    align-items: center;
-}
-
-.ycm-hint-text::before {
-    content: "💡";
-    margin-right: 5px;
-}
-
-/* --- BẢNG SẢN PHẨM --- */
+/* --- BẢNG DỮ LIỆU (TABLE) --- */
 .ycm-table-responsive {
     overflow-x: auto;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
 }
 
 .ycm-modern-table {
@@ -192,13 +257,14 @@ select.ycm-input-control {
 
 .ycm-modern-table th {
     background: #f1f5f9;
-    color: #334155;
-    font-weight: 700;
+    color: var(--text-muted);
+    font-weight: 600;
     padding: 14px 16px;
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     text-transform: uppercase;
-    border-bottom: 2px solid #e2e8f0;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .ycm-modern-table td {
@@ -215,310 +281,41 @@ select.ycm-input-control {
     border-bottom: none;
 }
 
-/* --- TIỆN ÍCH BẢNG --- */
 .text-center { text-align: center !important; }
-.fw-bold { font-weight: 600 !important; }
-.text-muted { color: #94a3b8 !important; }
+.text-muted { color: var(--text-muted) !important; }
 
-/* Nút xóa */
-.ycm-btn-remove {
-    background: #fee2e2;
-    color: #ef4444;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.ycm-btn-remove:hover:not(:disabled) {
-    background: #ef4444;
-    color: white;
-}
-
-.ycm-btn-remove:disabled {
-    background: #f1f5f9;
-    color: #cbd5e1;
-    cursor: not-allowed;
-}
-
-/* --- FOOTER CỦA BẢNG (THÊM DÒNG + TỔNG) --- */
-.ycm-table-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.ycm-btn-add-row {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px dashed #93c5fd;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.ycm-btn-add-row:hover:not(:disabled) {
-    background: #dbeafe;
-    border-color: #2563eb;
-}
-
-.ycm-btn-add-row:disabled {
-    background: #f8fafc;
-    color: #94a3b8;
-    border-color: #e2e8f0;
-    cursor: not-allowed;
-}
-
-.ycm-total-summary {
-    font-size: 1rem;
-    color: #475569;
-    font-weight: 500;
-    background: #fff7ed;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: 1px solid #ffedd5;
-}
-
-.ycm-total-summary span {
-    font-weight: 800;
-    color: #ea580c;
-    font-size: 1.1rem;
-    margin-left: 5px;
-}
-
-/* --- ACTION FOOTER (NÚT SUBMIT) --- */
-.ycm-action-footer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-}
-
-.ycm-btn-submit {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: linear-gradient(to right, #f97316, #ea580c);
-    color: white;
-    border: none;
-    padding: 16px 36px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
-    transition: all 0.2s ease;
-}
-
-.ycm-btn-submit:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
-}
-
-.ycm-btn-submit:disabled {
-    background: #cbd5e1;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-}
-
-.ycm-icon-lg {
-    font-size: 1.4rem;
-}
-
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-    .ycm-form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .ycm-table-footer {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .ycm-btn-submit {
-        width: 100%;
-        justify-content: center;
-    }
-}
-/* =========================================
-   GIAO DIỆN FORM LẬP YÊU CẦU MUA HÀNG
-========================================= */
-
-.ycm-wrapper {
-    padding: 20px;
-    background-color: #f8f9fc;
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* --- Header --- */
-.ycm-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 25px;
-    gap: 20px;
-}
-
-.ycm-btn-back {
+.ycm-readonly-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 18px;
-    background: #ffffff;
-    border: 1px solid #d1d3e2;
-    border-radius: 8px;
-    color: #4e73df;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.ycm-btn-back:hover {
-    background: #4e73df;
-    color: #ffffff;
-    transform: translateY(-2px);
-}
-
-.ycm-header-titles h2 {
-    margin: 0;
-    color: #333333;
-    font-size: 1.6rem;
-    font-weight: 700;
-}
-
-.ycm-subtitle {
-    margin: 5px 0 0 0;
-    color: #858796;
-    font-size: 0.95rem;
-}
-
-/* --- Khung Phiếu Yêu Cầu (Card) --- */
-.ycm-card {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    padding: 25px;
-    transition: transform 0.2s ease-in-out;
-}
-
-.ycm-card:hover {
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-}
-
-.ycm-section {
-    margin-bottom: 25px;
-}
-
-.ycm-section-title {
-    font-size: 1.1rem;
-    color: #4e73df;
-    border-bottom: 2px solid #eaecf4;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-/* --- Form Inputs --- */
-.ycm-form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
-}
-
-.ycm-form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.ycm-form-group label {
     font-weight: 600;
-    color: #5a5c69;
-    margin-bottom: 8px;
-    font-size: 0.95rem;
+    padding: 10px 14px;
+    background: var(--bg-main);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
 }
 
-.ycm-required {
-    color: #e74a3b;
-    margin-left: 3px;
+.ycm-stock-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
 }
+.stock-ok { background: #dcfce7; color: #166534; }
+.stock-low { background: #fee2e2; color: #991b1b; }
 
-.ycm-input-control {
-    padding: 12px 15px;
-    border: 1px solid #d1d3e2;
-    border-radius: 8px;
-    font-size: 1rem;
-    color: #495057;
-    transition: all 0.2s;
-    background-color: #ffffff;
-}
-
-.ycm-input-control:focus {
-    outline: none;
-    border-color: #4e73df;
-    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
-}
-
-.ycm-input-control:disabled {
-    background-color: #eaecf4;
-    color: #858796;
-    cursor: not-allowed;
-    border-color: #d1d3e2;
-}
-
-/* --- Bảng Chi Tiết Hàng Hóa --- */
-.ycm-table-responsive {
-    overflow-x: auto;
-    border: 1px solid #e3e6f0;
-    border-radius: 8px;
-}
-
-.ycm-modern-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #ffffff;
-}
-
-.ycm-modern-table th {
-    background-color: #f8f9fc;
-    color: #4e73df;
+.input-qty {
     font-weight: bold;
-    padding: 14px 15px;
-    text-align: left;
-    border-bottom: 2px solid #e3e6f0;
-    font-size: 0.95rem;
+    color: var(--primary);
+    max-width: 120px;
+    margin: 0 auto;
 }
 
-.ycm-modern-table td {
-    padding: 12px 15px;
-    vertical-align: middle;
-    border-bottom: 1px solid #e3e6f0;
-}
-
-.ycm-modern-table tr:last-child td {
-    border-bottom: none;
-}
-
-.text-center {
-    text-align: center !important;
-}
-
-/* --- Các nút bấm (Buttons) --- */
-.ycm-btn-remove {
+/* --- BUTTONS TRONG FORM --- */
+.ycm-btn-remove-row {
     background: #fee2e2;
-    color: #e74a3b;
+    color: var(--danger);
     border: none;
     padding: 8px 12px;
     border-radius: 6px;
@@ -529,66 +326,124 @@ select.ycm-input-control {
     justify-content: center;
 }
 
-.ycm-btn-remove:hover {
-    background: #e74a3b;
-    color: #ffffff;
+.ycm-btn-remove-row:hover:not(:disabled) {
+    background: var(--danger);
+    color: white;
+}
+
+.ycm-btn-remove-row:disabled {
+    background: var(--bg-main);
+    color: #cbd5e1;
+    cursor: not-allowed;
 }
 
 .ycm-btn-add-row {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: #e3e6f0;
-    color: #4e73df;
-    border: none;
+    gap: 8px;
+    background: #e0e7ff;
+    color: var(--primary);
+    border: 1px dashed #a5b4fc;
     padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
+    border-radius: var(--radius-md);
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 0.9rem;
 }
 
 .ycm-btn-add-row:hover:not(:disabled) {
-    background: #d1d3e2;
-    color: #2e59d9;
+    background: #c7d2fe;
+    border-color: var(--primary);
 }
 
 .ycm-btn-add-row:disabled {
-    opacity: 0.5;
+    background: var(--bg-main);
+    color: var(--text-muted);
+    border-color: var(--border-color);
     cursor: not-allowed;
 }
 
-.ycm-footer {
-    margin-top: 20px;
+/* --- THÊM PHIẾU MỚI & SUBMIT --- */
+.ycm-add-request-wrapper {
     text-align: center;
+    margin: 10px 0;
+}
+
+.ycm-btn-add-request {
+    background: #ffffff;
+    color: var(--primary);
+    border: 2px dashed #a5b4fc;
+    padding: 16px 32px;
+    border-radius: var(--radius-lg);
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    width: 100%;
+    justify-content: center;
+}
+
+.ycm-btn-add-request:hover {
+    background: #e0e7ff;
+    border-color: var(--primary);
+}
+
+.ycm-footer-actions {
+    margin-top: 16px;
+    margin-bottom: 40px;
 }
 
 .ycm-btn-submit {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    background: #1cc88a;
-    color: #ffffff;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    color: white;
     border: none;
-    border-radius: 10px;
-    font-weight: bold;
+    padding: 18px 36px;
+    border-radius: var(--radius-lg);
+    font-size: 1.15rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 6px rgba(28, 200, 138, 0.2);
-    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(67, 56, 202, 0.3);
+    transition: all 0.3s ease;
     letter-spacing: 0.5px;
 }
 
-.ycm-btn-submit:hover {
-    background: #17a673;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(28, 200, 138, 0.3);
+.ycm-btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(67, 56, 202, 0.4);
 }
 
-.ycm-btn-submit:disabled {
-    background: #858796;
-    box-shadow: none;
-    cursor: not-allowed;
-    transform: none;
+.ycm-btn-submit:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.ycm-icon-lg {
+    font-size: 1.5rem;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .ycm-form-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .ycm-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .ycm-btn-submit {
+        padding: 16px;
+        font-size: 1rem;
+    }
 }

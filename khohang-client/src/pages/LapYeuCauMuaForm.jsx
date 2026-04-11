@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/axiosConfig';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiTrash2, FiArrowLeft, FiEdit3, FiPackage, FiFilePlus, FiTruck, FiBox, FiClipboard } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiArrowLeft, FiEdit3, FiPackage, FiFilePlus, FiTruck, FiBox, FiClipboard, FiInfo } from 'react-icons/fi';
 import './LapYeuCauMuaForm.css';
 
 const LapYeuCauMuaForm = () => {
@@ -10,7 +10,6 @@ const LapYeuCauMuaForm = () => {
     const location = useLocation();
 
     const [suppliers, setSuppliers] = useState([]);
-
     const [batchRequests, setBatchRequests] = useState([
         { maNhaCungCap: '', ghiChu: '', chiTiets: [{ maHang: '', tenHang: '', soLuongCanMua: 1, soLuongTon: 0 }] }
     ]);
@@ -38,11 +37,7 @@ const LapYeuCauMuaForm = () => {
                     const foundSupplier = suppliers.find(s =>
                         s.danhSachHangHoa?.some(p => p.maHang === item.maHang)
                     );
-                    if (foundSupplier) {
-                        maNCC = foundSupplier.maNCC;
-                    } else {
-                        maNCC = "";
-                    }
+                    maNCC = foundSupplier ? foundSupplier.maNCC : "";
                 }
 
                 if (!groups[maNCC]) {
@@ -65,9 +60,7 @@ const LapYeuCauMuaForm = () => {
         }
     }, [location.state, suppliers]);
 
-    // ----------------------------------------------------
-    // CÁC HÀM XỬ LÝ 
-    // ----------------------------------------------------
+    // --- CÁC HÀM XỬ LÝ ---
     const handleSupplierChange = (reqIndex, value) => {
         const newBatch = [...batchRequests];
         newBatch[reqIndex].maNhaCungCap = value;
@@ -150,43 +143,48 @@ const LapYeuCauMuaForm = () => {
                 <button type="button" className="ycm-btn-back" onClick={() => navigate(-1)}>
                     <FiArrowLeft /> Quay lại
                 </button>
-                <div className="ycm-header-titles">
-                    <h2>{isAutoMode ? "⚡ Lập Yêu Cầu Mua Hàng Loạt" : "📝 Lập Yêu Cầu Mua Hàng"}</h2>
-                    <p className="ycm-subtitle">
-                        {isAutoMode
-                            ? "Hệ thống đã tự động gom nhóm hàng hóa. Có thể xóa bớt đơn nếu chưa muốn nhập ngay!"
-                            : "Đề xuất danh sách hàng hóa sắp hết để phòng Mua hàng tiến hành nhập kho"}
-                    </p>
+                <div className="ycm-header-content">
+                    <div className="ycm-title-box">
+                        <div className={`ycm-icon-box ${isAutoMode ? 'auto-mode' : 'manual-mode'}`}>
+                            {isAutoMode ? <FiTruck /> : <FiClipboard />}
+                        </div>
+                        <div>
+                            <h2>{isAutoMode ? "Lập Yêu Cầu Mua Hàng Loạt" : "Lập Yêu Cầu Mua Hàng"}</h2>
+                            <p className="ycm-subtitle">
+                                {isAutoMode
+                                    ? "Hệ thống tự động phân nhóm hàng hóa theo Nhà Cung Cấp."
+                                    : "Đề xuất danh sách hàng hóa sắp hết để tiến hành nhập kho."}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="ycm-form-container">
                 {batchRequests.map((req, reqIndex) => {
                     const currentSupplier = suppliers.find(s => s.maNCC === req.maNhaCungCap);
                     const availableProducts = currentSupplier?.danhSachHangHoa || [];
 
                     return (
-                        <div key={reqIndex} className="ycm-card" style={{ marginBottom: '20px', borderTop: isAutoMode ? '4px solid #4e73df' : '4px solid #1cc88a' }}>
-                            <div className="ycm-section" style={{ position: 'relative' }}>
+                        <div key={reqIndex} className={`ycm-card ${isAutoMode ? 'card-border-auto' : 'card-border-manual'}`}>
+                            <div className="ycm-card-header">
+                                <h4 className="ycm-section-title">
+                                    <FiPackage className="icon-mr" /> Đơn Yêu Cầu #{reqIndex + 1}
+                                </h4>
+                                {batchRequests.length > 1 && (
+                                    <button
+                                        type="button"
+                                        className="ycm-btn-delete-req"
+                                        onClick={() => removeRequest(reqIndex)}
+                                        title="Hủy đơn này"
+                                    >
+                                        <FiTrash2 /> Hủy Đơn
+                                    </button>
+                                )}
+                            </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <h4 className="ycm-section-title text-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                                        <FiPackage /> Đơn Yêu Cầu #{reqIndex + 1}
-                                    </h4>
-
-                                    {/* SỬA CHỖ NÀY: Bỏ chặn isAutoMode, cho phép xóa phiếu bất kể đang tạo thủ công hay tự động */}
-                                    {batchRequests.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => removeRequest(reqIndex)}
-                                            style={{ background: 'none', border: 'none', color: '#e74a3b', cursor: 'pointer', fontWeight: 'bold' }}
-                                        >
-                                            <FiTrash2 /> Hủy Đơn Này
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="ycm-form-grid" style={{ marginTop: '15px' }}>
+                            <div className="ycm-card-body">
+                                <div className="ycm-form-grid">
                                     <div className="ycm-form-group">
                                         <label>Chọn Nhà Cung Cấp <span className="ycm-required">*</span></label>
                                         <select
@@ -196,7 +194,7 @@ const LapYeuCauMuaForm = () => {
                                             required
                                             disabled={isAutoMode}
                                         >
-                                            <option value="">-- Click để chọn nhà cung cấp --</option>
+                                            <option value="" disabled>-- Click để chọn nhà cung cấp --</option>
                                             {suppliers.map(s => (
                                                 <option key={s.maNCC} value={s.maNCC}>{s.tenNCC}</option>
                                             ))}
@@ -215,18 +213,18 @@ const LapYeuCauMuaForm = () => {
                                         />
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="ycm-section">
-                                <h4 className="ycm-section-title" style={{ fontSize: '1rem' }}>Danh sách mặt hàng</h4>
+                                <div className="ycm-section-divider"></div>
+
+                                <h5 className="ycm-sub-title"><FiBox className="icon-mr"/> Danh sách mặt hàng cần mua</h5>
                                 <div className="ycm-table-responsive">
                                     <table className="ycm-modern-table">
                                         <thead>
                                             <tr>
-                                                <th width="50%">Sản phẩm cần mua</th>
+                                                <th width="50%">Sản phẩm</th>
                                                 <th width="20%" className="text-center">Tồn kho hiện tại</th>
                                                 <th width="20%" className="text-center">Số lượng nhập</th>
-                                                <th width="10%" className="text-center">Xóa</th>
+                                                <th width="10%" className="text-center">Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -234,8 +232,8 @@ const LapYeuCauMuaForm = () => {
                                                 <tr key={itemIndex}>
                                                     <td>
                                                         {isAutoMode && item.tenHang ? (
-                                                            <div style={{ fontWeight: 'bold', padding: '8px 12px', background: '#f8f9fc', borderRadius: '5px', border: '1px solid #e3e6f0' }}>
-                                                                {item.tenHang}
+                                                            <div className="ycm-readonly-item">
+                                                                <FiInfo className="text-muted" /> {item.tenHang}
                                                             </div>
                                                         ) : (
                                                             <select
@@ -245,7 +243,7 @@ const LapYeuCauMuaForm = () => {
                                                                 required
                                                                 disabled={!req.maNhaCungCap}
                                                             >
-                                                                <option value="">-- Chọn mặt hàng --</option>
+                                                                <option value="" disabled>-- Chọn mặt hàng --</option>
                                                                 {availableProducts.map(p => (
                                                                     <option key={p.maHang} value={p.maHang}>
                                                                         [{p.maHang}] - {p.tenHang} (Tồn: {p.soLuongTon || 0})
@@ -254,12 +252,14 @@ const LapYeuCauMuaForm = () => {
                                                             </select>
                                                         )}
                                                     </td>
-                                                    <td className="text-center" style={{ color: '#e74a3b', fontWeight: 'bold' }}>
-                                                        {item.soLuongTon}
+                                                    <td className="text-center">
+                                                        <span className={`ycm-stock-badge ${item.soLuongTon <= 5 ? 'stock-low' : 'stock-ok'}`}>
+                                                            {item.soLuongTon}
+                                                        </span>
                                                     </td>
                                                     <td>
                                                         <input
-                                                            className="ycm-input-control text-center"
+                                                            className="ycm-input-control text-center input-qty"
                                                             type="number"
                                                             min="1"
                                                             value={item.soLuongCanMua === '' ? '' : item.soLuongCanMua}
@@ -271,7 +271,13 @@ const LapYeuCauMuaForm = () => {
                                                         />
                                                     </td>
                                                     <td className="text-center">
-                                                        <button type="button" className="ycm-btn-remove" onClick={() => removeRow(reqIndex, itemIndex)}>
+                                                        <button 
+                                                            type="button" 
+                                                            className="ycm-btn-remove-row" 
+                                                            onClick={() => removeRow(reqIndex, itemIndex)}
+                                                            disabled={req.chiTiets.length <= 1}
+                                                            title="Xóa dòng"
+                                                        >
                                                             <FiTrash2 />
                                                         </button>
                                                     </td>
@@ -280,9 +286,10 @@ const LapYeuCauMuaForm = () => {
                                         </tbody>
                                     </table>
                                 </div>
+                                
                                 {!isAutoMode && (
-                                    <button type="button" className="ycm-btn-add-row mt-3" onClick={() => addRow(reqIndex)} disabled={!req.maNhaCungCap}>
-                                        <FiPlus /> Thêm dòng
+                                    <button type="button" className="ycm-btn-add-row" onClick={() => addRow(reqIndex)} disabled={!req.maNhaCungCap}>
+                                        <FiPlus /> Thêm dòng sản phẩm
                                     </button>
                                 )}
                             </div>
@@ -291,27 +298,17 @@ const LapYeuCauMuaForm = () => {
                 })}
 
                 {!isAutoMode && (
-                    <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <button
-                            type="button"
-                            onClick={addNewRequest}
-                            style={{
-                                background: '#f8f9fc', color: '#4e73df', border: '2px dashed #4e73df',
-                                padding: '12px 25px', borderRadius: '8px', fontWeight: 'bold',
-                                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px',
-                                fontSize: '1rem', transition: 'all 0.2s'
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.background = '#eaecf4'}
-                            onMouseOut={(e) => e.currentTarget.style.background = '#f8f9fc'}
-                        >
-                            <FiFilePlus size={20} /> Tạo thêm Phiếu Yêu Cầu khác
+                    <div className="ycm-add-request-wrapper">
+                        <button type="button" className="ycm-btn-add-request" onClick={addNewRequest}>
+                            <FiFilePlus size={20} /> Tạo thêm Phiếu Yêu Cầu mới
                         </button>
                     </div>
                 )}
 
-                <div className="ycm-footer">
-                    <button type="submit" className="ycm-btn-submit" style={{ width: '100%', fontSize: '1.1rem', padding: '15px' }}>
-                        <FiEdit3 className="ycm-icon" /> XÁC NHẬN & TRÌNH SẾP DUYỆT TẤT CẢ ({batchRequests.length} ĐƠN)
+                <div className="ycm-footer-actions">
+                    <button type="submit" className="ycm-btn-submit">
+                        <FiEdit3 className="ycm-icon-lg" /> 
+                        <span>XÁC NHẬN & TRÌNH SẾP DUYỆT ({batchRequests.length} ĐƠN)</span>
                     </button>
                 </div>
             </form>

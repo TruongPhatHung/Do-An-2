@@ -159,43 +159,56 @@
 .hanghoa-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: auto; /* Đổi từ fixed sang auto để bảng tự chia khoảng cách thông minh */
+    min-width: 1050px; /* Đảm bảo bảng không bị móp méo trên màn hình nhỏ */
 }
 
 .hanghoa-table th {
     background-color: #f8f9fc;
     color: #4a5568;
     font-weight: 600;
-    padding: 18px 12px;
+    padding: 18px 20px; /* Tăng khoảng cách ngang để các cột thoáng hơn */
     text-align: left;
     border-bottom: 2px solid #e3e6f0;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 13px;
     letter-spacing: 0.5px;
+    white-space: nowrap; /* Giữ tiêu đề không bị rớt dòng lộn xộn */
 }
 
 .hanghoa-table td {
-    padding: 16px 12px;
+    padding: 16px 20px; /* Đồng bộ padding ngang với thẻ th */
     border-bottom: 1px solid #edf2f7;
     color: #2d3748;
     vertical-align: middle;
     font-size: 14px;
 }
 
-.col-id { width: 12%; }
-.col-name { width: 28%; }
-.col-category { width: 15%; }
-.col-unit { width: 10%; text-align: center; }
-.col-stock { width: 10%; text-align: right; }
-.col-min-stock { width: 10%; text-align: right; }
-.col-price { width: 15%; text-align: right; }
-.col-actions { width: 150px; text-align: center !important; }
+/* --- Xóa % cố định và dùng min-width để giãn dòng tự nhiên --- */
+.col-id { min-width: 100px; }
 
+.col-name { 
+    width: 30%; /* Ưu tiên cột Tên Hàng rộng nhất */
+    min-width: 250px; 
+    white-space: normal; /* Cho phép Tên Hàng xuống dòng nếu quá dài */
+    line-height: 1.5;
+}
+
+.col-category { min-width: 140px; }
+.col-unit { min-width: 90px; text-align: center; }
+.col-stock { min-width: 130px; text-align: right; }
+.col-min-stock { min-width: 110px; text-align: right; }
+.col-price { min-width: 130px; text-align: right; }
+
+.col-actions { 
+    width: 170px; 
+    min-width: 170px; 
+    text-align: center !important; 
+}
+
+/* Các class phụ trợ giữ nguyên */
 .truncate-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+    white-space: normal; /* Bỏ truncate để xem full tên hàng, hoặc bạn có thể giữ nguyên tùy ý */
     display: inline-block;
 }
 
