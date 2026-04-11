@@ -223,3 +223,56 @@
 
 /* Modal Styling */
 .modal-info-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f8f9fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+.text-success {
+    color: #2f855a !important;
+}
+
+.dyx-revenue-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0fff4; /* Xanh lá nhạt */
+    border: 2px dashed #68d391;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2f855a;
+}
+
+.dyx-revenue-banner span {
+    font-size: 1.4rem;
+    color: #38a169;
+}
+
+.badge-alert {
+    background: #fff5f5;
+    color: #c53030;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-ok {
+    background: #f0fff4;
+    color: #2f855a;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.reject-area {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #edf2f7;
+}
+
+.reject-area label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4a5568;
+}

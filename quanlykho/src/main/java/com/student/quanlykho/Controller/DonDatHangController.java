@@ -1,14 +1,7 @@
 package com.student.quanlykho.Controller;
 
-import com.student.quanlykho.Entity.ChiTietDonDatHang;
-import com.student.quanlykho.Entity.DonDatHang;
-import com.student.quanlykho.Entity.HangHoa;
-import com.student.quanlykho.Entity.NhaCungCap;
-import com.student.quanlykho.Entity.SanPhamNCC;
-import com.student.quanlykho.Repository.DonDatHangRepository;
-import com.student.quanlykho.Repository.HangHoaRepository;
-import com.student.quanlykho.Repository.NhaCungCapRepository;
-import com.student.quanlykho.Repository.SanPhamNCCRepository;
+import com.student.quanlykho.Entity.*;
+import com.student.quanlykho.Repository.*;
 import com.student.quanlykho.Service.AuditLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,20 +20,11 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 public class DonDatHangController {
 
-    @Autowired
-    private DonDatHangRepository donDatHangRepository;
-
-    @Autowired
-    private NhaCungCapRepository nhaCungCapRepository;
-
-    @Autowired
-    private SanPhamNCCRepository sanPhamNCCRepository;
-
-    @Autowired
-    private HangHoaRepository hangHoaRepository;
-
-    @Autowired
-    private AuditLogService auditLogService;
+    @Autowired private DonDatHangRepository donDatHangRepository;
+    @Autowired private NhaCungCapRepository nhaCungCapRepository;
+    @Autowired private SanPhamNCCRepository sanPhamNCCRepository;
+    @Autowired private HangHoaRepository hangHoaRepository;
+    @Autowired private AuditLogService auditLogService;
 
     @GetMapping
     public List<DonDatHang> getAll() {
@@ -50,12 +36,14 @@ public class DonDatHangController {
         return donDatHangRepository.findByTrangThaiIn(List.of("Mới Tạo", "Giao Thiếu"));
     }
 
+    // 🚀 HÀM TẠO ĐƠN: Đã tích hợp tự động cập nhật giá bán theo hợp đồng
     @PostMapping
     @Transactional
     public DonDatHang create(@RequestBody DonHangRequest request) {
         DonDatHang donDatHang = new DonDatHang();
         donDatHang.setMaDon(request.getMaDon());
         donDatHang.setTrangThai("Mới Tạo");
+        donDatHang.setNgayTao(LocalDateTime.now()); // Đảm bảo có ngày tạo
 
         NhaCungCap nhaCungCap = nhaCungCapRepository.findByMaNCC(request.getNhaCungCap().getMaNCC())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Nhà cung cấp"));
@@ -66,35 +54,29 @@ public class DonDatHangController {
             ChiTietDonDatHang chiTiet = new ChiTietDonDatHang();
             chiTiet.setDonDatHang(donDatHang);
 
-            // 1. Tìm sản phẩm trong danh mục của Nhà cung cấp này
+            // 🎯 ĐÂY LÀ BIẾN sanPham MÀ SẾP ĐANG THIẾU
             SanPhamNCC sanPham = sanPhamNCCRepository.findByMaHangAndNhaCungCap_MaNCC(item.getHangHoa().getMaHang(), nhaCungCap.getMaNCC())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy hàng hóa: " + item.getHangHoa().getMaHang()));
 
-            // ====================================================================
-            // 2. TÌM HOẶC TẠO MỚI HÀNG HÓA TRONG KHO TỔNG
-            // ====================================================================
             HangHoa actualHangHoa;
             if (!hangHoaRepository.existsById(sanPham.getMaHang())) {
                 HangHoa newProduct = new HangHoa();
                 newProduct.setMaHang(sanPham.getMaHang());
                 newProduct.setTenHang(sanPham.getTenHang());
-                newProduct.setLoaiHang(sanPham.getLoaiHang()); // Lấy loại từ bên NCC sang
-                newProduct.setSoLuongTon(0); // Tồn kho ban đầu là 0
-                newProduct.setSoLuongToiThieu(10); // Mức cảnh báo tối thiểu (Mặc định)
-                newProduct.setGiaNhap(item.getDonGia());
-                newProduct.setGiaBan(item.getDonGia() * 1.2);
-                newProduct.setDonViTinh("Cái"); // Mặc định đơn vị tính
-
-                actualHangHoa = hangHoaRepository.save(newProduct); // Lưu ngay để có Object thật
+                newProduct.setLoaiHang(sanPham.getLoaiHang());
+                newProduct.setSoLuongTon(0);
+                newProduct.setSoLuongToiThieu(10);
+                actualHangHoa = newProduct;
             } else {
-                // Nếu đã có trong kho thì lôi ra
                 actualHangHoa = hangHoaRepository.findById(sanPham.getMaHang()).get();
             }
 
-            // ====================================================================
-            // 🎯 3. ĐÃ SỬA: Set trực tiếp Object HangHoa vào Chi Tiết
-            // (Không còn dùng setMaHang hay setTenHang nữa)
-            // ====================================================================
+            // 💰 CẬP NHẬT GIÁ: GIÁ NHẬP VÀ GIÁ BÁN CHO ĐẠI LÝ (Markup 20%)
+            actualHangHoa.setGiaNhap(item.getDonGia());
+            actualHangHoa.setGiaBan(item.getDonGia() * 1.2); // Sếp có thể thay 1.2 bằng tỉ lệ sếp muốn
+
+            hangHoaRepository.save(actualHangHoa);
+
             chiTiet.setHangHoa(actualHangHoa);
             chiTiet.setSoLuongDat(item.getSoLuongDat());
             chiTiet.setDonGia(item.getDonGia());
@@ -106,26 +88,17 @@ public class DonDatHangController {
         donDatHang.setChiTiets(chiTietDonDatHangs);
         DonDatHang saved = donDatHangRepository.save(donDatHang);
 
-        // Tính tổng số lượng để ghi log
-        int tongSoLuong = saved.getChiTiets().stream().mapToInt(ChiTietDonDatHang::getSoLuongDat).sum();
-
-        // GHI LOG
-        String moi = String.format("Gửi đến: %s | Gồm %d mặt hàng | Tổng SL đặt: %d",
-                nhaCungCap.getTenNCC(), saved.getChiTiets().size(), tongSoLuong);
-        auditLogService.ghiLog("THÊM", "ĐƠN ĐẶT HÀNG (PO)", saved.getMaDon(), "Chưa có", moi);
+        auditLogService.ghiLog("THÊM", "ĐƠN ĐẶT HÀNG (PO)", saved.getMaDon(), "Chưa có", "Tạo đơn mua hàng từ NCC");
 
         return saved;
     }
-    // 🚀 TÍNH NĂNG: LẤY DANH SÁCH HÀNG ĐANG CHỜ VỀ (CÓ LỌC THEO THỜI GIAN)
-    // 🚀 ĐÃ NÂNG CẤP: Trả về Map<Mã Hàng, Tổng số lượng đang chờ về>
-    // 🚀 ĐÃ NÂNG CẤP LẦN CUỐI: Fix lỗi "Hoàn Tất" và tính đúng số lượng CÒN THIẾU
-    @GetMapping("/hang-dang-cho-ve")
-    public ResponseEntity<java.util.Map<String, Integer>> getHangDangChoVeTuPO() {
 
+    // 🚀 TÍNH NĂNG: LẤY DANH SÁCH HÀNG ĐANG CHỜ VỀ (FIX LỖI CHÍNH TẢ & SỐ LƯỢNG)
+    @GetMapping("/hang-dang-cho-ve")
+    public ResponseEntity<Map<String, Integer>> getHangDangChoVeTuPO() {
         LocalDateTime mocThoiGian = LocalDateTime.now().minusDays(3);
 
         List<DonDatHang> activePOs = donDatHangRepository.findAll().stream()
-                // 🎯 FIX 1: Chặn đứng cả "Hoàn Tất" và "Hoàn Thành" cho chắc cú
                 .filter(po -> !po.getTrangThai().equalsIgnoreCase("Hoàn Tất")
                         && !po.getTrangThai().equalsIgnoreCase("Hoàn Thành")
                         && !po.getTrangThai().equalsIgnoreCase("Đã Hủy")
@@ -133,19 +106,14 @@ public class DonDatHangController {
                 .filter(po -> po.getNgayTao() != null && po.getNgayTao().isAfter(mocThoiGian))
                 .collect(Collectors.toList());
 
-        java.util.Map<String, Integer> hangPendingMap = new java.util.HashMap<>();
-
+        Map<String, Integer> hangPendingMap = new HashMap<>();
         for (DonDatHang po : activePOs) {
             for (ChiTietDonDatHang ct : po.getChiTiets()) {
                 if(ct.getHangHoa() != null) {
                     String maHang = ct.getHangHoa().getMaHang();
-
-                    // 🎯 FIX 2: Tính số lượng THỰC SỰ đang chờ về trên đường
-                    // Nếu ct.getSoLuongDaNhap() bị null thì cho nó bằng 0
                     int daNhap = (ct.getSoLuongDaNhap() != null) ? ct.getSoLuongDaNhap() : 0;
                     int soLuongThucCho = ct.getSoLuongDat() - daNhap;
 
-                    // Chỉ cộng những món thực sự chưa giao tới
                     if (soLuongThucCho > 0) {
                         hangPendingMap.put(maHang, hangPendingMap.getOrDefault(maHang, 0) + soLuongThucCho);
                     }
@@ -155,7 +123,7 @@ public class DonDatHangController {
         return ResponseEntity.ok(hangPendingMap);
     }
 
-    // --- DTO CLASSES ---
+    // --- DTO CLASSES (GIỮ NGUYÊN) ---
     public static class DonHangRequest {
         private String maDon;
         private NhaCungCapRequest nhaCungCap;

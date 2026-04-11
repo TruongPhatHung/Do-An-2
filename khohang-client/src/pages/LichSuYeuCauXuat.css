@@ -207,3 +207,47 @@
     border-radius: 12px;
     border: 1px dashed #cbd5e1;
 }
+.lsx-revenue-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fff4; /* Xanh lá nhạt */
+    border: 1px dashed #68d391;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 12px 0;
+    font-weight: 600;
+    color: #2f855a;
+}
+
+.lsx-revenue-tag span {
+    font-size: 1.2rem;
+    color: #38a169;
+}
+
+.item-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.item-price-row {
+    font-size: 0.85rem;
+    color: #718096;
+    margin-bottom: 8px;
+    border-bottom: 1px inset #edf2f7;
+    padding-bottom: 4px;
+}
+
+.msg-success {
+    background-color: #f0fff4;
+    color: #2f855a;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
