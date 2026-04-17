@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 
 const HangHoaList = () => {
     const [hangHoa, setHangHoa] = useState([]);
-    const [pendingItems, setPendingItems] = useState({}); // 🎯 Đổi thành Object (Dictionary)
+    const [pendingItems, setPendingItems] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const [stockFilter, setStockFilter] = useState('all');
     const { user } = useContext(AuthContext);
@@ -17,6 +17,9 @@ const HangHoaList = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20;
+
+    // Chuẩn hóa role để dễ kiểm tra
+    const userRole = user?.role?.toUpperCase();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,16 +32,14 @@ const HangHoaList = () => {
                 const productsData = Array.isArray(resProducts.data) ? resProducts.data : [];
                 setHangHoa(productsData);
 
-                // 🎯 Nhận cục Data MỚI: { "H01": 5, "H02": 10 }
                 const pendingData = resPending.data || {};
                 setPendingItems(pendingData);
 
-                // Check cảnh báo khẩn
                 const itemsToOrder = productsData.filter(item => {
                     const stock = Number(item.soLuongTon || 0);
                     const minStock = Number(item.soLuongToiThieu || 0);
-                    const incomingQty = pendingData[item.maHang] || 0; // Lấy SL đang về
-                    return (stock + incomingQty) < minStock; // 🎯 So sánh Tổng dự kiến với Định mức
+                    const incomingQty = pendingData[item.maHang] || 0;
+                    return (stock + incomingQty) < minStock;
                 });
 
                 if (itemsToOrder.length > 0) {
@@ -53,9 +54,6 @@ const HangHoaList = () => {
         fetchData();
     }, []);
 
-    // ==========================================================
-    // 🎯 LOGIC MỚI: CHIA NHÓM CHUẨN XÁC THEO SỐ LƯỢNG
-    // ==========================================================
     const lowStockItems = hangHoa.filter(item => {
         const stock = Number(item.soLuongTon || 0);
         const incomingQty = pendingItems[item.maHang] || 0;
@@ -66,18 +64,15 @@ const HangHoaList = () => {
         const stock = Number(item.soLuongTon || 0);
         const minStock = Number(item.soLuongToiThieu || 0);
         const incomingQty = pendingItems[item.maHang] || 0;
-        // Thực tế đang thiếu, nhưng đã đặt đủ (hoặc dư) thì vô nhóm Xanh
         return stock < minStock && (stock + incomingQty) >= minStock;
     });
 
     const handleChuyenSangTrangLapYeuCau = () => {
         if (lowStockItems.length === 0) return toast.info("Không có hàng cần nhập!");
 
-        // 🎯 TÍNH LUÔN SỐ LƯỢNG THỰC TẾ CẦN MUA BÙ
         const dataToOrder = lowStockItems.map(item => {
             const stock = Number(item.soLuongTon || 0);
             const incomingQty = pendingItems[item.maHang] || 0;
-            // Ép nó hiểu là tồn kho hiện tại đã bao gồm cả hàng đang về để Form nó trừ đúng
             return { ...item, soLuongTon: stock + incomingQty };
         });
 
@@ -103,8 +98,8 @@ const HangHoaList = () => {
         else if (stockFilter === 'under50') matchStock = stock < 50;
         else if (stockFilter === 'over50') matchStock = stock >= 50;
         else if (stockFilter === 'outOfStock') matchStock = stock === 0;
-        else if (stockFilter === 'lowStockWarning') matchStock = totalExpected < minStock; // Đỏ
-        else if (stockFilter === 'incoming') matchStock = stock < minStock && totalExpected >= minStock; // Xanh
+        else if (stockFilter === 'lowStockWarning') matchStock = totalExpected < minStock;
+        else if (stockFilter === 'incoming') matchStock = stock < minStock && totalExpected >= minStock;
 
         return matchSearch && matchStock;
     });
@@ -133,9 +128,12 @@ const HangHoaList = () => {
                         <button className="btn-filter-alert" onClick={() => setStockFilter('lowStockWarning')}>
                             <FiFilter /> Lọc xem ngay
                         </button>
-                        <button className="btn-filter-alert" onClick={handleChuyenSangTrangLapYeuCau} style={{ background: '#fff', color: '#e74a3b', border: '1px solid #e74a3b' }}>
-                            <FiShoppingCart /> Tự động lên Đơn
-                        </button>
+                        {/* 🎯 Phân quyền: Nhân viên kinh doanh không được thấy nút Tự động lên đơn mua */}
+                        {(userRole === 'ADMIN' || userRole === 'QUANLYKHO' || userRole === 'MUAHANG' || userRole === 'KHO') && (
+                            <button className="btn-filter-alert" onClick={handleChuyenSangTrangLapYeuCau} style={{ background: '#fff', color: '#e74a3b', border: '1px solid #e74a3b' }}>
+                                <FiShoppingCart /> Tự động lên Đơn
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
@@ -185,7 +183,7 @@ const HangHoaList = () => {
                             <th className="col-unit">ĐVT</th>
                             <th className="col-stock text-right">Số Lượng Tồn</th>
                             <th className="col-min-stock text-right">Định Mức</th>
-                            {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
+                            {(userRole === 'ADMIN' || userRole === 'MUAHANG') && (
                                 <th className="col-price text-right">Giá Nhập</th>
                             )}
                             <th className="col-actions">Thao Tác</th>
@@ -198,15 +196,14 @@ const HangHoaList = () => {
                             const incomingQty = pendingItems[item.maHang] || 0;
                             const totalExpected = stock + incomingQty;
 
-                            // 🎯 TÍNH TOÁN CLASS DỰA TRÊN TỔNG DỰ KIẾN
                             let stockClass = "stock-normal";
                             let iconObj = null;
 
                             if (totalExpected < minStock) {
-                                stockClass = "stock-warning"; // Chưa đủ hàng -> Báo đỏ
+                                stockClass = "stock-warning";
                                 iconObj = <FiAlertCircle className="warning-icon" title={`Thiếu ${minStock - totalExpected} cái!`} />;
                             } else if (stock < minStock && totalExpected >= minStock) {
-                                stockClass = "stock-pending"; // Đã đặt đủ bù định mức -> Báo xanh
+                                stockClass = "stock-pending";
                                 iconObj = <FiTruck title={`Đang chờ về ${incomingQty} cái!`} />;
                             }
 
@@ -226,7 +223,7 @@ const HangHoaList = () => {
 
                                     <td className="col-min-stock text-muted text-right">{minStock}</td>
 
-                                    {(user?.role === 'ADMIN' || user?.role === 'MUAHANG') && (
+                                    {(userRole === 'ADMIN' || userRole === 'MUAHANG') && (
                                         <td className="col-price price-text text-right">
                                             {item.giaNhap ? item.giaNhap.toLocaleString() : '0'} VNĐ
                                         </td>
@@ -234,7 +231,11 @@ const HangHoaList = () => {
 
                                     <td className="col-actions action-buttons">
                                         <button className="btn-action btn-view" onClick={() => navigate(`/product-detail/${item.maHang}`)} title="Xem chi tiết"><FiEye /> Xem</button>
-                                        <button className="btn-action btn-edit" onClick={() => navigate(`/edit-product/${item.maHang}`)} title="Chỉnh sửa"><FiEdit /> Sửa</button>
+                                        
+                                        {/* 🎯 Phân quyền: CHỈ Quản lý kho và Admin mới có quyền Sửa */}
+                                        {(userRole === 'ADMIN' || userRole === 'QUANLYKHO') && (
+                                            <button className="btn-action btn-edit" onClick={() => navigate(`/edit-product/${item.maHang}`)} title="Chỉnh sửa"><FiEdit /> Sửa</button>
+                                        )}
                                     </td>
                                 </tr>
                             );
@@ -242,7 +243,7 @@ const HangHoaList = () => {
 
                         {currentItems.length === 0 && (
                             <tr>
-                                <td colSpan={user?.role === 'ADMIN' || user?.role === 'MUAHANG' ? 8 : 7} className="empty-message">
+                                <td colSpan={userRole === 'ADMIN' || userRole === 'MUAHANG' ? 8 : 7} className="empty-message">
                                     <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty" width="60" style={{ opacity: 0.5, marginBottom: '10px' }} />
                                     <p>Không tìm thấy hàng hóa nào phù hợp với điều kiện lọc.</p>
                                 </td>

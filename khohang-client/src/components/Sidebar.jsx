@@ -11,11 +11,10 @@ import './Sidebar.css';
 const Sidebar = () => {
     const { user } = useContext(AuthContext);
 
-    // Quản lý đóng mở menu
     const [openMenus, setOpenMenus] = useState({
         danhMuc: true,
         muaHang: false,
-        kho: true, // Mặc định mở kho cho tiện
+        kho: true, 
         quanTri: false
     });
 
@@ -25,6 +24,8 @@ const Sidebar = () => {
     const isAdmin = role === 'ADMIN';
     const isMuaHang = role === 'MUAHANG';
     const isKho = role === 'KHO' || role === 'QUANLYKHO';
+    // 🎯 Khai báo thêm role Nhân viên Kinh doanh
+    const isKinhDoanh = role === 'KINHDOANH' || role === 'NHANVIENKINHDOANH'; 
 
     const navClass = ({ isActive }) => isActive ? "sidebar-item active" : "sidebar-item";
 
@@ -45,7 +46,6 @@ const Sidebar = () => {
             </div>
 
             <ul className="sidebar-menu">
-                {/* --- TỔNG QUAN --- */}
                 <li className="sidebar-header">HỆ THỐNG</li>
                 <li>
                     <NavLink to="/dashboard" className={navClass}>
@@ -53,7 +53,7 @@ const Sidebar = () => {
                     </NavLink>
                 </li>
 
-                {/* --- NHÓM DANH MỤC --- */}
+                {/* --- NHÓM DANH MỤC: Mọi role đều được xem --- */}
                 <li>
                     <div className={`sidebar-dropdown-header ${openMenus.danhMuc ? 'open' : ''}`} onClick={() => toggleMenu('danhMuc')}>
                         <div className="header-left">
@@ -71,6 +71,7 @@ const Sidebar = () => {
                 </li>
 
                 {/* --- NHÓM MUA HÀNG --- */}
+                {(isAdmin || isMuaHang || isKho) && (
                 <li>
                     <div className={`sidebar-dropdown-header ${openMenus.muaHang ? 'open' : ''}`} onClick={() => toggleMenu('muaHang')}>
                         <div className="header-left">
@@ -88,9 +89,10 @@ const Sidebar = () => {
                         </ul>
                     )}
                 </li>
+                )}
 
-                {/* --- NHÓM KHO VẬN (CẬP NHẬT MỚI) --- */}
-                {(isAdmin || isKho) && (
+                {/* --- NHÓM KHO VẬN: Cho phép thêm Kinh Doanh xem để lập Yêu cầu xuất --- */}
+                {(isAdmin || isKho || isKinhDoanh) && (
                     <li>
                         <div className={`sidebar-dropdown-header ${openMenus.kho ? 'open' : ''}`} onClick={() => toggleMenu('kho')}>
                             <div className="header-left">
@@ -100,19 +102,38 @@ const Sidebar = () => {
                         </div>
                         {openMenus.kho && (
                             <ul className="sidebar-submenu">
-                                <li className="submenu-label">Giao dịch</li>
-                                <li><NavLink to="/nhap-kho" className={navClass}><FiDownload /> Nhập Kho</NavLink></li>
-                                <li><NavLink to="/xuat-kho" className={navClass}><FiUpload /> Xuất Kho</NavLink></li>
+                                {/* Giao dịch nhập/xuất kho vật lý: Chỉ Kho và Admin */}
+                                {(isAdmin || isKho) && (
+                                    <>
+                                        <li className="submenu-label">Giao dịch</li>
+                                        <li><NavLink to="/nhap-kho" className={navClass}><FiDownload /> Nhập Kho</NavLink></li>
+                                        <li><NavLink to="/xuat-kho" className={navClass}><FiUpload /> Xuất Kho</NavLink></li>
+                                    </>
+                                )}
 
                                 <li className="submenu-label">Lệnh & Yêu cầu</li>
-                                <li><NavLink to="/lap-lenh-yeu-cau-mua" className={navClass}><FiFileText /> Yêu Cầu Mua</NavLink></li>
-                                <li><NavLink to="/lap-lenh-xuat" className={navClass}><FiFileText /> Yêu Cầu Xuất</NavLink></li>
+                                {/* Yêu cầu mua: Chỉ Kho và Admin */}
+                                {(isAdmin || isKho) && (
+                                    <li><NavLink to="/lap-lenh-yeu-cau-mua" className={navClass}><FiFileText /> Yêu Cầu Mua</NavLink></li>
+                                )}
+                                {/* 🎯 Yêu cầu xuất: Kinh Doanh được phép lập lệnh */}
+                                {(isAdmin || isKho || isKinhDoanh) && (
+                                    <li><NavLink to="/lap-lenh-xuat" className={navClass}><FiFileText /> Yêu Cầu Xuất</NavLink></li>
+                                )}
 
                                 <li className="submenu-label">Lịch sử dữ liệu</li>
-                                <li><NavLink to="/lich-su-nhap-kho" className={navClass}><FiClock /> LS Nhập Kho</NavLink></li>
-                                <li><NavLink to="/lich-su-xuat-kho" className={navClass}><FiClock /> LS Xuất Kho</NavLink></li>
-                                <li><NavLink to="/lich-su-yeu-cau-mua" className={navClass}><FiClock /> LS Yêu Cầu Mua</NavLink></li>
-                                <li><NavLink to="/lich-su-yeu-cau-xuat" className={navClass}><FiClock /> LS Yêu Cầu Xuất</NavLink></li>
+                                {/* Lịch sử Kho/Mua: Chỉ Kho và Admin */}
+                                {(isAdmin || isKho) && (
+                                    <>
+                                        <li><NavLink to="/lich-su-nhap-kho" className={navClass}><FiClock /> LS Nhập Kho</NavLink></li>
+                                        <li><NavLink to="/lich-su-xuat-kho" className={navClass}><FiClock /> LS Xuất Kho</NavLink></li>
+                                        <li><NavLink to="/lich-su-yeu-cau-mua" className={navClass}><FiClock /> LS Yêu Cầu Mua</NavLink></li>
+                                    </>
+                                )}
+                                {/* 🎯 LS Yêu cầu xuất: Kinh Doanh được phép theo dõi trạng thái */}
+                                {(isAdmin || isKho || isKinhDoanh) && (
+                                    <li><NavLink to="/lich-su-yeu-cau-xuat" className={navClass}><FiClock /> LS Yêu Cầu Xuất</NavLink></li>
+                                )}
                             </ul>
                         )}
                     </li>
