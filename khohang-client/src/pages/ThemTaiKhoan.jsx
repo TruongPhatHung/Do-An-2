@@ -70,6 +70,7 @@ const ThemTaiKhoan = () => {
                                 <option value="QUANLYKHO">Quản lý Kho</option>
                                 <option value="MUAHANG">Nhân viên Mua hàng</option>
                                 <option value="ADMIN">Quản trị viên (Admin)</option>
+                                <option value="NV_KD">NV Kinh Doanh</option>
                             </select>
                         </div>
                     </div>

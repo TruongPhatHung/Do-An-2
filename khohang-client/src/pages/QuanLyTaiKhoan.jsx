@@ -186,6 +186,7 @@ const QuanLyTaiKhoan = () => {
                                             <option value="QUANLYKHO">Quản lý Kho</option>
                                             <option value="MUAHANG">NV Mua Hàng</option>
                                             <option value="ADMIN">Admin</option>
+                                            <option value="NV_KD">NV Kinh Doanh</option>
                                         </select>
                                     </td>
 

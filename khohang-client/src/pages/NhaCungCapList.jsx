@@ -13,7 +13,7 @@ const NhaCungCapList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [expandedRowId, setExpandedRowId] = useState(null);
-    const itemsPerPage = 10;
+    const itemsPerPage = 20;
     const navigate = useNavigate();
 
     const fetchNCC = useCallback(async () => {

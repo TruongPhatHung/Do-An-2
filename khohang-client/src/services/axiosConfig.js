@@ -2,7 +2,7 @@ import axios from 'axios'; // Chữ 'axios' phải viết thường hết nha,np
 const api = axios.create({
 
 
-    baseURL: 'http://10.10.107.131:8080/api', // Chỉnh lại cho đúng port Backend của bạn
+    baseURL: 'http://localhost:8080/api', // Chỉnh lại cho đúng port Backend của bạn
 
 
 });
