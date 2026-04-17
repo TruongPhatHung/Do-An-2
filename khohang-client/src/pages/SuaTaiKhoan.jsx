@@ -106,6 +106,7 @@ const SuaTaiKhoan = () => {
                                 <label>Vai trò</label>
                                 <select name="vaiTro" value={formData.vaiTro} onChange={handleChange}>
                                     <option value="QUANLYKHO">Quản lý Kho</option>
+                                    <option value="KHO">Nhân viên Kho</option>
                                     <option value="MUAHANG">NV Mua Hàng</option>
                                     <option value="ADMIN">Admin</option>
                                     <option value="NV_KD">NV Kinh Doanh</option>

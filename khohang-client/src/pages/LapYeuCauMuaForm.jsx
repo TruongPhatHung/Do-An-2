@@ -41,7 +41,7 @@ const LapYeuCauMuaForm = () => {
 
                 if (!maNCC) {
                     const foundSupplier = suppliers.find(s =>
-                        s.danhSachHangHoa?.some(p => p.maHang === item.maHang)
+                        s.danhSachHangHoa?.some(p => String(p.maHang) === String(item.maHang))
                     );
                     maNCC = foundSupplier ? foundSupplier.maNCC : "";
                 }
@@ -54,11 +54,17 @@ const LapYeuCauMuaForm = () => {
                     };
                 }
 
+                // Tính toán chuẩn xác: Số lượng cần mua = Định mức - (Tồn thực tế + Đang chờ về)
+                const tongTonVaDangVe = item.soLuongTon + (item.hangDangVe || 0);
+                const canMua = (item.soLuongToiThieu - tongTonVaDangVe) > 0
+                    ? (item.soLuongToiThieu - tongTonVaDangVe)
+                    : 5;
+
                 groups[maNCC].chiTiets.push({
                     maHang: item.maHang,
                     tenHang: item.tenHang,
-                    soLuongTon: item.soLuongTon,
-                    soLuongCanMua: (item.soLuongToiThieu - item.soLuongTon) > 0 ? (item.soLuongToiThieu - item.soLuongTon) : 5
+                    soLuongTon: item.soLuongTon, // Giữ đúng số lượng tồn thực tế hiển thị
+                    soLuongCanMua: canMua
                 });
             });
 
@@ -85,11 +91,11 @@ const LapYeuCauMuaForm = () => {
         const newBatch = [...batchRequests];
 
         if (field === 'maHang') {
-            const currentSupplier = suppliers.find(s => s.maNCC === newBatch[reqIndex].maNhaCungCap);
-            const selectedProduct = currentSupplier?.danhSachHangHoa?.find(p => p.maHang === value);
+            const currentSupplier = suppliers.find(s => String(s.maNCC) === String(newBatch[reqIndex].maNhaCungCap));
+            const selectedProduct = currentSupplier?.danhSachHangHoa?.find(p => String(p.maHang) === String(value));
 
             // 🎯 Lục tìm trong kho mình xem món này đang tồn bao nhiêu
-            const productInWarehouse = allProducts.find(p => p.maHang === value);
+            const productInWarehouse = allProducts.find(p => String(p.maHang) === String(value));
 
             if (selectedProduct) {
                 newBatch[reqIndex].chiTiets[itemIndex].maHang = selectedProduct.maHang;
@@ -146,8 +152,9 @@ const LapYeuCauMuaForm = () => {
             maNhaCungCap: req.maNhaCungCap,
             ghiChu: req.ghiChu,
             chiTiets: req.chiTiets.map(item => ({
-                maHang: item.maHang,
-                soLuongCanMua: item.soLuongCanMua
+                // Dùng String().trim() để xóa sạch khoảng trắng vô tình lọt vào (VD: "PA-002 " -> "PA-002")
+                maHang: item.maHang ? String(item.maHang).trim() : '',
+                soLuongCanMua: Number(item.soLuongCanMua) // Ép kiểu số luôn cho an toàn với Backend
             }))
         }));
 
@@ -188,7 +195,7 @@ const LapYeuCauMuaForm = () => {
 
             <form onSubmit={handleSubmit} className="ycm-form-container">
                 {batchRequests.map((req, reqIndex) => {
-                    const currentSupplier = suppliers.find(s => s.maNCC === req.maNhaCungCap);
+                    const currentSupplier = suppliers.find(s => String(s.maNCC) === String(req.maNhaCungCap));
                     const availableProducts = currentSupplier?.danhSachHangHoa || [];
 
                     return (
@@ -270,9 +277,8 @@ const LapYeuCauMuaForm = () => {
                                                                 disabled={!req.maNhaCungCap}
                                                             >
                                                                 <option value="" disabled>-- Chọn mặt hàng --</option>
-                                                                {/* 🎯 ĐÃ FIX: Chữ trong dropdown cũng tự check tồn kho để hiện số thật */}
                                                                 {availableProducts.map(p => {
-                                                                    const khoItem = allProducts.find(k => k.maHang === p.maHang);
+                                                                    const khoItem = allProducts.find(k => String(k.maHang) === String(p.maHang));
                                                                     const tonThucTe = khoItem ? khoItem.soLuongTon : 0;
                                                                     return (
                                                                         <option key={p.maHang} value={p.maHang}>

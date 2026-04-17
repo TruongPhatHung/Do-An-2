@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import adminAvatar from "../components/avarta/Screenshot 2026-03-21 185323 copy.png";
 import khoAvatar from "../components/avarta/Screenshot 2026-03-21 185359.png";
-// 🎯 THÊM FiLock và FiUnlock vào danh sách icon
 import { FiUserPlus, FiX, FiKey, FiTrash2, FiEye, FiEdit, FiLock, FiUnlock } from 'react-icons/fi';
 
 const QuanLyTaiKhoan = () => {
@@ -23,12 +22,8 @@ const QuanLyTaiKhoan = () => {
 
     const fetchUsers = async () => {
         try {
-            // 🎯 THÊM THAM SỐ CHỐNG CACHE VÀO ĐÂY
             const res = await api.get(`/users?t=${new Date().getTime()}`);
-
-            // Log ra xem dữ liệu thực tế Backend trả về là gì
             console.log("Dữ liệu Users mới nhất:", res.data);
-
             setUsers(res.data);
         } catch (error) {
             console.error("Lỗi tải danh sách:", error);
@@ -38,7 +33,6 @@ const QuanLyTaiKhoan = () => {
     const handleUpdateRole = async (maND, newRole) => {
         if (!window.confirm(`Xác nhận nâng chức/đổi quyền thành ${newRole}?`)) return;
         try {
-            // 🎯 ĐÃ FIX: Bọc newRole vào object { role: newRole }
             await api.put(`/users/${maND}/role`, { role: newRole }, {
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -48,6 +42,7 @@ const QuanLyTaiKhoan = () => {
             toast.error("❌ Cập nhật quyền thất bại!");
         }
     };
+
     const handleUpdatePassword = async (maND) => {
         const newPw = window.prompt("🔑 Nhập mật khẩu mới cho nhân viên này:");
         if (newPw === null || newPw.trim() === "") return;
@@ -57,8 +52,6 @@ const QuanLyTaiKhoan = () => {
         }
 
         try {
-            // 🎯 ĐÃ FIX: Bọc newPw vào object. 
-            // (Lưu ý: Chữ "matKhau" phải giống với chữ bên Java sếp đang hứng nhé, nếu Java dùng "password" thì sếp đổi lại)
             await api.patch(`/users/${maND}/password`, { matKhau: newPw }, {
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -80,13 +73,10 @@ const QuanLyTaiKhoan = () => {
         }
     };
 
-    // 🎯 THÊM HÀM MỚI: Khóa / Mở khóa tài khoản
     const handleToggleLock = async (id, isCurrentlyLocked) => {
         const actionText = isCurrentlyLocked ? "mở khóa" : "khóa";
         if (window.confirm(`❗ Bạn có chắc muốn ${actionText} tài khoản này?`)) {
             try {
-                // 🎯 ĐÃ FIX: Bọc boolean vào object
-                // (Lưu ý: Chữ "trangThai" phải khớp với Backend Java)
                 await api.patch(`/users/${id}/status`, { trangThai: !isCurrentlyLocked }, {
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -97,6 +87,7 @@ const QuanLyTaiKhoan = () => {
             }
         }
     };
+
     const handleViewDetails = (id) => {
         navigate(`/chi-tiet-tai-khoan/${id}`);
     };
@@ -146,8 +137,10 @@ const QuanLyTaiKhoan = () => {
                     <tbody>
                         {users.map((acc) => {
                             const isUserOnline = acc.isOnline === true; 
-                            // 🎯 Biến kiểm tra xem tài khoản có đang bị khóa không (Lấy từ DB)
                             const isLocked = acc.isLocked || acc.trangThai === false;
+                            
+                            // 🎯 ĐÃ THÊM: Biến kiểm tra xem user này có phải ADMIN không
+                            const isAdmin = acc.vaiTro?.toUpperCase() === 'ADMIN';
 
                             return (
                                 <tr key={acc.id || acc.maND} className={isLocked ? 'tk-row-locked' : ''}>
@@ -194,7 +187,7 @@ const QuanLyTaiKhoan = () => {
 
                                     <td className="tk-actions-col">
                                         <div className="tk-action-buttons">
-                                            {/* Nút Xem chi tiết */}
+                                            {/* Nút Xem chi tiết (Ai cũng được xem) */}
                                             <button
                                                 className="tk-btn-icon btn-eye"
                                                 title="Xem chi tiết"
@@ -203,7 +196,7 @@ const QuanLyTaiKhoan = () => {
                                                 <FiEye />
                                             </button>
 
-                                            {/* Nút Sửa */}
+                                            {/* Nút Sửa (Ai cũng được sửa) */}
                                             <button
                                                 className="tk-btn-icon btn-edit"
                                                 title="Sửa thông tin"
@@ -213,7 +206,7 @@ const QuanLyTaiKhoan = () => {
                                                 <FiEdit />
                                             </button>
 
-                                            {/* Nút Đổi mật khẩu */}
+                                            {/* Nút Đổi mật khẩu (Ai cũng được đổi) */}
                                             <button
                                                 className="tk-btn-icon btn-key"
                                                 title="Đổi mật khẩu"
@@ -223,23 +216,26 @@ const QuanLyTaiKhoan = () => {
                                                 <FiKey />
                                             </button>
 
-                                            {/* 🎯 NÚT KHÓA / MỞ KHÓA VỪA THÊM */}
-                                            <button
-                                                className={`tk-btn-icon ${isLocked ? 'btn-unlock' : 'btn-lock'}`}
-                                                title={isLocked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
-                                                onClick={() => handleToggleLock(acc.maND || acc.id, isLocked)}
-                                            >
-                                                {isLocked ? <FiUnlock /> : <FiLock />}
-                                            </button>
+                                            {/* 🎯 ĐÃ SỬA: Chỉ hiển thị nút Khóa và nút Xóa nếu KHÔNG phải là ADMIN */}
+                                            {!isAdmin && (
+                                                <>
+                                                    <button
+                                                        className={`tk-btn-icon ${isLocked ? 'btn-unlock' : 'btn-lock'}`}
+                                                        title={isLocked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
+                                                        onClick={() => handleToggleLock(acc.maND || acc.id, isLocked)}
+                                                    >
+                                                        {isLocked ? <FiUnlock /> : <FiLock />}
+                                                    </button>
 
-                                            {/* Nút Xóa (Giữ nguyên) */}
-                                            <button
-                                                className="tk-btn-icon btn-trash"
-                                                title="Xóa tài khoản"
-                                                onClick={() => handleDelete(acc.maND || acc.id)}
-                                            >
-                                                <FiTrash2 />
-                                            </button>
+                                                    <button
+                                                        className="tk-btn-icon btn-trash"
+                                                        title="Xóa tài khoản"
+                                                        onClick={() => handleDelete(acc.maND || acc.id)}
+                                                    >
+                                                        <FiTrash2 />
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

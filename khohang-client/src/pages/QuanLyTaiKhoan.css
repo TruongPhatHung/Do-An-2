@@ -270,10 +270,13 @@
 
 .tk-role-badge:hover { filter: brightness(0.95); transform: scale(1.02); }
 
-.role-admin { background: #fee2e2; color: #ef4444; }
-.role-kho { background: #e0e7ff; color: #4f46e5; }
-.role-quanlykho { background: #f3e8ff; color: #9333ea; }
-.role-muahang { background: #dcfce7; color: #16a34a; }
+.role-admin { background: #fee2e2; color: #ef4444; } /* Đỏ */
+.role-kho { background: #e0e7ff; color: #4f46e5; } /* Xanh dương đậm */
+.role-quanlykho { background: #f3e8ff; color: #9333ea; } /* Tím */
+.role-muahang { background: #dcfce7; color: #16a34a; } /* Xanh lá */
+
+/* 🎯 ĐÂY LÀ ĐOẠN BẠN CẦN THÊM VÀO: CSS cho NV_KD */
+.role-nv_kd { background: #e0f2fe; color: #0284c7; } /* Xanh da trời */
 
 /* --- ACTION BUTTONS --- */
 .tk-actions-col { text-align: center; }
