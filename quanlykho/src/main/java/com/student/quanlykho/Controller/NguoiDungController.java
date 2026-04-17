@@ -149,4 +149,30 @@ public class NguoiDungController {
 
         return ResponseEntity.ok(stats);
     }
+    // 🎯 API CẬP NHẬT QUYỀN (ROLE) CHO TÀI KHOẢN (Đừng quên cái này nha sếp!)
+    @PutMapping("/{id}/role")
+    public ResponseEntity<?> updateUserRole(@PathVariable String id, @RequestBody Map<String, String> request) {
+        try {
+            NguoiDung user = nguoiDungRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản mã: " + id));
+
+            String newRole = request.get("role");
+
+            if (newRole != null && !newRole.trim().isEmpty()) {
+                String oldRole = user.getVaiTro();
+                user.setVaiTro(newRole);
+                nguoiDungRepository.save(user);
+
+                // Ghi log lại luôn cho nó chuyên nghiệp
+                auditLogService.ghiLog("SỬA", "PHÂN QUYỀN", id, "Quyền cũ: " + oldRole, "Quyền mới: " + newRole);
+            } else {
+                return ResponseEntity.badRequest().body("Quyền không được để trống!");
+            }
+
+            return ResponseEntity.ok("Cập nhật quyền thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi cập nhật quyền: " + e.getMessage());
+        }
+    }
 }
