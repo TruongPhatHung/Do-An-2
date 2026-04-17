@@ -3,6 +3,8 @@ package com.student.quanlykho.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Table(name = "Hang_Hoa")
 @Entity
@@ -46,6 +48,8 @@ public class HangHoa {
     public Integer getSoLuongTon() {
         return (this.soLuongTon == null) ? 0 : this.soLuongTon;
     }
+    @Column(name = "ngay_cap_nhat_cuoi")
+   private LocalDateTime ngayCapNhatCuoi;
 
     // 🎯 3. Bọc giáp hàm Cảnh báo (THAY ĐỔI QUAN TRỌNG NHẤT Ở ĐÂY)
     public boolean isCanhBaoHetHang() {

@@ -4,6 +4,7 @@ import { AuthContext } from '../Context/AuthContext';
 import NotificationBell from './NotificationBell';
 import { FiRefreshCw } from 'react-icons/fi'; // Import icon làm mới
 import { FaWarehouse } from 'react-icons/fa'; // 👈 THÊM DÒNG NÀY: Import icon từ FontAwesome
+import api from '../services/axiosConfig';
 import './Navbar.css';
 
 const Navbar = ({ onToggleSidebar }) => {

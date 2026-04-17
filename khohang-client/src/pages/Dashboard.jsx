@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Dashboard.css';
-import { FiGrid, FiDownload, FiUpload, FiClock } from 'react-icons/fi';
-
+import { FiGrid, FiDownload, FiUpload, FiClock, FiClipboard } from 'react-icons/fi';
+import TabKiemKe from './TabKiemKe';
 // Import các Tab con
 import TabTongQuan from './TabTongQuan';
 import TabXuatKho from './TabXuatKho';
@@ -46,6 +46,13 @@ const Dashboard = () => {
                 >
                     <FiUpload /> 3. Tình Hình Xuất Kho
                 </button>
+                <button
+                    className={`db-tab-btn ${activeTab === 'audit' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('audit')}
+                    style={{ color: activeTab === 'audit' ? '#ef4444' : '' }} // Cho nó màu đỏ cho nổi bật vì là Cảnh báo
+                >
+                    <FiClipboard /> 4. Cảnh Báo Kiểm Kê
+                </button>
             </div>
 
             {/* --- KHU VỰC HIỂN THỊ NỘI DUNG THEO TAB --- */}
@@ -54,6 +61,7 @@ const Dashboard = () => {
                 {activeTab === 'overview' && <TabTongQuan />}
                 {activeTab === 'inbound' && <TabNhapKho />}
                 {activeTab === 'outbound' && <TabXuatKho />}
+                {activeTab === 'audit' && <TabKiemKe />} {/* 🎯 RENDER TAB MỚI */}
             </div>
         </div>
     );

@@ -72,11 +72,13 @@ const Sidebar = () => {
                     {openMenus.danhMuc && (
                         <ul className="sidebar-submenu">
                             {/* [UML: Xem DS Hàng Hóa] - Ai cũng có quyền xem */}
+                            <li><NavLink to="/categories" className={navClass}><FiClock /> Loại Hàng</NavLink></li>
                             <li><NavLink to="/products" className={navClass}><FiBox /> Hàng Hóa</NavLink></li>
-                            <li><NavLink to="/categories" className={navClass}><FiLayers /> Loại Hàng</NavLink></li>
+                            
 
                             {/* 🎯 [UML: Quản lý DS nhà cung cấp] - Chỉ QUẢN LÝ KHO & ADMIN */}
                             {(isAdmin || isQuanLyKho) && (
+                                
                                 <li><NavLink to="/suppliers" className={navClass}><FiTruck /> Nhà Cung Cấp</NavLink></li>
                             )}
                         </ul>
@@ -141,6 +143,7 @@ const Sidebar = () => {
                                 <li><NavLink to="/nhap-kho" className={navClass}><FiDownload /> Nhập Kho Thực Tế</NavLink></li>
                                 <li><NavLink to="/xuat-kho" className={navClass}><FiUpload /> Xuất Kho Thực Tế</NavLink></li>
                                 <li><NavLink to="/don-giao-thieu" className={navClass}><FiAlertCircle /> Xử Lý Đơn Giao Thiếu</NavLink></li>
+                                <li><NavLink to="/kiem-ke" className={navClass}><FiClipboard /> Kiểm Kê Kho Định Kỳ</NavLink></li>
                                 <li className="submenu-label">Lịch sử giao dịch</li>
                                 <li><NavLink to="/lich-su-nhap-kho" className={navClass}><FiClock /> LS Nhập Kho</NavLink></li>
                                 <li><NavLink to="/lich-su-xuat-kho" className={navClass}><FiClock /> LS Xuất Kho</NavLink></li>
