@@ -10,20 +10,26 @@ const LapYeuCauMuaForm = () => {
     const location = useLocation();
 
     const [suppliers, setSuppliers] = useState([]);
+    const [allProducts, setAllProducts] = useState([]); // 🎯 THÊM STATE LƯU KHO HÀNG
     const [batchRequests, setBatchRequests] = useState([
         { maNhaCungCap: '', ghiChu: '', chiTiets: [{ maHang: '', tenHang: '', soLuongCanMua: 1, soLuongTon: 0 }] }
     ]);
 
+    // 🎯 GỌI SONG SONG 2 API: LẤY NHÀ CUNG CẤP & LẤY KHO HÀNG
     useEffect(() => {
-        const fetchSuppliers = async () => {
+        const fetchData = async () => {
             try {
-                const response = await api.get('/suppliers');
-                setSuppliers(response.data);
+                const [supRes, prodRes] = await Promise.all([
+                    api.get('/suppliers'),
+                    api.get('/products') // API danh sách hàng hóa trong kho của mình
+                ]);
+                setSuppliers(supRes.data);
+                setAllProducts(prodRes.data);
             } catch (error) {
-                toast.error("Lỗi tải danh sách nhà cung cấp!");
+                toast.error("Lỗi tải dữ liệu hệ thống!");
             }
         };
-        fetchSuppliers();
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -74,9 +80,29 @@ const LapYeuCauMuaForm = () => {
         setBatchRequests(newBatch);
     };
 
+    // 🎯 ĐÃ FIX HOÀN TOÀN: Lấy tồn kho từ bảng `allProducts` (Kho thật của mình)
     const handleItemChange = (reqIndex, itemIndex, field, value) => {
         const newBatch = [...batchRequests];
-        newBatch[reqIndex].chiTiets[itemIndex][field] = value;
+
+        if (field === 'maHang') {
+            const currentSupplier = suppliers.find(s => s.maNCC === newBatch[reqIndex].maNhaCungCap);
+            const selectedProduct = currentSupplier?.danhSachHangHoa?.find(p => p.maHang === value);
+
+            // 🎯 Lục tìm trong kho mình xem món này đang tồn bao nhiêu
+            const productInWarehouse = allProducts.find(p => p.maHang === value);
+
+            if (selectedProduct) {
+                newBatch[reqIndex].chiTiets[itemIndex].maHang = selectedProduct.maHang;
+                newBatch[reqIndex].chiTiets[itemIndex].tenHang = selectedProduct.tenHang;
+                // Ép số tồn kho lấy từ kho nhà mình, không lấy từ NCC
+                newBatch[reqIndex].chiTiets[itemIndex].soLuongTon = productInWarehouse ? productInWarehouse.soLuongTon : 0;
+            } else {
+                newBatch[reqIndex].chiTiets[itemIndex].maHang = value;
+            }
+        } else {
+            newBatch[reqIndex].chiTiets[itemIndex][field] = value;
+        }
+
         setBatchRequests(newBatch);
     };
 
@@ -216,7 +242,7 @@ const LapYeuCauMuaForm = () => {
 
                                 <div className="ycm-section-divider"></div>
 
-                                <h5 className="ycm-sub-title"><FiBox className="icon-mr"/> Danh sách mặt hàng cần mua</h5>
+                                <h5 className="ycm-sub-title"><FiBox className="icon-mr" /> Danh sách mặt hàng cần mua</h5>
                                 <div className="ycm-table-responsive">
                                     <table className="ycm-modern-table">
                                         <thead>
@@ -244,11 +270,16 @@ const LapYeuCauMuaForm = () => {
                                                                 disabled={!req.maNhaCungCap}
                                                             >
                                                                 <option value="" disabled>-- Chọn mặt hàng --</option>
-                                                                {availableProducts.map(p => (
-                                                                    <option key={p.maHang} value={p.maHang}>
-                                                                        [{p.maHang}] - {p.tenHang} (Tồn: {p.soLuongTon || 0})
-                                                                    </option>
-                                                                ))}
+                                                                {/* 🎯 ĐÃ FIX: Chữ trong dropdown cũng tự check tồn kho để hiện số thật */}
+                                                                {availableProducts.map(p => {
+                                                                    const khoItem = allProducts.find(k => k.maHang === p.maHang);
+                                                                    const tonThucTe = khoItem ? khoItem.soLuongTon : 0;
+                                                                    return (
+                                                                        <option key={p.maHang} value={p.maHang}>
+                                                                            [{p.maHang}] - {p.tenHang} (Tồn hiện tại: {tonThucTe})
+                                                                        </option>
+                                                                    )
+                                                                })}
                                                             </select>
                                                         )}
                                                     </td>
@@ -271,9 +302,9 @@ const LapYeuCauMuaForm = () => {
                                                         />
                                                     </td>
                                                     <td className="text-center">
-                                                        <button 
-                                                            type="button" 
-                                                            className="ycm-btn-remove-row" 
+                                                        <button
+                                                            type="button"
+                                                            className="ycm-btn-remove-row"
                                                             onClick={() => removeRow(reqIndex, itemIndex)}
                                                             disabled={req.chiTiets.length <= 1}
                                                             title="Xóa dòng"
@@ -286,7 +317,7 @@ const LapYeuCauMuaForm = () => {
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 {!isAutoMode && (
                                     <button type="button" className="ycm-btn-add-row" onClick={() => addRow(reqIndex)} disabled={!req.maNhaCungCap}>
                                         <FiPlus /> Thêm dòng sản phẩm
@@ -307,7 +338,7 @@ const LapYeuCauMuaForm = () => {
 
                 <div className="ycm-footer-actions">
                     <button type="submit" className="ycm-btn-submit">
-                        <FiEdit3 className="ycm-icon-lg" /> 
+                        <FiEdit3 className="ycm-icon-lg" />
                         <span>XÁC NHẬN & TRÌNH SẾP DUYỆT ({batchRequests.length} ĐƠN)</span>
                     </button>
                 </div>

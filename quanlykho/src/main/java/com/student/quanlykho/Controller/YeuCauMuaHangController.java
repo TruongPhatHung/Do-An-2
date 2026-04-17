@@ -155,6 +155,9 @@ public class YeuCauMuaHangController {
     // ========================================================
     // 🚀 TÍNH NĂNG MỚI: TẠO YÊU CẦU MUA HÀNG LOẠT (TỪ CẢNH BÁO TỒN KHO)
     // ========================================================
+    // ========================================================
+    // 🚀 TÍNH NĂNG MỚI: TẠO YÊU CẦU MUA HÀNG LOẠT (TỪ CẢNH BÁO TỒN KHO)
+    // ========================================================
     @PostMapping("/tao-hang-loat")
     @Transactional
     public ResponseEntity<?> taoYeuCauHangLoat(@RequestBody List<YeuCauMuaRequest> requests) {
@@ -179,12 +182,26 @@ public class YeuCauMuaHangController {
 
                 List<ChiTietYeuCauMua> dsChiTiet = new ArrayList<>();
                 for (ChiTietYeuCauMuaRequest item : req.getChiTiets()) {
-                    HangHoa hangHoa = hangHoaRepository.findById(item.getMaHang())
-                            .orElseThrow(() -> new RuntimeException("Không tìm thấy hàng hóa!"));
+
+                    // 🎯 ĐÃ FIX CHỖ NÀY NÈ SẾP: Phải check xem NCC này có bán món này không!
+                    SanPhamNCC spNcc = sanPhamNCCRepository.findByMaHangAndNhaCungCap_MaNCC(item.getMaHang(), ncc.getMaNCC())
+                            .orElseThrow(() -> new RuntimeException("Lỗi: Mặt hàng [" + item.getMaHang() + "] không có trong danh sách bán của nhà cung cấp [" + ncc.getTenNCC() + "]."));
+
+                    // 2. 🎯 ĐÃ FIX: Lấy hàng trong kho. Nếu kho chưa có (hàng mới) -> Tự động KHAI SINH vào kho!
+                    HangHoa hangHoaTrongKho = hangHoaRepository.findById(item.getMaHang())
+                            .orElseGet(() -> {
+                                HangHoa hhMoi = new HangHoa();
+                                hhMoi.setMaHang(spNcc.getMaHang());
+                                hhMoi.setTenHang(spNcc.getTenHang());
+                                hhMoi.setGiaNhap(spNcc.getGiaBan()); // Lấy giá NCC làm giá nhập
+                                hhMoi.setGiaBan(spNcc.getGiaBan() != null ? spNcc.getGiaBan() * 1.2 : 0); // Tạm tính giá bán lãi 20%
+                                hhMoi.setSoLuongTon(0);
+                                return hangHoaRepository.save(hhMoi); // Lưu ngay vào kho
+                            });
 
                     ChiTietYeuCauMua chiTiet = new ChiTietYeuCauMua();
                     chiTiet.setYeuCauMuaHang(ycm);
-                    chiTiet.setHangHoa(hangHoa);
+                    chiTiet.setHangHoa(hangHoaTrongKho); // Giờ thì chắc chắn không bị null nữa!
                     chiTiet.setSoLuongCanMua(item.getSoLuongCanMua());
                     dsChiTiet.add(chiTiet);
                 }
@@ -199,14 +216,14 @@ public class YeuCauMuaHangController {
             // Rung chuông báo Admin có lô hàng mới
             ThongBao tb = new ThongBao();
             tb.setTieuDe("🚨 Yêu cầu mua khẩn cấp!");
-            tb.setNoiDung("Quản lý kho vừa dùng tính năng Auto để tạo " + savedList.size() + " phiếu yêu cầu mua hàng.");
+            tb.setNoiDung("Hệ thống vừa dùng tính năng Auto để tạo " + savedList.size() + " phiếu yêu cầu mua hàng.");
             tb.setNguoiNhan("ADMIN");
             tb.setDuongDan("/duyet-yeu-cau-mua");
             thongBaoRepository.save(tb);
 
             return ResponseEntity.ok("Đã tạo thành công " + savedList.size() + " Yêu cầu mua hàng!");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Lỗi tạo yêu cầu hàng loạt: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
