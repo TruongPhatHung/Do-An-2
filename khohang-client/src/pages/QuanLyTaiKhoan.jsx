@@ -38,7 +38,8 @@ const QuanLyTaiKhoan = () => {
     const handleUpdateRole = async (maND, newRole) => {
         if (!window.confirm(`Xác nhận nâng chức/đổi quyền thành ${newRole}?`)) return;
         try {
-            await api.put(`/users/${maND}/role`, newRole, {
+            // 🎯 ĐÃ FIX: Bọc newRole vào object { role: newRole }
+            await api.put(`/users/${maND}/role`, { role: newRole }, {
                 headers: { 'Content-Type': 'application/json' }
             });
             toast.success(`✅ Đã đổi quyền thành ${newRole}`);
@@ -47,7 +48,6 @@ const QuanLyTaiKhoan = () => {
             toast.error("❌ Cập nhật quyền thất bại!");
         }
     };
-
     const handleUpdatePassword = async (maND) => {
         const newPw = window.prompt("🔑 Nhập mật khẩu mới cho nhân viên này:");
         if (newPw === null || newPw.trim() === "") return;
@@ -57,7 +57,9 @@ const QuanLyTaiKhoan = () => {
         }
 
         try {
-            await api.patch(`/users/${maND}/password`, newPw, {
+            // 🎯 ĐÃ FIX: Bọc newPw vào object. 
+            // (Lưu ý: Chữ "matKhau" phải giống với chữ bên Java sếp đang hứng nhé, nếu Java dùng "password" thì sếp đổi lại)
+            await api.patch(`/users/${maND}/password`, { matKhau: newPw }, {
                 headers: { 'Content-Type': 'application/json' }
             });
             toast.success("✅ Đã cập nhật mật khẩu mới thành công!");
@@ -83,8 +85,9 @@ const QuanLyTaiKhoan = () => {
         const actionText = isCurrentlyLocked ? "mở khóa" : "khóa";
         if (window.confirm(`❗ Bạn có chắc muốn ${actionText} tài khoản này?`)) {
             try {
-                // Giả định sếp có API này, nếu tên API khác thì sếp đổi lại chữ /status nhé
-                await api.patch(`/users/${id}/status`, !isCurrentlyLocked, {
+                // 🎯 ĐÃ FIX: Bọc boolean vào object
+                // (Lưu ý: Chữ "trangThai" phải khớp với Backend Java)
+                await api.patch(`/users/${id}/status`, { trangThai: !isCurrentlyLocked }, {
                     headers: { 'Content-Type': 'application/json' }
                 });
                 toast.success(`✅ Đã ${actionText} tài khoản!`);
@@ -94,7 +97,6 @@ const QuanLyTaiKhoan = () => {
             }
         }
     };
-
     const handleViewDetails = (id) => {
         navigate(`/chi-tiet-tai-khoan/${id}`);
     };
