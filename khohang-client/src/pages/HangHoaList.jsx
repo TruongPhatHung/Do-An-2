@@ -67,17 +67,19 @@ const HangHoaList = () => {
         return stock < minStock && (stock + incomingQty) >= minStock;
     });
 
-    const handleChuyenSangTrangLapYeuCau = () => {
-        if (lowStockItems.length === 0) return toast.info("Không có hàng cần nhập!");
+   // Thay thế đoạn này trong HangHoaList.jsx
+const handleChuyenSangTrangLapYeuCau = () => {
+    if (lowStockItems.length === 0) return toast.info("Không có hàng cần nhập!");
 
-        const dataToOrder = lowStockItems.map(item => {
-            const stock = Number(item.soLuongTon || 0);
-            const incomingQty = pendingItems[item.maHang] || 0;
-            return { ...item, soLuongTon: stock + incomingQty };
-        });
+    const dataToOrder = lowStockItems.map(item => {
+        const stock = Number(item.soLuongTon || 0);
+        const incomingQty = pendingItems[item.maHang] || 0;
+        // Trả về đúng Tồn kho thực tế, và truyền thêm biến hangDangVe
+        return { ...item, soLuongTon: stock, hangDangVe: incomingQty }; 
+    });
 
-        navigate('/lap-lenh-yeu-cau-mua', { state: { items: dataToOrder } });
-    };
+    navigate('/lap-lenh-yeu-cau-mua', { state: { items: dataToOrder } });
+};
 
     const filteredHangHoa = hangHoa.filter(item => {
         if (!item) return false;
@@ -128,8 +130,8 @@ const HangHoaList = () => {
                         <button className="btn-filter-alert" onClick={() => setStockFilter('lowStockWarning')}>
                             <FiFilter /> Lọc xem ngay
                         </button>
-                        {/* 🎯 Phân quyền: Nhân viên kinh doanh không được thấy nút Tự động lên đơn mua */}
-                        {(userRole === 'ADMIN' || userRole === 'QUANLYKHO' || userRole === 'MUAHANG' || userRole === 'KHO') && (
+                        {/* 🎯 Phân quyền: CHỈ Admin và Nhân viên Kinh doanh mới được thấy nút Tự động lên đơn mua */}
+                        {(userRole === 'ADMIN' || userRole === 'NV_KD') && (
                             <button className="btn-filter-alert" onClick={handleChuyenSangTrangLapYeuCau} style={{ background: '#fff', color: '#e74a3b', border: '1px solid #e74a3b' }}>
                                 <FiShoppingCart /> Tự động lên Đơn
                             </button>

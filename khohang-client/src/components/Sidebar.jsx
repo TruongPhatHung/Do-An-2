@@ -18,7 +18,8 @@ const Sidebar = () => {
     const isAdmin = role === 'ADMIN';
     const isMuaHang = role === 'MUAHANG';
     const isQuanLyKho = role === 'QUANLYKHO';
-    const isKho = role === 'KHO' || isQuanLyKho; // KHO gồm cả Quản lý & Nhân viên
+    const isNhanVienKho = role === 'KHO'; // Thêm biến kiểm tra riêng cho Nhân viên kho
+    const isKho = isNhanVienKho || isQuanLyKho; // KHO gồm cả Quản lý & Nhân viên
     const isKinhdoanh = role === 'NV_KD';
 
     const [openMenus, setOpenMenus] = useState({
@@ -75,10 +76,8 @@ const Sidebar = () => {
                             <li><NavLink to="/categories" className={navClass}><FiClock /> Loại Hàng</NavLink></li>
                             <li><NavLink to="/products" className={navClass}><FiBox /> Hàng Hóa</NavLink></li>
                             
-
                             {/* 🎯 [UML: Quản lý DS nhà cung cấp] - Chỉ QUẢN LÝ KHO & ADMIN */}
                             {(isAdmin || isQuanLyKho) && (
-                                
                                 <li><NavLink to="/suppliers" className={navClass}><FiTruck /> Nhà Cung Cấp</NavLink></li>
                             )}
                         </ul>
@@ -140,10 +139,17 @@ const Sidebar = () => {
                         </div>
                         {openMenus.kho && (
                             <ul className="sidebar-submenu">
-                                <li><NavLink to="/nhap-kho" className={navClass}><FiDownload /> Nhập Kho Thực Tế</NavLink></li>
-                                <li><NavLink to="/xuat-kho" className={navClass}><FiUpload /> Xuất Kho Thực Tế</NavLink></li>
-                                <li><NavLink to="/don-giao-thieu" className={navClass}><FiAlertCircle /> Xử Lý Đơn Giao Thiếu</NavLink></li>
-                                <li><NavLink to="/kiem-ke" className={navClass}><FiClipboard /> Kiểm Kê Kho Định Kỳ</NavLink></li>
+                                {/* Chỉ Admin hoặc Nhân Viên Kho mới thao tác xuất/nhập/giao thiếu/kiểm kê */}
+                                {(isAdmin || isNhanVienKho) && (
+                                    <>
+                                        <li><NavLink to="/nhap-kho" className={navClass}><FiDownload /> Nhập Kho Thực Tế</NavLink></li>
+                                        <li><NavLink to="/xuat-kho" className={navClass}><FiUpload /> Xuất Kho Thực Tế</NavLink></li>
+                                        <li><NavLink to="/don-giao-thieu" className={navClass}><FiAlertCircle /> Xử Lý Đơn Giao Thiếu</NavLink></li>
+                                        <li><NavLink to="/kiem-ke" className={navClass}><FiClipboard /> Kiểm Kê Kho Định Kỳ</NavLink></li>
+                                    </>
+                                )}
+
+                                {/* Lịch sử giao dịch: Cả Admin, Quản Lý Kho và Nhân Viên Kho đều xem được */}
                                 <li className="submenu-label">Lịch sử giao dịch</li>
                                 <li><NavLink to="/lich-su-nhap-kho" className={navClass}><FiClock /> LS Nhập Kho</NavLink></li>
                                 <li><NavLink to="/lich-su-xuat-kho" className={navClass}><FiClock /> LS Xuất Kho</NavLink></li>

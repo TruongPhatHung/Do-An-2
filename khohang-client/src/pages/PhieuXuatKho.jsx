@@ -217,7 +217,7 @@ const PhieuXuatKho = () => {
                                         <th className="text-center">Yêu Cầu (Đã Duyệt)</th>
                                         <th className="text-center">Đã Giao Trước Đó</th>
                                         <th className="text-center">Tồn Kho</th>
-                                        <th width="20%" className="text-center">SL Nhặt Lần Này</th>
+                                        <th width="20%" className="text-center">SL Nhập Lần Này</th>
                                     </tr>
                                 </thead>
                                 <tbody>

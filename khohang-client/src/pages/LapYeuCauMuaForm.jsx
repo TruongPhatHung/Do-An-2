@@ -9,22 +9,42 @@ const LapYeuCauMuaForm = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [suppliers, setSuppliers] = useState([]);
     const [batchRequests, setBatchRequests] = useState([
         { maNhaCungCap: '', ghiChu: '', chiTiets: [{ maHang: '', tenHang: '', soLuongCanMua: 1, soLuongTon: 0 }] }
     ]);
 
+    // Thêm state mới
+    const [suppliers, setSuppliers] = useState([]);
+    const [allProducts, setAllProducts] = useState([]); // State mới để chứa kho thực tế
+
     useEffect(() => {
-        const fetchSuppliers = async () => {
+        const fetchData = async () => {
             try {
-                const response = await api.get('/suppliers');
-                setSuppliers(response.data);
+                // Gọi song song cả 2 API cho nhanh
+                const [suppliersRes, productsRes] = await Promise.all([
+                    api.get('/suppliers'),
+                    api.get('/products') // Thay '/products' bằng đúng API lấy danh sách hàng hóa của bạn
+                ]);
+                setSuppliers(suppliersRes.data);
+                setAllProducts(productsRes.data);
             } catch (error) {
-                toast.error("Lỗi tải danh sách nhà cung cấp!");
+                toast.error("Lỗi tải dữ liệu!");
             }
         };
-        fetchSuppliers();
+        fetchData();
     }, []);
+
+    // useEffect(() => {
+    //     const fetchSuppliers = async () => {
+    //         try {
+    //             const response = await api.get('/suppliers');
+    //             setSuppliers(response.data);
+    //         } catch (error) {
+    //             toast.error("Lỗi tải danh sách nhà cung cấp!");
+    //         }
+    //     };
+    //     fetchSuppliers();
+    // }, []);
 
     useEffect(() => {
         if (location.state?.items && location.state.items.length > 0 && suppliers.length > 0) {
@@ -35,7 +55,8 @@ const LapYeuCauMuaForm = () => {
 
                 if (!maNCC) {
                     const foundSupplier = suppliers.find(s =>
-                        s.danhSachHangHoa?.some(p => p.maHang === item.maHang)
+                    s.danhSachHangHoa?.some(p => String(p.maHang) === String(item.maHang))
+
                     );
                     maNCC = foundSupplier ? foundSupplier.maNCC : "";
                 }
@@ -48,11 +69,17 @@ const LapYeuCauMuaForm = () => {
                     };
                 }
 
+                // Tính toán chuẩn xác: Số lượng cần mua = Định mức - (Tồn thực tế + Đang chờ về)
+                const tongTonVaDangVe = item.soLuongTon + (item.hangDangVe || 0);
+                const canMua = (item.soLuongToiThieu - tongTonVaDangVe) > 0 
+                             ? (item.soLuongToiThieu - tongTonVaDangVe) 
+                             : 5;
+
                 groups[maNCC].chiTiets.push({
                     maHang: item.maHang,
                     tenHang: item.tenHang,
-                    soLuongTon: item.soLuongTon,
-                    soLuongCanMua: (item.soLuongToiThieu - item.soLuongTon) > 0 ? (item.soLuongToiThieu - item.soLuongTon) : 5
+                    soLuongTon: item.soLuongTon, // Giữ đúng số lượng tồn thực tế hiển thị
+                    soLuongCanMua: canMua
                 });
             });
 
@@ -108,7 +135,7 @@ const LapYeuCauMuaForm = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
         e.preventDefault();
 
         const isValid = batchRequests.every(req => req.maNhaCungCap !== '' && req.chiTiets[0].maHang !== '');
@@ -116,12 +143,14 @@ const LapYeuCauMuaForm = () => {
             return toast.error("Vui lòng điền đầy đủ thông tin hoặc xóa các phiếu/dòng trống!");
         }
 
+        // --- ĐÃ SỬA TẠI ĐÂY ---
         const payload = batchRequests.map(req => ({
             maNhaCungCap: req.maNhaCungCap,
             ghiChu: req.ghiChu,
             chiTiets: req.chiTiets.map(item => ({
-                maHang: item.maHang,
-                soLuongCanMua: item.soLuongCanMua
+                // Dùng String().trim() để xóa sạch khoảng trắng vô tình lọt vào (VD: "PA-002 " -> "PA-002")
+                maHang: item.maHang ? String(item.maHang).trim() : '', 
+                soLuongCanMua: Number(item.soLuongCanMua) // Ép kiểu số luôn cho an toàn với Backend
             }))
         }));
 
@@ -162,7 +191,8 @@ const LapYeuCauMuaForm = () => {
 
             <form onSubmit={handleSubmit} className="ycm-form-container">
                 {batchRequests.map((req, reqIndex) => {
-                    const currentSupplier = suppliers.find(s => s.maNCC === req.maNhaCungCap);
+                   // Thay vì: s.maNCC === req.maNhaCungCap
+                    const currentSupplier = suppliers.find(s => String(s.maNCC) === String(req.maNhaCungCap));
                     const availableProducts = currentSupplier?.danhSachHangHoa || [];
 
                     return (
@@ -236,20 +266,46 @@ const LapYeuCauMuaForm = () => {
                                                                 <FiInfo className="text-muted" /> {item.tenHang}
                                                             </div>
                                                         ) : (
-                                                            <select
-                                                                className="ycm-input-control"
-                                                                value={item.maHang}
-                                                                onChange={(e) => handleItemChange(reqIndex, itemIndex, 'maHang', e.target.value)}
-                                                                required
-                                                                disabled={!req.maNhaCungCap}
-                                                            >
-                                                                <option value="" disabled>-- Chọn mặt hàng --</option>
-                                                                {availableProducts.map(p => (
-                                                                    <option key={p.maHang} value={p.maHang}>
-                                                                        [{p.maHang}] - {p.tenHang} (Tồn: {p.soLuongTon || 0})
-                                                                    </option>
-                                                                ))}
-                                                            </select>
+                                                       <select
+                                                    className="ycm-input-control"
+                                                    value={item.maHang}
+                                                  onChange={(e) => {
+                                                        const selectedMaHang = e.target.value;
+                                                        
+                                                        // Tìm trong danh sách của NCC để lấy tên
+                                                        const productInSupplier = availableProducts.find(p => String(p.maHang) === String(selectedMaHang));
+                                                        
+                                                        // TÌM TRONG DANH SÁCH TỔNG ĐỂ LẤY TỒN KHO THỰC TẾ
+                                                        const realProduct = allProducts.find(p => String(p.maHang) === String(selectedMaHang));
+                                                        
+                                                        const newBatch = [...batchRequests];
+                                                        const updatedChiTiets = [...newBatch[reqIndex].chiTiets];
+                                                        
+                                                        updatedChiTiets[itemIndex] = {
+                                                            ...updatedChiTiets[itemIndex],
+                                                            maHang: selectedMaHang,
+                                                            tenHang: productInSupplier?.tenHang || '',
+                                                            // Thay vì lấy từ supplier, hãy lấy từ realProduct
+                                                            soLuongTon: realProduct?.soLuongTon ?? 0 
+                                                        };
+
+                                                        newBatch[reqIndex] = {
+                                                            ...newBatch[reqIndex],
+                                                            chiTiets: updatedChiTiets
+                                                        };
+                                                        
+                                                        setBatchRequests(newBatch);
+                                                    }}
+                                                    required
+                                                    disabled={!req.maNhaCungCap}
+                                                >
+                                                    <option value="" disabled>-- Chọn mặt hàng --</option>
+                                                    {availableProducts.map(p => (
+                                                        <option key={p.maHang} value={p.maHang}>
+                                                            [{p.maHang}] - {p.tenHang}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                                         )}
                                                     </td>
                                                     <td className="text-center">

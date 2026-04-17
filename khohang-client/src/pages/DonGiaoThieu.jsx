@@ -186,7 +186,7 @@ const DonGiaoThieu = () => {
                             <tr>
                                 <th>Mã Lệnh</th>
                                 <th>Nơi Nhận</th>
-                                <th>Ngày Tạo Lệnh</th>
+                                <th>Ngày Tạo Đơn</th>
                                 <th>Trạng Thái</th>
                                 <th className="text-center">Hẹn Giao Bù</th>
                                 <th className="text-center">Thao Tác</th>
