@@ -46,6 +46,7 @@ import PhieuNhapDetail from './pages/PhieuNhapDetail';
 import ThemTaiKhoan from './pages/ThemTaiKhoan'; // Trang thêm tài khoản mới
 import ChiTietTaiKhoan from './pages/ChiTietTaiKhoan'; // Trang chi tiết tài khoản
 import SuaTaiKhoan from './pages/SuaTaiKhoan'; // Trang sửa tài khoản
+import KiemKeKho from './pages/KiemKeKho';
 
 import PhieuXuatDetail from './pages/PhieuXuatDetail';
 
@@ -116,6 +117,7 @@ function App() {
                 <Route path="/chi-tiet-phieu-nhap/:id" element={<ProtectedRoute><PhieuNhapDetail /></ProtectedRoute>} />
                 <Route path="/lich-su-nhap-kho" element={<ProtectedRoute><LichSuNhapKho /></ProtectedRoute>} />
                 <Route path="/phieu-xuat-detail/:id" element={<ProtectedRoute><PhieuXuatDetail /></ProtectedRoute>} />
+                <Route path="/kiem-ke" element={<ProtectedRoute><KiemKeKho /></ProtectedRoute>} />
                 
 
                 {/* YeuCauXuat */}

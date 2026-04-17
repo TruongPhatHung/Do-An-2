@@ -1,0 +1,117 @@
+/* =========================================
+   TAB CẢNH BÁO KIỂM KÊ (TabKiemKe.css)
+   ========================================= */
+
+.tab-kiemke-container {
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tab-kiemke-main-title {
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #fee2e2;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.kiemke-section {
+    margin-top: 20px;
+}
+
+.kiemke-section-title.danger {
+    color: #b91c1c;
+    margin-bottom: 10px;
+}
+
+.kiemke-section-title.warning {
+    color: #d97706;
+    margin-bottom: 10px;
+    margin-top: 30px;
+}
+
+/* Kiểu dáng bảng chung */
+.kiemke-alert-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.kiemke-alert-table th,
+.kiemke-alert-table td {
+    padding: 10px;
+    text-align: left;
+}
+
+/* Bảng màu ĐỎ (Hàng hư hỏng) */
+.table-danger thead tr {
+    background-color: #fef2f2;
+    color: #991b1b;
+}
+
+.table-danger th {
+    border: 1px solid #fca5a5;
+}
+
+.table-danger td {
+    border: 1px solid #fecaca;
+}
+
+.text-danger-note {
+    color: #ef4444;
+    font-weight: 500;
+}
+
+/* Bảng màu VÀNG (Hàng tồn lâu ngày) */
+.table-warning thead tr {
+    background-color: #fffbeb;
+    color: #b45309;
+}
+
+.table-warning th {
+    border: 1px solid #fcd34d;
+}
+
+.table-warning td {
+    border: 1px solid #fde68a;
+}
+
+.text-warning-status {
+    font-weight: bold;
+    color: #d97706;
+}
+
+/* Nút bấm hành động */
+.btn-kiemke-action {
+    padding: 6px 12px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-huy {
+    background-color: #ef4444;
+    margin-right: 8px;
+}
+
+.btn-huy:hover {
+    background-color: #dc2626;
+}
+
+.btn-tra {
+    background-color: #f59e0b;
+}
+
+.btn-tra:hover {
+    background-color: #d97706;
+}
