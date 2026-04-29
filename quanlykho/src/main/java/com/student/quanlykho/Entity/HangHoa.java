@@ -1,35 +1,60 @@
 package com.student.quanlykho.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 @Table(name = "Hang_Hoa")
 @Entity
 public class HangHoa {
-   @Id
-   @Column(name = "ma_hang")
+    @Id
+    @Column(name = "ma_hang")
     private String maHang;
 
-   @Column(name = "ten_hang", nullable = false)
+    @Column(name = "ten_hang", nullable = false)
     private String tenHang;
 
-   @Column(name = "so_luong_ton")
-    private int  soLuongTon;
-   @Column(name = "don_vi_tinh")
+    @Column(name = "so_luong_ton")
+    private Integer soLuongTon;
+
+    @Column(name = "don_vi_tinh")
     private String donViTinh;
 
-   @Column(name = "gia_nhap")
+    @Column(name = "gia_nhap")
     private Double giaNhap;
 
-   @Column(name = "so_luong_toi_thieu")
-    private int soLuongToiThieu;
+    @Column(name = "gia_ban")
+    private Double giaBan;
 
+    @Column(name = "so_luong_toi_thieu")
+    private Integer soLuongToiThieu = 0;
 
-    public boolean isCanhBaoHetHang(){
-        return this.soLuongTon < this.soLuongToiThieu;
+    @ManyToOne
+    @JoinColumn(name = "ma_ncc")
+    private NhaCungCap nhaCungCap;
+
+    @ManyToOne
+    @JoinColumn(name = "loai_hang_id")
+    private LoaiHang loaiHang;
+
+    // 🎯 1. Bọc giáp Tối thiểu
+    public Integer getSoLuongToiThieu() {
+        return (this.soLuongToiThieu == null) ? 0 : this.soLuongToiThieu;
+    }
+
+    // 🎯 2. Bọc giáp Tồn kho
+    public Integer getSoLuongTon() {
+        return (this.soLuongTon == null) ? 0 : this.soLuongTon;
+    }
+    @Column(name = "ngay_cap_nhat_cuoi")
+   private LocalDateTime ngayCapNhatCuoi;
+
+    // 🎯 3. Bọc giáp hàm Cảnh báo (THAY ĐỔI QUAN TRỌNG NHẤT Ở ĐÂY)
+    public boolean isCanhBaoHetHang() {
+        int ton = (this.soLuongTon == null) ? 0 : this.soLuongTon;
+        int toiThieu = (this.soLuongToiThieu == null) ? 0 : this.soLuongToiThieu;
+        return ton < toiThieu;
     }
 }

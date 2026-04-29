@@ -1,0 +1,197 @@
+/* =========================================
+   GIAO DIỆN KIỂM KÊ KHO (KiemKeKho.css)
+   Bao gồm cả Giao diện Bảng cũ & Thẻ thông minh mới
+   ========================================= */
+
+/* -----------------------------------------
+   1. PHẦN CHUNG & GIAO DIỆN BẢNG (BẢN CŨ)
+   ----------------------------------------- */
+.kiemke-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.alert-kiemke {
+    background-color: #eff6ff;
+    color: #1e3a8a;
+    border-left: 4px solid #3b82f6;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.kiemke-table-wrapper { margin-top: 20px; }
+.col-thucte-width { width: 150px; }
+.text-ton-phanmem { font-size: 1.1rem; font-weight: bold; }
+
+/* Các ô Input trong bảng */
+.input-soluong-kiemke {
+    width: 80px;
+    padding: 6px;
+    text-align: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+.input-soluong-kiemke:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.input-ghichu-kiemke {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+.input-ghichu-kiemke:disabled {
+    opacity: 0.5;
+    background-color: #f8fafc;
+    cursor: not-allowed;
+}
+
+.row-lech-kiemke { background-color: #fffbeb !important; }
+.status-khop { color: #10b981; font-weight: 500; }
+.status-du { color: #d97706; font-weight: bold; }
+.status-hut { color: #ef4444; font-weight: bold; }
+
+
+/* -----------------------------------------
+   2. GIAO DIỆN "1 CHẠM" THÔNG MINH (BẢN MỚI)
+   ----------------------------------------- */
+.kiemke-smart-container { 
+    padding: 20px; 
+    background: #f1f5f9; 
+    border-radius: 12px;
+}
+
+/* Header & Tiến độ */
+.kiemke-top-bar {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    background: white; 
+    padding: 20px; 
+    border-radius: 12px; 
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.progress-section h3 { margin: 0 0 5px 0; color: #1e293b; font-size: 1.1rem; }
+.progress-bg { 
+    width: 100%; /* Sửa lại cho linh hoạt */
+    max-width: 300px; 
+    height: 10px; 
+    background: #e2e8f0; 
+    border-radius: 5px; 
+}
+.progress-fill { 
+    height: 100%; 
+    background: #3b82f6; 
+    border-radius: 5px; 
+    transition: width 0.4s ease-in-out; 
+}
+
+/* Các nút bấm Header */
+.action-btns { display: flex; gap: 10px; }
+
+.btn-excel {
+    background: #10b981; color: white; border: none; padding: 10px 15px; 
+    border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600;
+}
+.btn-excel:hover { background: #059669; }
+
+.btn-save-all {
+    background: #3b82f6; color: white; border: none; padding: 10px 15px; 
+    border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600;
+}
+.btn-save-all:hover:not(:disabled) { background: #2563eb; }
+.btn-save-all:disabled { cursor: not-allowed; opacity: 0.6; }
+
+/* Thanh tìm kiếm */
+.search-bar-audit {
+    display: flex; align-items: center; background: white; 
+    padding: 15px; border-radius: 8px; margin-bottom: 15px; gap: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.search-bar-audit svg { color: #64748b; font-size: 1.2rem; }
+.search-bar-audit input { border: none; outline: none; width: 100%; font-size: 1rem; color: #334155; }
+
+/* Card chứa thông tin kiểm kê */
+.audit-item-card {
+    background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-left: 5px solid #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+.audit-item-card:hover { transform: translateX(2px); }
+.audit-item-card.match { border-left-color: #10b981; background: #f0fdf4; }
+.audit-item-card.issue { border-left-color: #ef4444; background: #fef2f2; }
+
+.item-info { display: flex; flex-direction: column; gap: 4px; }
+.item-info strong { font-size: 1.1rem; color: #1e293b; }
+.item-info span { color: #64748b; font-size: 0.9rem; }
+
+/* Nút bấm trong Card */
+.item-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+.btn-match { background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.btn-match:hover { background: #059669; }
+
+.btn-issue { background: #64748b; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.btn-issue:hover { background: #475569; }
+
+.badge-match { color: #059669; font-weight: 600; cursor: pointer; padding: 8px; border-radius: 6px; background: #d1fae5; }
+.badge-match:hover { background: #bbf7d0; }
+
+/* Khung nhập liệu khi báo Lệch/Hỏng */
+.issue-input-group { display: flex; gap: 8px; align-items: center; }
+.issue-input-group input { padding: 8px; border: 1px solid #fca5a5; border-radius: 4px; outline: none; }
+.issue-input-group input:focus { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2); }
+.issue-input-group input[type="number"] { width: 100px; }
+
+.btn-camera { background: #3b82f6; color: white; border: none; padding: 9px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.btn-camera:hover { background: #2563eb; }
+
+.btn-undo { background: #e2e8f0; color: #334155; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: 500; }
+.btn-undo:hover { background: #cbd5e1; }
+
+
+/* -----------------------------------------
+   3. RESPONSIVE CHO ĐIỆN THOẠI (MOBILE)
+   ----------------------------------------- */
+@media (max-width: 768px) {
+    .kiemke-top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .action-btns { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+    .btn-excel, .btn-save-all { justify-content: center; }
+
+    .audit-item-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .item-actions, .issue-input-group {
+        width: 100%;
+    }
+
+    .issue-input-group {
+        flex-wrap: wrap; /* Cho phép các ô input rớt dòng nếu màn hình quá nhỏ */
+    }
+
+    .issue-input-group input[type="text"] {
+        flex: 1; /* Cho ô ghi chú chiếm hết chỗ còn lại */
+        min-width: 150px;
+    }
+}

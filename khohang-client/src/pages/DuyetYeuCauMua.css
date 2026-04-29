@@ -1,0 +1,329 @@
+/* =========================================
+   GIAO DIỆN SẾP DUYỆT YÊU CẦU MUA HÀNG
+========================================= */
+
+.dyc-container {
+    padding: 20px 30px;
+    font-family: 'Inter', sans-serif;
+    color: #1e293b;
+}
+
+.dyc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 25px;
+}
+
+.dyc-header h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: #0f172a;
+}
+
+.dyc-header p {
+    margin: 5px 0 0 0;
+    color: #64748b;
+}
+
+/* Bộ lọc Dropdown */
+.dyc-filter-box {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 15px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.filter-icon {
+    color: #64748b;
+    margin-right: 10px;
+}
+
+.dyc-filter-box select {
+    border: none;
+    padding: 10px 0;
+    font-size: 1rem;
+    color: #334155;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Bảng dữ liệu */
+.dyc-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.dyc-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dyc-table th {
+    background: #f8fafc;
+    color: #475569;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dyc-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.dyc-table tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Nút Xem */
+.dyc-btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    color: #3b82f6;
+    border: 1px solid #cbd5e1;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.dyc-btn-view:hover {
+    background: #e0e7ff;
+    border-color: #818cf8;
+}
+
+/* Badges Trạng Thái */
+.dyc-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.dyc-badge-warning { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+.dyc-badge-success { background: #dcfce3; color: #16a34a; border: 1px solid #bbf7d0; }
+.dyc-badge-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.dyc-badge-info { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+
+/* ================== MODAL ================== */
+.dyc-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.dyc-modal-content {
+    background: #fff;
+    width: 90%;
+    max-width: 700px;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.reject-modal {
+    max-width: 500px; /* Modal nhập lý do nhỏ hơn */
+}
+
+.dyc-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dyc-modal-header h3 {
+    margin: 0;
+    color: #0f172a;
+}
+
+.btn-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.btn-close:hover { color: #ef4444; }
+
+.dyc-modal-body {
+    padding: 25px;
+    overflow-y: auto;
+}
+
+/* Info Grid trong Modal */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.info-grid p { margin: 0; color: #475569; }
+.info-grid strong { color: #1e293b; }
+.text-highlight { color: #d97706; font-weight: bold; }
+
+.reject-reason-box {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border-left: 4px solid #ef4444;
+    margin-bottom: 20px;
+}
+
+/* Table chi tiết trong Modal */
+.dyc-table-detail {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dyc-table-detail th {
+    background: #f1f5f9;
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+}
+
+.dyc-table-detail td {
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Buttons Modal Footer */
+.dyc-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 25px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 0 0 12px 12px;
+}
+
+.btn-approve, .btn-reject, .btn-reject-confirm, .btn-cancel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+}
+
+.btn-approve {
+    background: #10b981;
+    color: white;
+}
+.btn-approve:hover { background: #059669; }
+
+.btn-reject {
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+}
+.btn-reject:hover { background: #fee2e2; }
+
+.btn-reject-confirm {
+    background: #ef4444;
+    color: white;
+}
+.btn-reject-confirm:hover { background: #dc2626; }
+
+.btn-cancel {
+    background: #e2e8f0;
+    color: #475569;
+}
+.btn-cancel:hover { background: #cbd5e1; }
+
+.reject-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.dyc-total-col {
+    color: #c53030;
+    font-weight: 700;
+}
+
+.dyc-budget-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff5f5;
+    border: 2px dashed #feb2b2;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #c53030;
+}
+
+.dyc-budget-alert span {
+    font-size: 1.4rem;
+    color: #e53e3e;
+}
+
+.text-right { text-align: right; }
+
+.dyc-table-detail th {
+    background: #f7fafc;
+    padding: 12px;
+}
+
+.reject-section {
+    margin-top: 15px;
+    border-top: 1px solid #edf2f7;
+    padding-top: 15px;
+}
+
+.reject-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.info-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 6px;
+}

@@ -1,0 +1,150 @@
+.navbar-top {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    position: relative; 
+    height: 60px; 
+    background-color: #2c3e50; 
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 0 25px; 
+}
+
+/* Vùng chức năng bên trái (chỉ chứa nút menu) */
+.nav-left-area {
+    display: flex;
+    align-items: center;
+}
+
+.menu-toggle-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 22px; 
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.menu-toggle-btn:hover { 
+    color: #3498db; 
+}
+
+/* --- Vùng Logo nằm chính giữa Navbar --- */
+.nav-center-area {
+    position: absolute; 
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+}
+
+.nav-center-area:hover {
+    color: #3498db;
+}
+
+/* Vùng chức năng bên phải */
+.nav-right-area {
+    display: flex;
+    align-items: center;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Giảm gap một chút để các icon đứng gần nhau hơn */
+}
+
+/* --- Nút Làm Mới (Refresh) --- */
+.refresh-btn {
+    background: transparent;
+    border: none;
+    color: #ecf0f1;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+    color: #3498db;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: rotate(180deg); /* Hiệu ứng xoay tròn khi hover */
+}
+
+/* Khu vực Avatar và Tên */
+.nav-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 15px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid #3498db;
+    background-color: white;
+    object-fit: cover;
+}
+
+.nav-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.nav-name {
+    font-size: 0.9rem;
+}
+
+.nav-role {
+    font-size: 0.75rem;
+    color: #bdc3c7;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Nút Đăng xuất */
+.logout-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+    margin-left: 10px; /* Cách profile một chút */
+}
+
+.logout-btn:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+}
+/* --- Cấu hình cho Icon Logo FontAwesome --- */
+.nav-logo-icon {
+    color: #f39c12; /* Màu vàng cam cho giống màu kiện hàng/kho vận */
+    font-size: 24px;
+    margin-right: 5px; /* Tạo khoảng cách 1 chút với chữ WMS-SYSTEM */
+}
+
+/* Hiệu ứng nhấp nháy/phát sáng nhẹ khi hover vào cụm Logo */
+.nav-center-area:hover .nav-logo-icon {
+    color: #f1c40f;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}

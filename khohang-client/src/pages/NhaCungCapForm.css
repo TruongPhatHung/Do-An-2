@@ -1,0 +1,484 @@
+/* TỌA ĐỘ BIẾN MÀU - DỄ DÀNG THAY ĐỔI THEME */
+:root {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-light: #eff6ff;
+    --success-color: #10b981;
+    --success-hover: #059669;
+    --danger-color: #ef4444;
+    --danger-light: #fef2f2;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* CONTAINER & HEADER */
+.ncc-container {
+    padding: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+}
+
+.ncc-header {
+    margin-bottom: 24px;
+}
+
+.ncc-title {
+    color: var(--text-main);
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.ncc-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0;
+}
+
+/* FORM CARD */
+.ncc-form-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    padding: 32px;
+}
+
+/* SECTION CHIA TỪNG PHẦN */
+.ncc-section {
+    margin-bottom: 36px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: var(--text-main);
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-title span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.section-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.section-header-flex .section-title {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* LƯỚI GRID CHIA CỘT */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px 24px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+/* INPUT GROUP */
+.ncc-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ncc-input-group label {
+    font-weight: 500;
+    color: var(--text-main);
+    font-size: 13px;
+}
+
+.required {
+    color: var(--danger-color);
+    margin-left: 2px;
+}
+
+.ncc-input-group input, 
+.ncc-input-group select {
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-main);
+    background-color: var(--bg-card);
+    transition: all 0.2s ease-in-out;
+    outline: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.ncc-input-group input:hover,
+.ncc-input-group select:hover {
+    border-color: #cbd5e1;
+}
+
+.ncc-input-group input:focus,
+.ncc-input-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.ncc-input-group input:disabled {
+    background-color: var(--bg-main);
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* DANH MỤC THÊM NHANH */
+.category-select-wrapper {
+    display: flex;
+    gap: 12px;
+}
+
+.category-select-wrapper select {
+    flex: 1;
+}
+
+.btn-toggle-quick {
+    padding: 10px 16px;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-toggle-quick:hover {
+    background-color: #e2e8f0;
+}
+
+.btn-toggle-quick.active {
+    background-color: var(--text-main);
+    color: white;
+    border-color: var(--text-main);
+}
+
+.quick-add-box {
+    margin-top: 12px;
+    padding: 16px;
+    background-color: var(--primary-light);
+    border: 1px dashed #93c5fd;
+    border-radius: 8px;
+}
+
+.quick-add-note {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.quick-add-inputs {
+    display: flex;
+    gap: 12px;
+}
+
+.input-small {
+    width: 120px;
+}
+
+.input-flex {
+    flex: 1;
+}
+
+.btn-quick-save {
+    padding: 10px 16px;
+    background-color: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-quick-save:hover {
+    background-color: var(--success-hover);
+}
+
+/* TABLE HÀNG HÓA */
+.table-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow-x: auto;
+    box-shadow: var(--shadow-sm);
+}
+
+.hang-hoa-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+.hang-hoa-table th {
+    background: #f8fafc;
+    color: var(--text-muted);
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hang-hoa-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.hang-hoa-table tr:last-child td {
+    border-bottom: none;
+}
+
+.hang-hoa-table tr:hover td {
+    background-color: #fcfcfd;
+}
+
+.hang-hoa-table input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 14px;
+    background: transparent;
+    transition: 0.2s;
+}
+
+.hang-hoa-table input:hover {
+    border-color: var(--border-color);
+    background: white;
+}
+
+.hang-hoa-table input:focus {
+    border-color: var(--primary-color);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* BUTTONS */
+.ncc-btn-group {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-save {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-save:hover:not(:disabled) { 
+    background: var(--primary-hover); 
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-save:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    background: white;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 12px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.btn-cancel:hover {
+    background: var(--bg-main);
+    color: var(--text-main);
+}
+
+.btn-add-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    color: var(--primary-color);
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px dashed var(--primary-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-add-row:hover {
+    background: var(--primary-light);
+}
+
+.btn-remove-row {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove-row:hover:not(:disabled) {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.btn-remove-row:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ALERTS & ANIMATIONS */
+.error-alert {
+    background-color: var(--danger-light);
+    color: var(--danger-color);
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1px solid #fca5a5;
+    margin-bottom: 24px;
+    font-weight: 500;
+    font-size: 14px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* MEDIA QUERIES - ĐIỆN THOẠI */
+@media (max-width: 768px) {
+    .ncc-container {
+        padding: 16px;
+    }
+    
+    .ncc-form-card {
+        padding: 20px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-add-inputs {
+        flex-direction: column;
+    }
+    
+    .input-small {
+        width: 100%;
+    }
+
+    .ncc-btn-group {
+        flex-direction: column-reverse;
+    }
+    
+    .btn-save, .btn-cancel {
+        width: 100%;
+    }
+}
+/* --- BỔ SUNG CĂN CHỈNH CHO ICON MỚI --- */
+
+/* Căn chỉnh icon ở Tiêu đề trang */
+.ncc-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.heading-icon {
+    color: var(--primary-color);
+}
+
+/* Căn chỉnh icon ở Tiêu đề Section (Phần 1, Phần 2) */
+.section-title-icon {
+    margin-right: -2px; /* Kéo icon sát lại với text một chút */
+    color: var(--text-muted);
+}
+
+/* Căn chỉnh icon bên trong các Label (Mã NCC, Tên NCC...) */
+.ncc-input-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ncc-input-group label svg {
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+/* Căn giữa icon và chữ cho các nút bấm Button */
+.btn-toggle-quick,
+.btn-quick-save,
+.btn-cancel,
+.btn-save {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Khoảng cách giữa icon và chữ */
+}

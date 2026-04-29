@@ -1,0 +1,170 @@
+/* Sidebar Tổng thể */
+.sidebar {
+    width: 260px; /* Tăng nhẹ độ rộng cho thoải mái */
+    background-color: #222d32;
+    color: #b8c7ce;
+    height: 100vh;
+    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+}
+
+/* --- USER PANEL MỚI --- */
+.sidebar-user-panel {
+    display: flex;
+    align-items: center;
+    padding: 20px 15px;
+    background-color: #1a2226;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    background: #3c8dbc;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-right: 12px;
+    border: 2px solid #2c3b41;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    margin: 0;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.user-role {
+    font-size: 11px;
+    color: #3c8dbc;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* --- MENU AREA --- */
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Custom scrollbar cho menu */
+.sidebar-menu::-webkit-scrollbar { width: 5px; }
+.sidebar-menu::-webkit-scrollbar-track { background: #222d32; }
+.sidebar-menu::-webkit-scrollbar-thumb { background: #4b646f; border-radius: 10px; }
+
+/* Headers */
+.sidebar-header {
+    color: #4b646f;
+    background: #1a2226;
+    padding: 12px 15px 8px 15px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Item chung */
+.sidebar-item, .sidebar-dropdown-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    color: #b8c7ce;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.menu-icon-svg {
+    font-size: 18px;
+    min-width: 25px;
+    margin-right: 12px;
+}
+
+.sidebar-item:hover, .sidebar-dropdown-header:hover {
+    background-color: #1e282c;
+    color: #ffffff;
+}
+
+.sidebar-item.active {
+    background-color: #1e282c;
+    color: #ffffff;
+    border-left-color: #3c8dbc; /* Màu xanh đặc trưng */
+}
+
+/* Dropdown Header */
+.header-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.arrow-icon {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-dropdown-header.open {
+    background-color: #1e282c;
+    color: #fff;
+}
+
+.sidebar-dropdown-header.open .arrow-icon {
+    transform: rotate(180deg);
+}
+
+/* --- SUBMENU --- */
+.sidebar-submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #2c3b41;
+}
+
+/* Label nhỏ trong submenu (Nhập/Xuất/Lịch sử) */
+.submenu-label {
+    padding: 10px 15px 5px 45px;
+    font-size: 10px;
+    color: #4b646f;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sidebar-submenu .sidebar-item {
+    padding: 10px 15px 10px 45px;
+    font-size: 13px;
+}
+
+.sidebar-submenu .sidebar-item svg {
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.sidebar-submenu .sidebar-item:hover {
+    color: #3c8dbc;
+    background: transparent;
+}
+
+.sidebar-submenu .sidebar-item.active {
+    color: #3c8dbc;
+    background: #222d32;
+    border-left: none;
+}

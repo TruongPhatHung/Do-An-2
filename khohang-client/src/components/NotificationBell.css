@@ -1,0 +1,127 @@
+.bell-container {
+    position: relative;
+}
+
+.bell-icon-wrapper {
+    position: relative;
+    cursor: pointer;
+    padding: 8px;
+    background: #f1f5f9;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.bell-icon-wrapper:hover {
+    background: #e2e8f0;
+}
+
+.bell-icon {
+    font-size: 1.5rem;
+    color: #475569;
+}
+
+.bell-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    width: 320px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.dropdown-header {
+    padding: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+}
+
+.dropdown-header h4 {
+    margin: 0;
+    color: #1e293b;
+}
+
+.mark-all {
+    font-size: 0.85rem;
+    color: #3b82f6;
+    cursor: pointer;
+}
+
+.mark-all:hover {
+    text-decoration: underline;
+}
+
+.dropdown-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.notif-item:hover {
+    background: #f8fafc;
+}
+
+.notif-item.unread {
+    background: #eff6ff;
+}
+
+.notif-content strong {
+    display: block;
+    color: #1e293b;
+    margin-bottom: 3px;
+}
+
+.notif-content p {
+    margin: 0 0 5px 0;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.notif-content small {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.unread-dot {
+    width: 10px;
+    height: 10px;
+    background: #3b82f6;
+    border-radius: 50%;
+}
+
+.empty-notif {
+    padding: 30px;
+    text-align: center;
+    color: #94a3b8;
+}

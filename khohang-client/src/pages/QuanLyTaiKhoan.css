@@ -1,0 +1,388 @@
+/* --- BIẾN MÀU SẮC CHUẨN HIỆN ĐẠI --- */
+:root {
+    --bg-color: #f4f7fe;
+    --card-bg: #ffffff;
+    --text-main: #2b3674;
+    --text-muted: #a3aed1;
+    --primary: #4318ff;
+    --primary-hover: #3311db;
+    --danger: #e74c3c;
+    --danger-hover: #c0392b;
+    --warning: #f39c12;
+    --success: #05cd99;
+    --border-color: #e2e8f0;
+}
+
+/* --- TỔNG QUAN --- */
+.tk-container {
+    padding: 24px;
+    background-color: var(--bg-color);
+    min-height: 100vh;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* --- HEADER CARD --- */
+.tk-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+    padding: 20px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    margin-bottom: 24px;
+}
+
+.tk-title {
+    color: var(--text-main);
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.tk-subtitle {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.tk-btn-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.tk-btn-toggle:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(67, 24, 255, 0.2);
+}
+
+.tk-btn-toggle.close {
+    background: var(--danger);
+}
+.tk-btn-toggle.close:hover {
+    background: var(--danger-hover);
+    box-shadow: 0 8px 15px rgba(231, 76, 60, 0.2);
+}
+
+/* --- FORM THÊM MỚI TÀI KHOẢN --- */
+.tk-add-card {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    margin-bottom: 24px;
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tk-card-title {
+    color: var(--text-main);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.tk-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+.tk-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tk-input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.tk-input-group input, 
+.tk-form-select {
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: #f8fafc;
+    color: var(--text-main);
+    font-size: 14px;
+    transition: 0.3s;
+    outline: none;
+}
+
+.tk-input-group input:focus,
+.tk-form-select:focus {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.1);
+}
+
+.tk-submit-group {
+    justify-content: flex-end;
+}
+
+.tk-btn-save {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    height: 43px;
+    transition: 0.3s;
+}
+
+.tk-btn-save:hover {
+    background: #04b384;
+    box-shadow: 0 5px 15px rgba(5, 205, 153, 0.3);
+}
+
+/* --- TABLE CARD --- */
+.tk-table-wrapper {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    padding: 0;
+}
+
+.tk-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.tk-table th {
+    background: #f8fafc;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    padding: 16px 24px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    letter-spacing: 0.5px;
+}
+
+.tk-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.tk-table tr:last-child td { border-bottom: none; }
+.tk-table tr:hover { background-color: #fdfdfe; }
+
+.tk-id-col { font-weight: 700; color: var(--text-muted); }
+.tk-name-col { font-weight: 600; }
+.tk-email-col { color: #64748b; font-size: 14px; }
+.align-center { text-align: center !important; }
+
+/* --- PROFILE CELL (Avatar + Tên) --- */
+.tk-profile-cell {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.tk-avatar-wrapper {
+    position: relative;
+    width: 42px;
+    height: 42px;
+}
+
+.tk-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: zoom-in;
+}
+
+.tk-status-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+.tk-status-dot.online { background-color: var(--success); }
+.tk-status-dot.offline { background-color: #cbd5e1; }
+
+.tk-profile-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.tk-username {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 15px;
+}
+
+.tk-status-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* --- SELECT ROLE (Dạng Badge) --- */
+.tk-role-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    text-align: center;
+    appearance: none;
+    transition: all 0.3s;
+}
+
+.tk-role-badge:hover { filter: brightness(0.95); transform: scale(1.02); }
+
+.role-admin { background: #fee2e2; color: #ef4444; } /* Đỏ */
+.role-kho { background: #e0e7ff; color: #4f46e5; } /* Xanh dương đậm */
+.role-quanlykho { background: #f3e8ff; color: #9333ea; } /* Tím */
+.role-muahang { background: #dcfce7; color: #16a34a; } /* Xanh lá */
+
+/* 🎯 ĐÂY LÀ ĐOẠN BẠN CẦN THÊM VÀO: CSS cho NV_KD */
+.role-nv_kd { background: #e0f2fe; color: #0284c7; } /* Xanh da trời */
+
+/* --- ACTION BUTTONS --- */
+.tk-actions-col { text-align: center; }
+.tk-action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.tk-btn-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+}
+
+.btn-key { color: var(--warning); background: rgba(243, 156, 18, 0.1); }
+.btn-key:hover { background: var(--warning); color: white; }
+
+.btn-trash { color: var(--danger); background: rgba(231, 76, 60, 0.1); }
+.btn-trash:hover { background: var(--danger); color: white; }
+
+/* --- EMPTY STATE --- */
+.tk-empty-state {
+    text-align: center;
+    padding: 40px !important;
+    color: var(--text-muted);
+}
+.tk-empty-state img { opacity: 0.5; margin-bottom: 10px; }
+
+/* --- MODAL IMAGE --- */
+.tk-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.tk-modal-content {
+    position: relative;
+    max-width: 500px;
+    animation: zoomIn 0.3s ease;
+}
+
+.tk-enlarged-img {
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.tk-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.tk-modal-close:hover { transform: scale(1.2); }
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+/* --- NÚT XEM CHI TIẾT --- */
+.btn-eye { color: var(--primary); background: rgba(67, 24, 255, 0.1); }
+.btn-eye:hover { background: var(--primary); color: white; }
+.tk-btn-icon.btn-edit { color: #f59e0b; background: #fef3c7; }
+.tk-btn-icon.btn-edit:hover { background: #fde68a; }
+/* Styling riêng cho nút Khóa / Mở khóa */
+.btn-lock {
+    color: #e67e22; /* Màu cam */
+    background-color: #fdf2e9;
+}
+.btn-lock:hover {
+    background-color: #e67e22;
+    color: white;
+}
+
+.btn-unlock {
+    color: #27ae60; /* Màu xanh lá */
+    background-color: #eafaf1;
+}
+.btn-unlock:hover {
+    background-color: #27ae60;
+    color: white;
+}
+
+/* Hiệu ứng khi bị khóa */
+.grayscale {
+    filter: grayscale(100%);
+    opacity: 0.6;
+}
+.tk-row-locked td {
+    background-color: #fcfcfc;
+    color: #95a5a6;
+}

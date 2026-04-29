@@ -3,6 +3,7 @@ package com.student.quanlykho.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,10 +24,17 @@ public class DonDatHang {
     @ManyToOne
     @JoinColumn(name = "ma_ncc")
     private NhaCungCap nhaCungCap;
+    @ManyToOne
+    @JoinColumn(name = "nguoi_tao_id") // Sếp có thể đổi tên cột này cho khớp với DB thực tế nếu cần
+    private NguoiDung nguoiTao;
 
     @OneToMany(mappedBy = "donDatHang", cascade = CascadeType.ALL)
     private List<ChiTietDonDatHang> chiTiets;
+    @Column(name = "ghi_chu", columnDefinition = "TEXT")
+    private String ghiChu;
 
     @OneToMany(mappedBy = "donDatHang")
     private List<PhieuNhap> donDatHang;
+    @Column(name = "ngay_du_kien_giao")
+    private LocalDate ngayDuKienGiao;
 }

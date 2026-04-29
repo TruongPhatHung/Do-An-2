@@ -14,19 +14,23 @@ public class ChiTietDonDatHang {
 
     @ManyToOne
     @JoinColumn(name = "ma_don")
-    @JsonIgnore // Tránh lặp vô tận khi chuyển sang JSON
+    @JsonIgnore
     private DonDatHang donDatHang;
 
+    // 🎯 THAY ĐỔI 1: Nối thẳng vào Thực thể HangHoa.
+    // Lúc này sếp gọi ct.getHangHoa().getTenHang() là ra tên, không cần lưu dư thừa nữa!
     @ManyToOne
     @JoinColumn(name = "ma_hang")
     private HangHoa hangHoa;
 
     @Column(name = "so_luong_dat")
-    private int soLuongDat; // Số lượng muốn mua [cite: 77]
+    private int soLuongDat;
 
-    @Column(name = "so_luong_da_nhap")
-    private int soLuongDaNhap = 0; // Field này cực quan trọng để tính toán Giao thiếu
+    // 🎯 THAY ĐỔI 2: Dùng `int` nguyên thủy thay vì `Integer` Object.
+    // Mặc định nó sẽ là 0, vĩnh viễn không bao giờ xuất hiện lỗi NULL nữa!
+    @Column(name = "so_luong_da_nhap", columnDefinition = "int default 0")
+    private Integer soLuongDaNhap = 0;
 
     @Column(name = "don_gia")
-    private Double donGia; // Giá nhập thỏa thuận
+    private Double donGia;
 }

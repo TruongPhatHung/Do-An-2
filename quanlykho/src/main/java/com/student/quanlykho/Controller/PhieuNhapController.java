@@ -1,26 +1,68 @@
 package com.student.quanlykho.Controller;
 
 import com.student.quanlykho.Entity.PhieuNhap;
+import com.student.quanlykho.Repository.PhieuNhapRepository;
 import com.student.quanlykho.Service.NhapKhoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.Map;
+
+@RestController
 @RequestMapping("/api/phieu-nhap")
 @CrossOrigin(origins = "*")
-@RestController
 public class PhieuNhapController {
+
+    @Autowired
+    private PhieuNhapRepository phieuNhapRepository;
+
+    // 🎯 Gọi cái Service sếp vừa tạo
     @Autowired
     private NhapKhoService nhapKhoService;
-    // API Nhập kho: POST /api/phieu-nhap
-    // Body mẫu: { "maDonHang": "PO-001", "chiTietNhap": { "SP001": 60, "SP002": 40 } }
+
+    @GetMapping
+    public List<PhieuNhap> getLichSu() {
+        return phieuNhapRepository.findAllByOrderByNgayNhapDesc();
+    }
 
     @PostMapping
-    public PhieuNhap taoPhieuNhap(@RequestBody NhapKhoRequest nhapKhoRequest ){
-        return nhapKhoService.taoPhieuNhap(nhapKhoRequest.maDonHang, nhapKhoRequest.chiTietNhap);
+    public ResponseEntity<String> nhapKho(@RequestBody NhapKhoRequest request) {
+        try {
+            // 🎯 Thêm request.getGhiChu() vào tham số truyền đi
+            String result = nhapKhoService.taoPhieuNhap(
+                    request.getMaDonHang(),
+                    request.getNguoiNhap(),
+                    request.getChiTietNhap(),
+                    request.getGhiChu() // <--- Ống dẫn 1
+            );
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-    // Class phụ để hứng dữ liệu JSON
-    public static class NhapKhoRequest{
-        public String maDonHang;
-        public Map<String, Integer> chiTietNhap;
+
+    @GetMapping("/{maPhieu}")
+    public ResponseEntity<PhieuNhap> getDetail(@PathVariable String maPhieu) {
+        return phieuNhapRepository.findById(maPhieu)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // --- DTO ---
+    public static class NhapKhoRequest {
+        private String maDonHang;
+        private String nguoiNhap;
+        private String ghiChu;
+        public String getGhiChu() { return ghiChu; }
+        public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
+        private Map<String, Integer> chiTietNhap;
+        public String getMaDonHang() { return maDonHang; }
+        public void setMaDonHang(String maDonHang) { this.maDonHang = maDonHang; }
+        public String getNguoiNhap() { return nguoiNhap; }
+        public void setNguoiNhap(String nguoiNhap) { this.nguoiNhap = nguoiNhap; }
+        public Map<String, Integer> getChiTietNhap() { return chiTietNhap; }
+        public void setChiTietNhap(Map<String, Integer> chiTietNhap) { this.chiTietNhap = chiTietNhap; }
     }
 }

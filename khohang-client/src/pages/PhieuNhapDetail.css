@@ -1,0 +1,364 @@
+/* ============================================================
+   1. GIAO DIỆN HIỂN THỊ TRÊN MÀN HÌNH (WEB VIEW)
+   ============================================================ */
+
+.detail-container {
+    padding: 20px;
+    background-color: #f4f7f6; /* Nền xám nhạt Dashboard */
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Thanh nút bấm điều hướng */
+.detail-header-actions {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.btn-back {
+    background-color: #3498db; 
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+.btn-print {
+    background-color: #f1c40f;
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+.btn-back:hover { background-color: #2980b9; transform: translateY(-2px); }
+.btn-print:hover { background-color: #f39c12; color: white; transform: translateY(-2px); }
+
+/* Khung tờ phiếu trắng (Preview) */
+.printable-receipt {
+    background: white;
+    padding: 50px 70px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 900px;
+    border: 1px dashed #ccc; /* Nét đứt trang trí trên web */
+    box-sizing: border-box;
+}
+
+.receipt-header h2 {
+    color: #00a884; /* Màu xanh ngọc chuẩn */
+    text-align: center;
+    font-size: 2rem;
+    margin: 0;
+}
+
+.receipt-code {
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 30px;
+}
+
+/* Grid thông tin chung */
+.receipt-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px 0;
+    border-top: 2px dashed #eaeaea;
+    border-bottom: 2px dashed #eaeaea;
+    margin-bottom: 40px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.1rem;
+}
+
+.info-item svg { color: #00a884; font-size: 1.3rem; }
+
+/* Bảng dữ liệu */
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+}
+
+.receipt-table thead th {
+    background-color: #00a884;
+    color: white;
+    padding: 15px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    border: 1px solid #00a884;
+}
+
+.receipt-table tbody td {
+    padding: 15px;
+    border: 1px solid #f1f1f1;
+}
+
+.total-amount {
+    background-color: #fff6f6;
+    color: #c0392b;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: right;
+    border-top: 2px solid #00a884 !important;
+}
+
+/* Chữ ký */
+.receipt-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 60px;
+}
+
+.signature-box { text-align: center; width: 40%; }
+.signature-box strong { color: #00a884; font-size: 1.2rem; display: block; margin-bottom: 5px; }
+
+/* ============================================================
+   2. CẤU HÌNH DÀNH RIÊNG CHO MÁY IN (PRINT MODE)
+   ============================================================ */
+
+/* ============================================================
+   BẢN RESET IN ẤN TOÀN DIỆN - TRỊ DỨT ĐIỂM LỖI 1 TRANG
+   ============================================================ */
+
+@media print {
+    /* 1. ÉP TOÀN BỘ CẤU TRÚC WEB PHẢI TRÀN RA (KHÔNG ĐƯỢC GIỚI HẠN) */
+    html, body, #root, #app, 
+    [class*="layout"], [class*="container"], [class*="wrapper"], [class*="main"] {
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+        position: static !important;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 2. THIẾT LẬP TRANG IN A4 */
+    @page {
+        size: A4 portrait;
+        margin: 15mm 10mm;
+    }
+
+    /* 3. ẨN TUYỆT ĐỐI CÁC THỨ "RÁC" (WMS-SYSTEM, Sidebar, Nút bấm) */
+    .no-print, .detail-header-actions, .sidebar, .top-bar, 
+    header, nav, .navbar, aside, footer {
+        display: none !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+
+    /* 4. TỜ PHIẾU PHẢI TRÔI TỰ NHIÊN THEO TRANG GIẤY */
+    .printable-receipt {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    /* 5. BẢNG HÀNG HÓA - TỰ ĐỘNG NHẢY TRANG */
+    .receipt-table {
+        width: 100% !important;
+        display: table !important; /* Buộc phải là table để nhảy trang */
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+    }
+
+    .receipt-table thead {
+        display: table-header-group !important; /* Lặp lại tiêu đề ở mỗi trang */
+    }
+
+    .receipt-table tbody tr {
+        page-break-inside: avoid !important; /* Không để dòng hàng bị cắt đôi */
+        page-break-after: auto !important;
+    }
+
+    .receipt-table th, .receipt-table td {
+        border: 1px solid #333 !important;
+        padding: 8px 5px !important;
+        color: black !important;
+    }
+
+    /* Ép hiển thị màu sắc */
+    .receipt-table thead th {
+        background-color: #00a884 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .total-value-cell {
+        background-color: #fff5f5 !important;
+        color: #c0392b !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 6. KHỐI CHỮ KÝ: Không được để chữ ký bị nhảy sang trang mới lẻ loi */
+    .receipt-footer {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        margin-top: 30px !important;
+        page-break-inside: avoid !important; 
+    }
+
+    /* Diệt thanh cuộn lì lợm của Chrome */
+    ::-webkit-scrollbar { display: none !important; }
+}/* ============================================================
+   BẢN RESET IN ẤN TOÀN DIỆN - TRỊ DỨT ĐIỂM LỖI 1 TRANG
+   ============================================================ */
+
+@media print {
+    /* 1. ÉP TOÀN BỘ CẤU TRÚC WEB PHẢI TRÀN RA (KHÔNG ĐƯỢC GIỚI HẠN) */
+    html, body, #root, #app, 
+    [class*="layout"], [class*="container"], [class*="wrapper"], [class*="main"] {
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+        position: static !important;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 2. THIẾT LẬP TRANG IN A4 */
+    @page {
+        size: A4 portrait;
+        margin: 15mm 10mm;
+    }
+
+    /* 3. ẨN TUYỆT ĐỐI CÁC THỨ "RÁC" (WMS-SYSTEM, Sidebar, Nút bấm) */
+    .no-print, .detail-header-actions, .sidebar, .top-bar, 
+    header, nav, .navbar, aside, footer {
+        display: none !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+
+    /* 4. TỜ PHIẾU PHẢI TRÔI TỰ NHIÊN THEO TRANG GIẤY */
+    .printable-receipt {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    /* 5. BẢNG HÀNG HÓA - TỰ ĐỘNG NHẢY TRANG */
+    .receipt-table {
+        width: 100% !important;
+        display: table !important; /* Buộc phải là table để nhảy trang */
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+    }
+
+    .receipt-table thead {
+        display: table-header-group !important; /* Lặp lại tiêu đề ở mỗi trang */
+    }
+
+    .receipt-table tbody tr {
+        page-break-inside: avoid !important; /* Không để dòng hàng bị cắt đôi */
+        page-break-after: auto !important;
+    }
+
+    .receipt-table th, .receipt-table td {
+        border: 1px solid #333 !important;
+        padding: 8px 5px !important;
+        color: black !important;
+    }
+
+    /* Ép hiển thị màu sắc */
+    .receipt-table thead th {
+        background-color: #00a884 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .total-value-cell {
+        background-color: #fff5f5 !important;
+        color: #c0392b !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 6. KHỐI CHỮ KÝ: Không được để chữ ký bị nhảy sang trang mới lẻ loi */
+    .receipt-footer {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        margin-top: 30px !important;
+        page-break-inside: avoid !important; 
+    }
+
+    /* Diệt thanh cuộn lì lợm của Chrome */
+    ::-webkit-scrollbar { display: none !important; }
+}
+/* =========================================
+   ĐỊNH DẠNG KHU VỰC CHỮ KÝ (DÀN HÀNG NGANG)
+   ========================================= */
+.receipt-signature-area {
+    display: flex;
+    justify-content: space-between; /* Đẩy 3 ông ra 3 góc */
+    align-items: flex-start;
+    margin-top: 40px;
+    padding: 0 20px;
+}
+
+.sig-box {
+    flex: 1; /* Chia đều không gian cho 3 người */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Canh giữa nội dung */
+    text-align: center;
+}
+
+.sig-box p {
+    margin: 5px 0;
+}
+
+.sig-sub {
+    font-style: italic;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+/* Tạo khoảng trống mông mênh cho người ta ký tay */
+.sig-space {
+    height: 80px; 
+    width: 100%;
+}

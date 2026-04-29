@@ -1,0 +1,374 @@
+/* ====================================================
+   GIAO DIỆN YÊU CẦU XUẤT KHO - MODERN SAAS THEME (BLUE)
+==================================================== */
+
+.ycx-wrapper {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #334155;
+}
+
+/* --- HEADER --- */
+.ycx-header {
+    margin-bottom: 25px;
+}
+
+.ycx-btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.ycx-btn-back:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+.ycx-header-titles .title-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.title-icon-box {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7); /* Tone xanh dương */
+    color: white;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    font-size: 22px;
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.25);
+}
+
+.ycx-header-titles h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.ycx-subtitle {
+    margin: 8px 0 0 60px;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* --- FORM CARDS --- */
+.ycx-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.ycx-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.ycx-card-header {
+    background: #f8fafc;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ycx-card-icon {
+    color: #0ea5e9;
+    font-size: 18px;
+}
+
+.ycx-card-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1e293b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ycx-card-body {
+    padding: 24px;
+}
+
+/* --- GRID LAYOUT --- */
+.ycx-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+.ycx-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.ycx-form-group label {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+
+.ycx-required {
+    color: #ef4444;
+    margin-left: 4px;
+}
+
+/* --- INPUTS --- */
+.ycx-input-control {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    transition: all 0.2s ease;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+select.ycx-input-control {
+    cursor: pointer;
+}
+
+.ycx-input-control:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.ycx-input-control:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+    border-color: #e2e8f0;
+}
+
+/* --- BẢNG SẢN PHẨM --- */
+.ycx-table-responsive {
+    overflow-x: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.ycx-modern-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ycx-modern-table th {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.ycx-modern-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.ycx-modern-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.ycx-modern-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* --- TIỆN ÍCH BẢNG --- */
+.text-center { text-align: center !important; }
+.fw-bold { font-weight: 600 !important; }
+.text-muted { color: #94a3b8 !important; }
+.text-primary { color: #0284c7 !important; }
+
+/* Trạng thái cảnh báo (Thiếu hàng) */
+.row-warning {
+    background-color: #fffbeb !important;
+}
+
+.input-warning {
+    border-color: #f59e0b !important;
+    color: #b45309 !important;
+    background-color: #fffbeb !important;
+}
+
+.input-warning:focus {
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
+}
+
+.warning-text {
+    color: #d97706;
+    font-size: 0.8rem;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-weight: 600;
+}
+
+/* Nút xóa */
+.ycx-btn-remove {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ycx-btn-remove:hover:not(:disabled) {
+    background: #ef4444;
+    color: white;
+}
+
+.ycx-btn-remove:disabled {
+    background: #f1f5f9;
+    color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+/* --- FOOTER CỦA BẢNG --- */
+.ycx-table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.ycx-btn-add-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px dashed #86efac;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ycx-btn-add-row:hover {
+    background: #dcfce7;
+    border-color: #16a34a;
+}
+
+.ycx-total-summary {
+    font-size: 1rem;
+    color: #475569;
+    font-weight: 500;
+    background: #f0f9ff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #e0f2fe;
+}
+
+.ycx-total-summary span {
+    font-weight: 800;
+    color: #0ea5e9;
+    font-size: 1.1rem;
+    margin-left: 5px;
+}
+
+/* --- ACTION FOOTER (NÚT SUBMIT) --- */
+.ycx-action-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.ycx-btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 16px 36px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+.ycx-btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.ycx-btn-submit:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.ycx-icon-lg {
+    font-size: 1.4rem;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .ycx-form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .full-width {
+        grid-column: span 1;
+    }
+    
+    .ycx-table-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .ycx-btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+}

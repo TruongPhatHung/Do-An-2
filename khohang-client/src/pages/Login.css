@@ -1,0 +1,285 @@
+/* Container chính - Fix tràn màn hình */
+.login-container {
+    position: fixed; /* Ép full màn hình, bỏ qua margin mặc định của thẻ body */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../src/components/avarta/Screenshot-2023-05-24-111059.png'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    z-index: 9999;
+}
+
+/* Lớp phủ đen làm mờ background để nổi bật form */
+.login-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.65); /* Giảm tối một chút để thấy background rõ hơn */
+    z-index: 1;
+}
+
+/* Form đăng nhập - Hiệu ứng trong suốt (Glassmorphism) */
+.login-box {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.1); /* Nền trắng trong suốt */
+    backdrop-filter: blur(12px); /* Làm mờ background phía sau */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25); /* Viền mờ bao quanh */
+    width: 420px;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    padding: 40px 30px;
+}
+
+/* Header */
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+/* Chuyển chữ sang màu trắng để nổi trên nền tối/trong suốt */
+.login-header h2 {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    letter-spacing: 1px;
+}
+
+.login-header p {
+    color: #ffffff; /* Trắng tinh để sáng nhất có thể */
+    font-size: 18px; /* Tăng size từ 15px lên 18px */
+    font-weight: 600; /* Làm đậm nét chữ */
+    margin: 10px 0 0 0; /* Đẩy cách icon avatar ra một chút */
+    letter-spacing: 1px; /* Giãn chữ ra cho thoáng và sang hơn */
+    text-transform: uppercase; /* In hoa toàn bộ để nhấn mạnh sự trang trọng */
+    /* Kết hợp đổ bóng đen để tách khỏi nền + phát sáng xanh (glow) nhẹ xung quanh */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 15px rgba(59, 130, 246, 0.6);
+}
+
+/* Hiển thị lỗi */
+.error-message {
+    background-color: rgba(254, 242, 242, 0.9);
+    color: #ef4444;
+    text-align: center;
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    border: 1px solid #fca5a5;
+}
+
+/* Các trường nhập liệu */
+.input-group {
+    margin-bottom: 24px;
+}
+
+/* Khoanh vùng riêng cho trang Login để không bị đè CSS từ trang khác */
+.login-container .input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ffffff !important; /* Ép buộc nhận màu trắng tinh */
+    font-size: 15px;
+    font-weight: 400; /* Tăng độ đậm lên để chữ nét hơn */
+    letter-spacing: 0.5px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+   width: 100%;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    font-size: 15px;
+    color: #000000 !important; 
+    background-color: rgba(255, 255, 255, 0.15); 
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+/* =========================================
+   1. CHỈNH KHOẢNG TRỐNG GÕ CHỮ (PADDING)
+========================================= */
+/* Ô Tên đăng nhập: Chừa 45px bên TRÁI để nhường chỗ cho icon User */
+.input-group:nth-child(1) .input-wrapper input {
+    padding: 14px 15px 14px 45px; /* Top:14, Right:15, Bottom:14, Left:45 */
+}
+
+/* Ô Mật khẩu: Chừa 45px bên PHẢI để nhường chỗ cho icon Mắt */
+.input-group:nth-child(2) .input-wrapper input {
+    padding: 14px 45px 14px 15px; /* Top:14, Right:45, Bottom:14, Left:15 */
+}
+
+/* Màu chữ placeholder */
+.input-wrapper input::placeholder {
+    color: #000000; 
+    opacity: 0.9;
+}
+
+.input-wrapper input:focus {
+    border-color: #3b82f6;
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); 
+    outline: none;
+}
+
+/* =========================================
+   2. VỊ TRÍ CÁC ICON
+========================================= */
+/* Icon tĩnh (User) - Đặt cố định bên TRÁI */
+.input-icon {
+    position: absolute;
+    left: 14px;  /* 🎯 Chốt ở bên trái */
+    right: auto; /* Hủy các cài đặt bên phải cũ */
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    color: #475569;
+    opacity: 0.8;
+}
+
+/* 🎯 ĐỔI MÀU ICON Ở ĐÂY: Dùng màu xám đậm để nổi trên nền input trắng */
+.input-icon, .toggle-password {
+    color: #475569; /* Đổi từ trắng sang xám đậm */
+    opacity: 0.8;
+    z-index: 10;
+}
+
+/* Icon mắt (Mật khẩu) - Đặt cố định bên PHẢI */
+.toggle-password {
+    position: absolute;
+    right: 14px; /* 🎯 Chốt ở bên phải */
+    left: auto;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    transition: color 0.2s;
+    color: #475569;
+    opacity: 0.8;
+    z-index: 10;
+}
+
+.toggle-password:hover {
+    color: #0f172a;
+    opacity: 1;
+}
+
+/* Nút bấm Submit gradient */
+.button-group {
+    margin-top: 30px;
+}
+
+.login-button {
+    width: 100%;
+    background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    /* 🎯 MỚI THÊM ĐỂ HIỂN THỊ SPINNER */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.login-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+.login-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* 🎯 MỚI THÊM TRẠNG THÁI DISABLED (KHI LOADING) */
+.login-button:disabled {
+    background: rgba(255, 255, 255, 0.3);
+    color: #e2e8f0;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* =========================================
+   CSS CHO ICON FONT AWESOME
+========================================= */
+.avatar-container {
+    margin-bottom: 15px;
+}
+
+.user-avatar-icon {
+    font-size: 85px; /* Kích thước icon to rõ */
+    color: #ffffff; /* Màu trắng để nổi trên nền kính mờ */
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); /* Đổ bóng nhẹ giúp icon có chiều sâu và tách khỏi nền */
+    transition: transform 0.3s ease;
+}
+
+.user-avatar-icon:hover {
+    transform: scale(1.05); /* Hiệu ứng phóng to nhẹ khi di chuột vào */
+}
+
+/* =========================================
+   FIX LỖI NỀN TRẮNG KHI TRÌNH DUYỆT AUTOFILL
+========================================= */
+.input-wrapper input:-webkit-autofill,
+.input-wrapper input:-webkit-autofill:hover, 
+.input-wrapper input:-webkit-autofill:focus, 
+.input-wrapper input:-webkit-autofill:active {
+    /* Đổi màu nền autofill tiệp với màu kính mờ của bạn */
+    -webkit-box-shadow: 0 0 0 30px #475569 inset !important; 
+    /* Ép chữ gõ vào luôn là màu trắng */
+    -webkit-text-fill-color: #ffffff !important;
+    transition: background-color 5000s ease-in-out 0s;
+    border-radius: 10px;
+}
+/* =========================================
+   FIX LỖI ICON BỊ ẨN KHI TRÌNH DUYỆT AUTOFILL
+========================================= */
+/* Bắt sự kiện: Nếu ô input phía trước đang bị autofill thì đổi màu icon phía sau thành trắng */
+.input-wrapper input:-webkit-autofill ~ .input-icon,
+.input-wrapper input:-webkit-autofill ~ .toggle-password {
+    color: #ffffff !important;
+}
+
+.input-wrapper input:-webkit-autofill ~ .toggle-password:hover {
+    color: #94a3b8 !important; /* Màu xám sáng nhẹ khi di chuột vào icon lúc đang autofill */
+}

@@ -1,0 +1,173 @@
+.ct-container {
+    position: relative;
+    padding: 20px;
+    min-height: calc(100vh - 80px);
+    background-color: #f8fafc;
+}
+
+.ct-header-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    border-radius: 0 0 20px 20px;
+    z-index: 0;
+}
+
+.ct-header-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.btn-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-back:hover { background: rgba(255, 255, 255, 0.3); }
+.ct-page-title { margin: 0; font-size: 1.5rem; font-weight: 700; }
+
+.ct-layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+}
+
+/* === CỘT TRÁI === */
+.ct-sidebar {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.ct-avatar-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.ct-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+.status-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    width: 18px;
+    height: 18px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+}
+.status-badge.online { background-color: #1cc88a; }
+.status-badge.offline { background-color: #e74a3b; }
+
+.ct-name { font-size: 1.4rem; color: #333; margin: 0 0 5px 0; }
+.ct-username { color: #858796; margin: 0 0 10px 0; font-size: 0.95rem; }
+
+.ct-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+.role-admin { background-color: #fef3c7; color: #d97706; }
+.role-kho, .role-quanlykho { background-color: #dcfce7; color: #15803d; }
+
+.ct-contact-list { text-align: left; border-top: 1px solid #eaecf4; padding-top: 20px; margin-bottom: 25px; }
+.contact-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; color: #555; font-size: 0.95rem; }
+.contact-icon { color: #4e73df; font-size: 1.1rem; }
+
+.btn-edit-profile {
+    width: 100%; padding: 10px; background-color: #f8f9fc; color: #4e73df;
+    border: 1px solid #d1d3e2; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.btn-edit-profile:hover { background-color: #4e73df; color: #fff; }
+
+/* === CỘT PHẢI === */
+.ct-main-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.ct-tabs { display: flex; border-bottom: 1px solid #eaecf4; background: #f8f9fc; }
+.tab-btn {
+    flex: 1; padding: 16px; border: none; background: transparent; font-size: 0.95rem; font-weight: 600;
+    color: #858796; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
+}
+.tab-btn:hover { color: #4e73df; }
+.tab-btn.active { color: #4e73df; background: #fff; border-bottom: 3px solid #4e73df; }
+
+.tab-content-area { padding: 30px; }
+.pane-title { margin-top: 0; color: #4e73df; font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px;}
+.mt-4 { margin-top: 30px; }
+.fade-in { animation: fadeIn 0.3s ease-in-out; }
+
+/* THÔNG TIN CÁ NHÂN */
+.ct-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.ct-info-item { display: flex; align-items: flex-start; gap: 15px; padding: 15px; background: #f8f9fc; border-radius: 10px; border: 1px solid #eaecf4; }
+.ct-icon { font-size: 1.5rem; color: #4e73df; margin-top: 2px; }
+.ct-info-item label { display: block; font-size: 0.85rem; color: #858796; font-weight: 600; margin-bottom: 5px; }
+.ct-info-item p { margin: 0; color: #333; font-weight: 500; }
+
+/* CHỨNG CHỈ */
+.cert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cert-card { display: flex; gap: 15px; padding: 15px; border: 1px solid #eaecf4; border-radius: 10px; align-items: center; }
+.cert-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+.cert-icon.green { background: #dcfce7; color: #1cc88a; }
+.cert-icon.orange { background: #fef3c7; color: #f6c23e; }
+.cert-info h6 { margin: 0 0 5px 0; font-size: 0.95rem; color: #333; }
+.cert-info p { margin: 0; font-size: 0.8rem; color: #858796; }
+
+/* KPI BOXES */
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.kpi-box { padding: 25px 20px; border-radius: 12px; text-align: center; color: #fff; position: relative; overflow: hidden; }
+.kpi-box h3 { margin: 10px 0 5px 0; font-size: 2.5rem; font-weight: bold; }
+.kpi-box p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
+.kpi-icon { font-size: 3rem; opacity: 0.2; position: absolute; right: -10px; bottom: -10px; }
+.box-inbound { background: linear-gradient(45deg, #1cc88a, #13a673); }
+.box-outbound { background: linear-gradient(45deg, #e74a3b, #be2617); }
+.box-inventory { background: linear-gradient(45deg, #4e73df, #224abe); }
+
+/* TIMELINE */
+.timeline-container { border-left: 2px solid #eaecf4; padding-left: 20px; margin-left: 10px; }
+.timeline-item { position: relative; margin-bottom: 25px; }
+.timeline-dot { position: absolute; left: -27px; top: 0; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; }
+.bg-success { background-color: #1cc88a; }
+.bg-primary { background-color: #4e73df; }
+.bg-warning { background-color: #f6c23e; }
+.timeline-content strong { display: block; color: #444; margin-bottom: 5px; }
+.timeline-time { font-size: 0.85rem; color: #858796; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
